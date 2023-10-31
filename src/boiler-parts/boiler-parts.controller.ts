@@ -61,4 +61,9 @@ export class BoilerPartsController {
   getByName(@Body() { name }: { name: string }) {
     return this.boilerPartsService.findOneByName(name);
   }
+
+  @Get('/products')
+  getProducts() {
+    return this.boilerPartsService.findAll();
+  }
 }
