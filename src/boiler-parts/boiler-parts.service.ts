@@ -32,7 +32,8 @@ export class BoilerPartsService {
     if (query.parts) {
       filter.parts_manufacturer = JSON.parse(decodeURIComponent(query.parts));
     }
-
+    console.log('filter');
+    console.log(filter);
     return this.boilerPartsModel.findAndCountAll({
       limit,
       offset,
