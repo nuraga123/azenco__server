@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { BoilerParts } from './boiler-parts.model';
 import { IBoilerPartsFilter, IBoilerPartsQuery } from './types';
-import { Op } from 'sequelize';
+import { Op, Sequelize } from 'sequelize';
 
 @Injectable()
 export class BoilerPartsService {
@@ -11,34 +11,34 @@ export class BoilerPartsService {
     private boilerPartsModel: typeof BoilerParts,
   ) {}
 
-  async paginateAndFilter(
-    query: IBoilerPartsQuery,
-  ): Promise<{ count: number; rows: BoilerParts[] }> {
-    const limit = +query.limit;
-    const offset = +query.offset * 20;
+  // async paginateAndFilter(
+  //   query: IBoilerPartsQuery,
+  // ): Promise<{ count: number; rows: BoilerParts[] }> {
+  //   const limit = +query.limit;
+  //   const offset = +query.offset * 20;
 
-    const filter = {} as Partial<IBoilerPartsFilter>;
+  //   const filter = {} as Partial<IBoilerPartsFilter>;
 
-    if (query.priceFrom && query.priceTo) {
-      filter.price = {
-        [Op.between]: [+query.priceFrom, +query.priceTo],
-      };
-    }
+  //   if (query.priceFrom && query.priceTo) {
+  //     filter.price = {
+  //       [Op.between]: [+query.priceFrom, +query.priceTo],
+  //     };
+  //   }
 
-    if (query.boiler) {
-      filter.boiler_manufacturer = JSON.parse(decodeURIComponent(query.boiler));
-    }
+  //   if (query.boiler) {
+  //     filter.boiler_manufacturer = JSON.parse(decodeURIComponent(query.boiler));
+  //   }
 
-    if (query.parts) {
-      filter.parts_manufacturer = JSON.parse(decodeURIComponent(query.parts));
-    }
+  //   if (query.parts) {
+  //     filter.parts_manufacturer = JSON.parse(decodeURIComponent(query.parts));
+  //   }
 
-    return this.boilerPartsModel.findAndCountAll({
-      limit,
-      offset,
-      where: filter,
-    });
-  }
+  //   return this.boilerPartsModel.findAndCountAll({
+  //     limit,
+  //     offset,
+  //     where: filter,
+  //   });
+  // }
 
   async bestsellers(): Promise<{ count: number; rows: BoilerParts[] }> {
     return this.boilerPartsModel.findAndCountAll({
@@ -73,7 +73,36 @@ export class BoilerPartsService {
     });
   }
 
-  async findAll() {
-    return this.boilerPartsModel.findAll();
+  async paginateAndFilterOrSort(
+    query: IBoilerPartsQuery,
+    sortBy: boolean = true,
+  ): Promise<{ count: number; rows: BoilerParts[] }> {
+    const limit = +query.limit;
+    const offset = +query.offset * 20;
+
+    const filter = {} as Partial<IBoilerPartsFilter>;
+
+    if (query.priceFrom && query.priceTo) {
+      filter.price = {
+        [Op.between]: [+query.priceFrom, +query.priceTo],
+      };
+    }
+
+    if (query.boiler) {
+      filter.boiler_manufacturer = JSON.parse(decodeURIComponent(query.boiler));
+    }
+
+    if (query.parts) {
+      filter.parts_manufacturer = JSON.parse(decodeURIComponent(query.parts));
+    }
+
+    const orderDirection = sortBy ? 'ASC' : 'DESC';
+
+    return this.boilerPartsModel.findAndCountAll({
+      limit,
+      offset,
+      where: filter,
+      order: [[Sequelize.literal('CAST(price AS DECIMAL)'), orderDirection]],
+    });
   }
 }

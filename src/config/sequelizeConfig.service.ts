@@ -30,6 +30,7 @@ export class SequelizeConfigService implements SequelizeOptionsFactory {
         charset: 'utf8',
         collate: 'utf8_general_ci',
       },
+      timezone: '+04:00',
     };
   }
 }

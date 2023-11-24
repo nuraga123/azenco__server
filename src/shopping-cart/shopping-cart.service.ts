@@ -39,6 +39,9 @@ export class ShoppingCartService {
     cart.name = part.name;
     cart.total_price = part.price;
 
+    cart.createdAt = new Date();
+    cart.updatedAt = new Date();
+
     return cart.save();
   }
 

@@ -9,6 +9,7 @@ import {
   GetByNameRequest,
   GetByNameResponse,
   GetNewResponse,
+  IBoilerPartsQuery,
   PaginateAndFilterResponse,
   SearchRequest,
   SearchResponse,
@@ -18,12 +19,12 @@ import {
 export class BoilerPartsController {
   constructor(private readonly boilerPartsService: BoilerPartsService) {}
 
-  @ApiOkResponse({ type: PaginateAndFilterResponse })
-  @UseGuards(AuthenticatedGuard)
-  @Get()
-  paginateAndFilter(@Query() query) {
-    return this.boilerPartsService.paginateAndFilter(query);
-  }
+  // @ApiOkResponse({ type: PaginateAndFilterResponse })
+  // @UseGuards(AuthenticatedGuard)
+  // @Get()
+  // paginateAndFilter(@Query() query: IBoilerPartsQuery) {
+  //   return this.boilerPartsService.paginateAndFilter(query);
+  // }
 
   @ApiOkResponse({ type: FindOneResponse })
   @UseGuards(AuthenticatedGuard)
@@ -62,8 +63,14 @@ export class BoilerPartsController {
     return this.boilerPartsService.findOneByName(name);
   }
 
-  @Get('/products')
-  getProducts() {
-    return this.boilerPartsService.findAll();
+  @ApiOkResponse({ type: PaginateAndFilterResponse })
+  @UseGuards(AuthenticatedGuard)
+  @Get()
+  paginateAndFilterOrSort(
+    @Query() query: IBoilerPartsQuery,
+    @Query('sortBy') sortBy: string,
+  ) {
+    const ascending = sortBy && sortBy.toLowerCase() === 'asc';
+    return this.boilerPartsService.paginateAndFilterOrSort(query, ascending);
   }
 }
