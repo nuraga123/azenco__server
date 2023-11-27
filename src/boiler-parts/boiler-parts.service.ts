@@ -75,7 +75,6 @@ export class BoilerPartsService {
 
   async paginateAndFilterOrSort(
     query: IBoilerPartsQuery,
-    sortBy: boolean = true,
   ): Promise<{ count: number; rows: BoilerParts[] }> {
     const limit = +query.limit;
     const offset = +query.offset * 20;
@@ -96,7 +95,8 @@ export class BoilerPartsService {
       filter.parts_manufacturer = JSON.parse(decodeURIComponent(query.parts));
     }
 
-    const orderDirection = sortBy ? 'ASC' : 'DESC';
+    // Используем query.sortBy вместо отдельного параметра
+    const orderDirection = query.sortBy === 'asc' ? 'asc' : 'desc';
 
     return this.boilerPartsModel.findAndCountAll({
       limit,

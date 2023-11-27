@@ -113,10 +113,11 @@ export class FindOneResponse extends BoilerParts {}
 export interface IBoilerPartsQuery {
   limit: string;
   offset: string;
-  boiler: string | undefined;
-  parts: string | undefined;
-  priceFrom: string | undefined;
-  priceTo: string | undefined;
+  priceFrom?: string;
+  priceTo?: string;
+  boiler?: string;
+  parts?: string;
+  sortBy?: string;
 }
 
 export interface IBoilerPartsFilter {

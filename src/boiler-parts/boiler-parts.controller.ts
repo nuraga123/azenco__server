@@ -66,11 +66,7 @@ export class BoilerPartsController {
   @ApiOkResponse({ type: PaginateAndFilterResponse })
   @UseGuards(AuthenticatedGuard)
   @Get()
-  paginateAndFilterOrSort(
-    @Query() query: IBoilerPartsQuery,
-    @Query('sortBy') sortBy: string,
-  ) {
-    const ascending = sortBy && sortBy.toLowerCase() === 'asc';
-    return this.boilerPartsService.paginateAndFilterOrSort(query, ascending);
+  paginateAndFilterOrSort(@Query() query: IBoilerPartsQuery) {
+    return this.boilerPartsService.paginateAndFilterOrSort(query);
   }
 }
