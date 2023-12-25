@@ -1,8 +1,8 @@
 import { Controller, Get } from '@nestjs/common';
-import { BoilerPartsService } from './boiler-parts.service';
-import { Body, Param, Post, Query, UseGuards } from '@nestjs/common/decorators';
-import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
 import { ApiBody, ApiOkResponse } from '@nestjs/swagger';
+import { Body, Param, Post, Query, UseGuards } from '@nestjs/common/decorators';
+import { BoilerPartsService } from './boiler-parts.service';
+import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
 import {
   FindOneResponse,
   GetBestsellersResponse,
