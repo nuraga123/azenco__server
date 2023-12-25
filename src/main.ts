@@ -1,7 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
-import cors from 'cors';
 import * as session from 'express-session';
 import * as passport from 'passport';
 import { AppModule } from './app.module';
@@ -24,7 +23,6 @@ async function bootstrap() {
     origin: ['http://localhost:3001', 'https://azenco-client.onrender.com'],
   };
 
-  app.use(cors());
   app.enableCors(corsOptions);
 
   const config = new DocumentBuilder()
