@@ -8,7 +8,6 @@ import {
   Header,
   Request,
   UseGuards,
-  Req,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -45,9 +44,9 @@ export class UsersController {
   }
 
   @ApiOkResponse({ type: LoginCheckResponse })
-  @Get('/login-check')
+  @Get('/check')
   @UseGuards(AuthenticatedGuard)
-  loginCheck(@Req() req) {
+  loginCheck(@Request() req) {
     const user = req.user;
     console.log('User data:', user);
     return user;
