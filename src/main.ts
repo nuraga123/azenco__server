@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-
+import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import * as session from 'express-session';
 import * as passport from 'passport';
 import { AppModule } from './app.module';
@@ -18,10 +18,12 @@ async function bootstrap() {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  app.enableCors({
+  const corsOptions: CorsOptions = {
     credentials: true,
     origin: ['http://localhost:3001', 'https://azenco-client.onrender.com'],
-  });
+  };
+
+  app.enableCors(corsOptions);
 
   const config = new DocumentBuilder()
     .setTitle('Azenco Anbar Serveri')
