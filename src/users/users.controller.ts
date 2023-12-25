@@ -47,6 +47,7 @@ export class UsersController {
   @Get('/login-check')
   @UseGuards(AuthenticatedGuard)
   loginCheck(@Request() req) {
+    console.log(req);
     return req.user;
   }
 

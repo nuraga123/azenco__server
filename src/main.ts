@@ -19,8 +19,8 @@ async function bootstrap() {
   app.use(passport.session());
 
   app.enableCors({
-    origin: ['https://azenco-client.onrender.com', 'http://localhost:3001'],
     credentials: true,
+    origin: ['http://localhost:3001', 'https://azenco-client.onrender.com'],
   });
 
   const config = new DocumentBuilder()
