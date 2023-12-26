@@ -6,9 +6,12 @@ import {
   HttpStatus,
   Body,
   Header,
-  Request,
+  Request as NestRequest,
   UseGuards,
+  Request,
 } from '@nestjs/common';
+import { Request as ExpressRequest } from 'express'; // добавим импорт express Request
+
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LocalAuthGuard } from 'src/auth/local.auth.guard';
@@ -31,6 +34,7 @@ export class UsersController {
   @HttpCode(HttpStatus.CREATED)
   @Header('Content-type', 'application/json')
   createUser(@Body() createUserDto: CreateUserDto) {
+    console.log('Creating user:', createUserDto);
     return this.usersService.create(createUserDto);
   }
 
@@ -39,7 +43,8 @@ export class UsersController {
   @Post('/login')
   @UseGuards(LocalAuthGuard)
   @HttpCode(HttpStatus.OK)
-  login(@Request() req) {
+  login(@NestRequest() req: ExpressRequest) {
+    console.log('User logged in:', req.user);
     return { user: req.user, msg: 'Logged in' };
   }
 
@@ -47,20 +52,19 @@ export class UsersController {
   @Get('/check')
   @UseGuards(AuthenticatedGuard)
   @HttpCode(HttpStatus.OK)
-  loginCheck(@Request() req) {
-    const user = req;
-    console.log('User data: ', user);
-    return (
-      req?.user || {
-        seccuss: false,
-      }
-    );
+  loginCheck(@NestRequest() req: ExpressRequest) {
+    console.log('Checking user:', req?.user);
+    if (req) {
+      return req.user;
+    } else {
+      return { ...req, myMessage: false };
+    }
   }
 
   @ApiOkResponse({ type: LogoutUserResponse })
   @Get('/logout')
   logout(@Request() req) {
     req.session.destroy();
-    return { msg: 'session has ended' };
+    return { msg: 'Session has ended' };
   }
 }
