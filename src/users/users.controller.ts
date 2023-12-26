@@ -10,7 +10,8 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
-import { Request as ExpressRequest } from 'express'; // добавим импорт express Request
+// добавим импорт express Request
+import { Request as ExpressRequest } from 'express';
 
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -52,12 +53,12 @@ export class UsersController {
   @Get('/check')
   @UseGuards(AuthenticatedGuard)
   @HttpCode(HttpStatus.OK)
-  loginCheck(@NestRequest() req: ExpressRequest) {
-    console.log('Checking user:', req?.user);
-    if (req) {
-      return req.user;
+  loginCheck(@NestRequest() userData: ExpressRequest) {
+    console.log('Checking user:', userData?.user);
+    if (userData) {
+      return userData.user;
     } else {
-      return { ...req, myMessage: false };
+      return { ...userData, myMessage: false };
     }
   }
 
