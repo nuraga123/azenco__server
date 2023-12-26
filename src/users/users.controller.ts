@@ -46,10 +46,15 @@ export class UsersController {
   @ApiOkResponse({ type: LoginCheckResponse })
   @Get('/check')
   @UseGuards(AuthenticatedGuard)
+  @HttpCode(HttpStatus.OK)
   loginCheck(@Request() req) {
-    const user = req.user;
-    console.log('User data:', user);
-    return user;
+    const user = req;
+    console.log('User data: ', user);
+    return (
+      req?.user || {
+        seccuss: false,
+      }
+    );
   }
 
   @ApiOkResponse({ type: LogoutUserResponse })
