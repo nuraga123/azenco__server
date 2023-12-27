@@ -19,7 +19,11 @@ async function bootstrap() {
 
   app.enableCors({
     credentials: true,
-    origin: ['http://localhost:3001', 'https://azenco-client.onrender.com'],
+    origin: [
+      'http://localhost:3001',
+      'https://azenco-client.onrender.com',
+      'https://azenco-client.vercel.app',
+    ],
   });
 
   const config = new DocumentBuilder()
