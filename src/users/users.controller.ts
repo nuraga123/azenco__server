@@ -50,6 +50,12 @@ export class UsersController {
     return req.user;
   }
 
+  @Get('/all')
+  getUsers() {
+    const usersData = this.usersService.getUser();
+    return usersData;
+  }
+
   @ApiOkResponse({ type: LogoutUserResponse })
   @Get('/logout')
   logout(@Request() req) {

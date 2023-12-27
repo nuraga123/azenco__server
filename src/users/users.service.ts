@@ -44,4 +44,8 @@ export class UsersService {
 
     return user.save();
   }
+
+  async getUser() {
+    return this.userModel.findAll();
+  }
 }
