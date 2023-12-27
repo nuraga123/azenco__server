@@ -6,13 +6,9 @@ import { UseGuards } from '@nestjs/common';
 export class AuthenticatedGuard implements CanActivate {
   @UseGuards(AuthGuard('local'))
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    console.log('context start');
-    console.log(context);
-    console.log('context end');
-
     const request = context.switchToHttp().getRequest();
     console.log('request start');
-    console.log(request);
+    console.log([{ ...request }]);
     console.log('request end');
 
     console.log('request.isAuthenticated()');
