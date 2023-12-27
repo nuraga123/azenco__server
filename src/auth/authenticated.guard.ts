@@ -8,10 +8,12 @@ export class AuthenticatedGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
 
+    console.log('request.isAuthenticated()');
+    console.log(request.isAuthenticated());
     if (request.isAuthenticated()) {
       return true;
     }
 
-    return true;
+    return false;
   }
 }
