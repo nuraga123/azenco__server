@@ -1,4 +1,8 @@
-import { Injectable, ExecutionContext } from '@nestjs/common';
+import {
+  Injectable,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
 @Injectable()
@@ -9,6 +13,13 @@ export class LocalAuthGuard extends AuthGuard('local') {
 
     await super.logIn(request);
 
-    return result;
+    if (request.isAuthenticated()) {
+      // Пользователь успешно аутентифицирован
+      console.log('User is authenticated:', request.user);
+      return result;
+    } else {
+      // Пользователь не аутентифицирован
+      throw new UnauthorizedException('Authentication failed');
+    }
   }
 }
