@@ -1,21 +1,19 @@
 import {
+  Body,
   Controller,
-  Post,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
-  Body,
-  Header,
-  Request as NestRequest,
-  UseGuards,
+  Post,
   Request,
+  UseGuards,
 } from '@nestjs/common';
-// добавим импорт express Request
-import { Request as ExpressRequest } from 'express';
-
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { LocalAuthGuard } from 'src/auth/local.auth.guard';
+import { LocalAuthGuard } from '../auth/local.auth.guard';
+import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
+import { ApiBody, ApiOkResponse } from '@nestjs/swagger';
 import {
   LoginCheckResponse,
   LoginUserRequest,
@@ -23,8 +21,6 @@ import {
   LogoutUserResponse,
   SignupResponse,
 } from './types';
-import { ApiBody, ApiOkResponse } from '@nestjs/swagger';
-import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
 
 @Controller('users')
 export class UsersController {
@@ -35,7 +31,6 @@ export class UsersController {
   @HttpCode(HttpStatus.CREATED)
   @Header('Content-type', 'application/json')
   createUser(@Body() createUserDto: CreateUserDto) {
-    console.log('Creating user:', createUserDto);
     return this.usersService.create(createUserDto);
   }
 
@@ -44,17 +39,14 @@ export class UsersController {
   @Post('/login')
   @UseGuards(LocalAuthGuard)
   @HttpCode(HttpStatus.OK)
-  login(@NestRequest() req: ExpressRequest) {
-    console.log('User logged in:', req.user);
+  login(@Request() req) {
     return { user: req.user, msg: 'Logged in' };
   }
 
   @ApiOkResponse({ type: LoginCheckResponse })
   @Get('/login-check')
   @UseGuards(AuthenticatedGuard)
-  @HttpCode(HttpStatus.OK)
-  loginCheck(@NestRequest() req: ExpressRequest) {
-    console.log('User logged in:', req.user);
+  loginCheck(@Request() req) {
     return req.user;
   }
 
@@ -62,6 +54,6 @@ export class UsersController {
   @Get('/logout')
   logout(@Request() req) {
     req.session.destroy();
-    return { msg: 'Session has ended' };
+    return { msg: 'session has ended' };
   }
 }

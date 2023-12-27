@@ -11,40 +11,29 @@ export class UsersService {
     private userModel: typeof User,
   ) {}
 
-  async findOne(filter: {
-    where: {
-      id?: string;
-      username?: string;
-      password?: string;
-      email?: string;
-    };
+  findOne(filter: {
+    where: { id?: string; username?: string; email?: string };
   }): Promise<User> {
-    return await this.userModel.findOne({ ...filter });
+    return this.userModel.findOne({ ...filter });
   }
 
   async create(
     createUserDto: CreateUserDto,
   ): Promise<User | { warningMessage: string }> {
     const user = new User();
-    // проверка был ли зарегестрирован
     const existingByUserName = await this.findOne({
       where: { username: createUserDto.username },
     });
-
     const existingByEmail = await this.findOne({
       where: { email: createUserDto.email },
     });
 
     if (existingByUserName) {
-      return {
-        warningMessage: `bu ad artıq qeydiyyatdan keçib: ${createUserDto.username}`,
-      };
+      return { warningMessage: 'Пользователь с таким именем уже существует' };
     }
 
     if (existingByEmail) {
-      return {
-        warningMessage: `Bu email artıq qeydiyyatdan keçib: ${createUserDto.email}`,
-      };
+      return { warningMessage: 'Пользователь с таким email уже существует' };
     }
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);

@@ -1,9 +1,9 @@
-import { NestFactory } from '@nestjs/core';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import * as session from 'express-session';
 import * as passport from 'passport';
+import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { DocumentBuilder } from '@nestjs/swagger';
+import { SwaggerModule } from '@nestjs/swagger/dist';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -14,27 +14,23 @@ async function bootstrap() {
       saveUninitialized: false,
     }),
   );
-
   app.use(passport.initialize());
   app.use(passport.session());
 
-  const corsOptions: CorsOptions = {
+  app.enableCors({
     credentials: true,
     origin: ['http://localhost:3001', 'https://azenco-client.onrender.com'],
-  };
-
-  app.enableCors(corsOptions);
+  });
 
   const config = new DocumentBuilder()
-    .setTitle('Azenco Anbar Serveri')
+    .setTitle('Azenco Swagger')
     .setDescription('api documentation')
     .setVersion('1.0')
     .addTag('api')
     .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('swagger', app, document);
 
-  const documemnt = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('swagger', app, documemnt);
-
-  await app.listen(process.env.PORT || 3000);
+  await app.listen(3000);
 }
 bootstrap();
