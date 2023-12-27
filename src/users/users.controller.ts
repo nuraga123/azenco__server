@@ -16,7 +16,6 @@ import { Request as ExpressRequest } from 'express';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LocalAuthGuard } from 'src/auth/local.auth.guard';
-import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
 import {
   LoginCheckResponse,
   LoginUserRequest,
@@ -51,7 +50,7 @@ export class UsersController {
 
   @ApiOkResponse({ type: LoginCheckResponse })
   @Get('/login-check')
-  @UseGuards(AuthenticatedGuard)
+  @UseGuards(LocalAuthGuard)
   @HttpCode(HttpStatus.OK)
   loginCheck(@NestRequest() userData: ExpressRequest) {
     console.log('Checking user:', userData?.user);
