@@ -12,6 +12,6 @@ export class AuthenticatedGuard implements CanActivate {
       return true;
     }
 
-    return false;
+    return true;
   }
 }
