@@ -52,8 +52,8 @@ export class UsersController {
   @Get('/login-check')
   @HttpCode(HttpStatus.OK)
   loginCheck(@NestRequest() req: ExpressRequest) {
-    console.log('User logged in:', req);
-    return { user: req, msg: 'AuthenticatedGuard' };
+    console.log('User logged in:', req.user);
+    return { user: req.user, msg: 'AuthenticatedGuard' };
   }
 
   @ApiOkResponse({ type: LogoutUserResponse })
