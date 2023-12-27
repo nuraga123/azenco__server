@@ -24,6 +24,7 @@ import {
   SignupResponse,
 } from './types';
 import { ApiBody, ApiOkResponse } from '@nestjs/swagger';
+import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
 
 @Controller('users')
 export class UsersController {
@@ -50,15 +51,11 @@ export class UsersController {
 
   @ApiOkResponse({ type: LoginCheckResponse })
   @Get('/login-check')
-  @UseGuards(LocalAuthGuard)
+  @UseGuards(AuthenticatedGuard)
   @HttpCode(HttpStatus.OK)
-  loginCheck(@NestRequest() userData: ExpressRequest) {
-    console.log('Checking user:', userData?.user);
-    if (userData) {
-      return userData.user;
-    } else {
-      return { ...userData, myMessage: false };
-    }
+  loginCheck(@NestRequest() req: ExpressRequest) {
+    console.log('User logged in:', req);
+    return { user: req, msg: 'AuthenticatedGuard' };
   }
 
   @ApiOkResponse({ type: LogoutUserResponse })
