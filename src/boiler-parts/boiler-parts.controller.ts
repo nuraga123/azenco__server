@@ -2,7 +2,6 @@ import { Controller, Get } from '@nestjs/common';
 import { ApiBody, ApiOkResponse } from '@nestjs/swagger';
 import { Body, Param, Post, Query, UseGuards } from '@nestjs/common/decorators';
 import { BoilerPartsService } from './boiler-parts.service';
-import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
 import {
   FindOneResponse,
   GetBestsellersResponse,
@@ -14,13 +13,14 @@ import {
   SearchRequest,
   SearchResponse,
 } from './types';
+import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
 
 @Controller('boiler-parts')
 export class BoilerPartsController {
   constructor(private readonly boilerPartsService: BoilerPartsService) {}
 
   // @ApiOkResponse({ type: PaginateAndFilterResponse })
-  // @UseGuards(AuthenticatedGuard)
+  //
   // @Get()
   // paginateAndFilter(@Query() query: IBoilerPartsQuery) {
   //   return this.boilerPartsService.paginateAndFilter(query);

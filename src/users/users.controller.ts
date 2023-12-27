@@ -50,7 +50,7 @@ export class UsersController {
   }
 
   @ApiOkResponse({ type: LoginCheckResponse })
-  @Get('/check')
+  @Get('/login-check')
   @UseGuards(AuthenticatedGuard)
   @HttpCode(HttpStatus.OK)
   loginCheck(@NestRequest() userData: ExpressRequest) {

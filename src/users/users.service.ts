@@ -11,7 +11,7 @@ export class UsersService {
     private userModel: typeof User,
   ) {}
 
-  findOne(filter: {
+  async findOne(filter: {
     where: {
       id?: string;
       username?: string;
@@ -19,7 +19,7 @@ export class UsersService {
       email?: string;
     };
   }): Promise<User> {
-    return this.userModel.findOne({ ...filter });
+    return await this.userModel.findOne({ ...filter });
   }
 
   async create(
