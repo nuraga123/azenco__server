@@ -7,6 +7,8 @@ import { SwaggerModule } from '@nestjs/swagger/dist';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Используйте express-session
   app.use(
     session({
       secret: 'keyword',
@@ -14,9 +16,12 @@ async function bootstrap() {
       saveUninitialized: false,
     }),
   );
+
+  // Инициализация passport и использование SessionSerializer
   app.use(passport.initialize());
   app.use(passport.session());
 
+  // Разрешение CORS
   app.enableCors({
     credentials: true,
     origin: [
@@ -26,15 +31,18 @@ async function bootstrap() {
     ],
   });
 
+  // Настройка Swagger
   const config = new DocumentBuilder()
     .setTitle('Azenco Swagger')
-    .setDescription('api documentation')
+    .setDescription('API documentation')
     .setVersion('1.0')
     .addTag('api')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('swagger', app, document);
 
-  await app.listen(3000);
+  // Слушаем на порту 3000
+  await app.listen(process.env.PORT || 3000);
 }
+
 bootstrap();
