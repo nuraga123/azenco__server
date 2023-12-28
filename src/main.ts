@@ -17,7 +17,6 @@ async function bootstrap() {
     }),
   );
 
-  // Инициализация passport и использование SessionSerializer
   app.use(passport.initialize());
   app.use(passport.session());
 
