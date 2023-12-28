@@ -17,6 +17,16 @@ async function bootstrap() {
     }),
   );
 
+  passport.serializeUser(function (user: any, done) {
+    console.log(user);
+    done(null, user);
+  });
+
+  passport.deserializeUser(function (user: any, done) {
+    console.log(user);
+    done(null, user);
+  });
+
   app.use(passport.initialize());
   app.use(passport.session());
 
