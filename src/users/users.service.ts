@@ -48,6 +48,6 @@ export class UsersService {
   async findUserOne(userId: number) {
     const usersData = await this.userModel.findAll();
     const result = usersData.filter((item) => item.id === userId);
-    return result[0].username;
+    return result[0];
   }
 }
