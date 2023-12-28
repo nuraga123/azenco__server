@@ -45,7 +45,9 @@ export class UsersService {
     return user.save();
   }
 
-  async findUserOne(id: number) {
-    return (await this.userModel.findAll()).map((user) => user.id === id);
+  async findUserOne(userId: number) {
+    const usersData = await this.userModel.findAll();
+    const result = usersData.filter((item) => item.id === userId);
+    return result[0].username;
   }
 }

@@ -51,9 +51,10 @@ export class UsersController {
     return req.user;
   }
 
-  @Get('find/:id')
-  getFindUserOne(@Param('id') userId: number) {
-    const usersData = this.usersService.findUserOne(userId);
+  @Get(':id')
+  getAll(@Param('id') userId: string) {
+    const usersData = this.usersService.findUserOne(+userId);
+    console.log(usersData);
     return usersData;
   }
 

@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiBody, ApiOkResponse } from '@nestjs/swagger';
-import { Body, Param, Post, Query, UseGuards } from '@nestjs/common/decorators';
+import { Body, Param, Post, Query } from '@nestjs/common/decorators';
 import { BoilerPartsService } from './boiler-parts.service';
 import {
   FindOneResponse,
@@ -13,7 +13,6 @@ import {
   SearchRequest,
   SearchResponse,
 } from './types';
-import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
 
 @Controller('boiler-parts')
 export class BoilerPartsController {
@@ -27,21 +26,18 @@ export class BoilerPartsController {
   // }
 
   @ApiOkResponse({ type: FindOneResponse })
-  @UseGuards(AuthenticatedGuard)
   @Get('find/:id')
   getOne(@Param('id') id: string) {
     return this.boilerPartsService.findOne(id);
   }
 
   @ApiOkResponse({ type: GetBestsellersResponse })
-  @UseGuards(AuthenticatedGuard)
   @Get('bestsellers')
   getBestseller() {
     return this.boilerPartsService.bestsellers();
   }
 
   @ApiOkResponse({ type: GetNewResponse })
-  @UseGuards(AuthenticatedGuard)
   @Get('new')
   getNew() {
     return this.boilerPartsService.new();
@@ -49,7 +45,6 @@ export class BoilerPartsController {
 
   @ApiOkResponse({ type: SearchResponse })
   @ApiBody({ type: SearchRequest })
-  @UseGuards(AuthenticatedGuard)
   @Post('search')
   search(@Body() { search }: { search: string }) {
     return this.boilerPartsService.searchByString(search);
@@ -57,14 +52,12 @@ export class BoilerPartsController {
 
   @ApiOkResponse({ type: GetByNameResponse })
   @ApiBody({ type: GetByNameRequest })
-  @UseGuards(AuthenticatedGuard)
   @Post('name')
   getByName(@Body() { name }: { name: string }) {
     return this.boilerPartsService.findOneByName(name);
   }
 
   @ApiOkResponse({ type: PaginateAndFilterResponse })
-  @UseGuards(AuthenticatedGuard)
   @Get()
   paginateAndFilterOrSort(@Query() query: IBoilerPartsQuery) {
     return this.boilerPartsService.paginateAndFilterOrSort(query);
