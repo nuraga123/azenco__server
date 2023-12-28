@@ -45,7 +45,7 @@ export class UsersService {
     return user.save();
   }
 
-  async getUser() {
-    return this.userModel.findAll();
+  async findUserOne(id: number) {
+    return (await this.userModel.findAll()).map((user) => user.id === id);
   }
 }

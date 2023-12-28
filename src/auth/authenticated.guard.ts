@@ -12,8 +12,9 @@ export class AuthenticatedGuard implements CanActivate {
         passport.authenticate('local', (err: any, user: any, info: any) => {
           // Логируем ошибку аутентификации (если есть)
           if (err) {
-            console.log('Ошибка аутентификации:', err);
+            console.log('user аутентификации:', user);
             console.log('Дополнительная информация:', info);
+            console.log('Ошибка аутентификации:', err);
             console.log(reject(err));
           }
 
@@ -32,6 +33,8 @@ export class AuthenticatedGuard implements CanActivate {
             resolve();
           });
         })(request, null, resolve);
+
+        return request.isAuthenticated();
       });
 
       // После повторной проверки, request.user должен быть определен

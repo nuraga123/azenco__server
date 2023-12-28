@@ -5,6 +5,7 @@ import {
   Header,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
   Request,
   UseGuards,
@@ -50,9 +51,9 @@ export class UsersController {
     return req.user;
   }
 
-  @Get('/all')
-  getUsers() {
-    const usersData = this.usersService.getUser();
+  @Get('find/:id')
+  getFindUserOne(@Param('id') userId: number) {
+    const usersData = this.usersService.findUserOne(userId);
     return usersData;
   }
 
