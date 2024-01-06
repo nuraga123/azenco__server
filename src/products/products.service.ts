@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Product } from './product.model';
 import { Op, Sequelize } from 'sequelize';
 import { IProductsFilter, IProductsQuery } from './types';
+import { CreateProductDto } from './dto/create-product.dto';
 
 @Injectable()
 export class ProductsService {
@@ -27,7 +28,7 @@ export class ProductsService {
     }
 
     if (query.bolt) {
-      filter.PRR = JSON.parse(decodeURIComponent(query.bolt));
+      filter.bolt = JSON.parse(decodeURIComponent(query.bolt));
     }
 
     if (query.PRR) {
@@ -35,7 +36,7 @@ export class ProductsService {
     }
 
     if (query.earring) {
-      filter.PRR = JSON.parse(decodeURIComponent(query.earring));
+      filter.earring = JSON.parse(decodeURIComponent(query.earring));
     }
 
     const orderDirection = query.sortBy === 'asc' ? 'asc' : 'desc';
@@ -46,5 +47,60 @@ export class ProductsService {
       where: filter,
       order: [[Sequelize.literal('CAST(price AS DECIMAL)'), orderDirection]],
     });
+  }
+
+  async findOneProduct(filter: {
+    where: { id: number | string };
+  }): Promise<Product | null> {
+    return this.productModel.findOne(filter);
+  }
+
+  findProductNameAndAzencoCode(filter: {
+    where: { name?: string; azenco__code?: string };
+  }): Promise<Product | null> {
+    return this.productModel.findOne(filter);
+  }
+
+  async addProduct(
+    createProductDto: CreateProductDto,
+  ): Promise<{ success: boolean; product?: Product; error?: string }> {
+    try {
+      const existingProductName = await this.findProductNameAndAzencoCode({
+        where: { name: createProductDto.name },
+      });
+
+      const existingProductAzencoCode = await this.findProductNameAndAzencoCode(
+        {
+          where: { azenco__code: createProductDto.azenco__code },
+        },
+      );
+
+      if (existingProductName) {
+        return {
+          success: false,
+          error: `Продукт с именем ${createProductDto.name} уже существует`,
+        };
+      }
+
+      if (existingProductAzencoCode) {
+        return {
+          success: false,
+          error: `Продукт с кодом azenco__code: ${createProductDto.azenco__code} уже существует `,
+        };
+      }
+
+      const product = await this.productModel.create({
+        ...createProductDto,
+      });
+
+      return { success: true, product };
+    } catch (error) {
+      console.log(error);
+
+      return {
+        success: false,
+        error: `Ошибка при добавлении продукта: ${error.message}`,
+      };
+    }
   }
 }

@@ -1,18 +1,19 @@
 import { Op } from 'sequelize';
 
-export interface Product {
+export interface IProduct {
   id: number;
+  azenco__code: string;
   name: string;
+  type: string;
   price: number;
   unit: string;
-  quantity: number;
   images: string[];
 }
 
 export interface IProductsFilter {
-  bolt: string | undefined;
-  PRR: string | undefined;
-  earring: string | undefined;
+  bolt?: string;
+  PRR?: string;
+  earring?: string;
   price: { [Op.between]: number[] };
 }
 
@@ -22,7 +23,7 @@ export interface IProductsQuery {
   priceFrom?: string;
   priceTo?: string;
   sortBy?: string;
-  bolt: string | undefined;
-  PRR: string | undefined;
-  earring: string | undefined;
+  bolt?: string;
+  PRR?: string;
+  earring?: string;
 }
