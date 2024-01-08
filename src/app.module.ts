@@ -9,6 +9,7 @@ import { BoilerPartsModule } from './boiler-parts/boiler-parts.module';
 import { ShoppingCartModule } from './shopping-cart/shopping-cart.module';
 import { PaymentModule } from './payment/payment.module';
 import { ProductsModule } from './products/products.module';
+import { TokenModule } from './token/token.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { ProductsModule } from './products/products.module';
     ShoppingCartModule,
     PaymentModule,
     ProductsModule,
+    TokenModule,
   ],
 })
 export class AppModule {}
