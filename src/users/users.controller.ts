@@ -24,6 +24,7 @@ import {
 } from './types';
 
 import { TokenService } from 'src/token/token.service';
+import { TokenGuard } from 'src/token/token.guard';
 
 @Controller('users')
 export class UsersController {
@@ -71,12 +72,17 @@ export class UsersController {
     return { msg: 'session has ended' };
   }
 
+  @UseGuards(TokenGuard)
   @Post('validate-token')
   async validateToken(@Body() { token }: { token: string }) {
     try {
       const validation = await this.tokenService.validateJwtToken(token);
       console.log(validation);
-      return validation;
+      return {
+        id: validation.user.id,
+        username: validation.user.username,
+        email: validation.user.email,
+      };
     } catch (error) {
       console.log(error);
     }
