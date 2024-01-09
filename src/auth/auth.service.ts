@@ -25,7 +25,6 @@ export class AuthService {
 
     if (user && passwordValid) {
       const token = await this.tokenService.generateJwtToken(user);
-
       return {
         userId: user.id,
         username: user.username,

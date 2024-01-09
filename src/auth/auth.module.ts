@@ -8,6 +8,7 @@ import { TokenService } from 'src/token/token.service';
 import { TokenModule } from 'src/token/token.module';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { JWTStrategy } from 'src/strategy';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ConfigService } from '@nestjs/config';
     TokenService,
     JwtService,
     ConfigService,
+    JWTStrategy,
   ],
 })
 export class AuthModule {}

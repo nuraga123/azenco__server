@@ -23,9 +23,14 @@ import {
   SignupResponse,
 } from './types';
 
+import { TokenService } from 'src/token/token.service';
+
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly tokenService: TokenService,
+  ) {}
 
   @ApiOkResponse({ type: SignupResponse })
   @Post('/signup')
@@ -64,5 +69,16 @@ export class UsersController {
   logout(@Request() req) {
     req.session.destroy();
     return { msg: 'session has ended' };
+  }
+
+  @Post('validate-token')
+  async validateToken(@Body() { token }: { token: string }) {
+    try {
+      const validation = await this.tokenService.validateJwtToken(token);
+      console.log(validation);
+      return validation;
+    } catch (error) {
+      console.log(error);
+    }
   }
 }
