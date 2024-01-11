@@ -23,5 +23,5 @@ export class CreateProductDto {
 
   @IsOptional()
   @IsString()
-  readonly images?: string;
+  readonly images: string;
 }

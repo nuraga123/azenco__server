@@ -1,4 +1,4 @@
-import { Table, Model, Column, DataType } from 'sequelize-typescript';
+import { Table, Model, Column } from 'sequelize-typescript';
 
 @Table
 export class Product extends Model {
@@ -17,6 +17,6 @@ export class Product extends Model {
   @Column
   azenco__code: string;
 
-  @Column(DataType.ARRAY(DataType.STRING))
-  images: string[];
+  @Column
+  images: string;
 }

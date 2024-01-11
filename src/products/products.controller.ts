@@ -1,13 +1,15 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { Param, Query } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { IProductsQuery } from './types';
 import { CreateProductDto } from './dto/create-product.dto';
+import { TokenGuard } from 'src/token/token.guard';
 
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productService: ProductsService) {}
 
+  @UseGuards(TokenGuard)
   @Get()
   paginateAndFilterOrSort(@Query() query: IProductsQuery) {
     return this.productService.paginateAndFilterOrSortProducts(query);

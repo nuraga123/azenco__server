@@ -7,7 +7,7 @@ export interface IProduct {
   type: string;
   price: number;
   unit: string;
-  images: string[];
+  images: string;
 }
 
 export interface IProductsFilter {

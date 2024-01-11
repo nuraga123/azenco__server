@@ -76,7 +76,9 @@ export class UsersController {
   @Post('validate-token')
   async validateToken(@Body() { token }: { token: string }) {
     try {
+      console.log(`token ${token}`);
       const validation = await this.tokenService.validateJwtToken(token);
+      console.log(`validation`);
       console.log(validation);
       return {
         id: validation.user.id,
