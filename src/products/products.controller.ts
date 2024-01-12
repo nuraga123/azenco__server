@@ -15,11 +15,13 @@ export class ProductsController {
     return this.productService.paginateAndFilterOrSortProducts(query);
   }
 
+  @UseGuards(TokenGuard)
   @Get('find/:id')
   getOneProduct(@Param('id') id: string) {
     return this.productService.findOneProduct({ where: { id } });
   }
 
+  @UseGuards(TokenGuard)
   @Post('/add')
   async addProduct(@Body() createProductDto: CreateProductDto) {
     try {
