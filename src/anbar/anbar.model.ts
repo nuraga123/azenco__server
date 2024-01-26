@@ -9,20 +9,35 @@ export class Anbar extends Model {
   productId: number;
 
   @Column
+  username: string;
+
+  @Column
   name: string;
 
-  @Column({ defaultValue: 0 })
-  stock: number;
+  @Column
+  type: string;
 
   @Column({ defaultValue: 0 })
   price: number;
 
   @Column({ defaultValue: 0 })
+  stock: number;
+
+  @Column({ defaultValue: 0 })
   total_price: number;
 
   @Column
-  type: string;
+  img: string;
+
+  @Column({ defaultValue: false })
+  ordered: boolean;
 
   @Column
-  img: string;
+  unit: string;
+
+  @Column({ defaultValue: 0 })
+  previous_total_price: number;
+
+  @Column({ defaultValue: 0 })
+  previous_stock: number;
 }

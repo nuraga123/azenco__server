@@ -1,3 +1,4 @@
+import { AnbarModule } from './anbar/anbar.module';
 import { Module } from '@nestjs/common';
 import { UsersModule } from './users/users.module';
 import { SequelizeModule } from '@nestjs/sequelize';
@@ -14,6 +15,7 @@ import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
+    AnbarModule,
     SequelizeModule.forRootAsync({
       imports: [ConfigModule],
       useClass: SequelizeConfigService,
@@ -38,6 +40,7 @@ import { JwtModule } from '@nestjs/jwt';
     PaymentModule,
     ProductsModule,
     TokenModule,
+    AnbarModule,
   ],
 })
 export class AppModule {}
