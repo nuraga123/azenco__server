@@ -19,8 +19,18 @@ export class AnbarService {
     private readonly productsService: ProductsService,
   ) {}
 
+  // получение всех анбаров
+  async findAll(): Promise<Anbar[]> {
+    try {
+      return await this.anbarModel.findAll();
+    } catch (error) {
+      // Обработка ошибок, если они возникнут при выполнении запроса
+      throw new Error(`Unable to fetch all Anbars: ${error.message}`);
+    }
+  }
+
   // Получить все записи в амбаре для указанного пользователя
-  async findAll(userId: number | string): Promise<Anbar[]> {
+  async findOne(userId: number | string): Promise<Anbar[]> {
     return this.anbarModel.findAll({ where: { userId } });
   }
 

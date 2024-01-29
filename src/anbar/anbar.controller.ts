@@ -9,9 +9,14 @@ import { Anbar } from './anbar.model';
 export class AnbarController {
   constructor(private readonly anbarService: AnbarService) {}
 
+  @Get('all')
+  getAnbars() {
+    return this.anbarService.findAll();
+  }
+
   @Get(':id')
-  getAnbar(@Param('id') userId: string): Promise<Anbar[]> {
-    return this.anbarService.findAll(userId);
+  getAnbarOne(@Param('id') userId: string): Promise<Anbar[]> {
+    return this.anbarService.findOne(userId);
   }
 
   @Post('/add')
