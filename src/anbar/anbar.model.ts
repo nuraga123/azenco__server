@@ -15,6 +15,9 @@ export class Anbar extends Model {
   name: string;
 
   @Column
+  azenco__code: string;
+
+  @Column
   type: string;
 
   @Column({ defaultValue: 0 })

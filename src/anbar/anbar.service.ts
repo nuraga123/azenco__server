@@ -71,6 +71,7 @@ export class AnbarService {
       userId: user.id,
       username: user.username,
       productId: product.id,
+      azenco__code: product.azenco__code,
       name: product.name,
       type: product.type,
       img: product.images,
