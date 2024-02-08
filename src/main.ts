@@ -7,7 +7,7 @@ import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const logger = new Logger('Bootstrap'); // Создаем логгер здесь
+  const logger = new Logger('Bootstrap');
 
   // Используйте express-session
   app.use(

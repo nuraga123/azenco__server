@@ -33,6 +33,13 @@ export class UsersController {
     private readonly tokenService: TokenService,
   ) {}
 
+  @Get('/work')
+  @HttpCode(HttpStatus.OK)
+  @Header('Content-type', 'application/json')
+  getWorking() {
+    return true;
+  }
+
   @ApiOkResponse({ type: SignupResponse })
   @Post('/signup')
   @HttpCode(HttpStatus.CREATED)
