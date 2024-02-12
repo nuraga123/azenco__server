@@ -4,9 +4,10 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from '@nestjs/common';
+import * as express from 'express';
+import * as path from 'path';
 
 async function bootstrap() {
-  const startTime = process.hrtime(); // Засекаем время старта сервера
   const app = await NestFactory.create(AppModule);
   const logger = new Logger('Bootstrap');
 
@@ -57,10 +58,8 @@ async function bootstrap() {
     logger.log('Server Working !');
   }, 60000);
 
-  // Вычисляем время, затраченное на старт сервера
-  const elapsedTime = process.hrtime(startTime);
-  const elapsedTimeInMs = elapsedTime[0] * 1000 + elapsedTime[1] / 1000000;
-  logger.log(`Server started in ${elapsedTimeInMs} ms`);
+  // Обслуживание статических файлов из папки public
+  app.use(express.static(path.join(__dirname, '..', 'public')));
 
   // Слушаем на порту 3000
   await app.listen(process.env.PORT || 3000);

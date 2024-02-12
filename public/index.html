@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Server Start Time</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+      }
+      .container {
+        margin-top: 100px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Сервер запущен!</h1>
+      <p>Начало запуска сервера: <span id="start-time"></span></p>
+      <p>Прошло секунд: <span id="elapsed-time"></span></p>
+    </div>
+    <script>
+      fetch('/users/time')
+        .then((response) => response.json())
+        .then((startTime) => {
+          console.log(startTime);
+          document.getElementById('start-time').innerText = startTime.startTime;
+          document.getElementById('elapsed-time').innerText =
+            startTime.elapsedTime;
+        })
+        .catch((error) => {
+          console.error('Ошибка при получении времени старта сервера:', error);
+        });
+    </script>
+  </body>
+</html>

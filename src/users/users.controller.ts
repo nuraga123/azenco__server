@@ -29,12 +29,13 @@ import { TokenGuard } from 'src/token/token.guard';
 @Controller('users')
 export class UsersController {
   private readonly startTime: number;
-
+  private readonly startDateTime: Date;
   constructor(
     private readonly usersService: UsersService,
     private readonly tokenService: TokenService,
   ) {
-    this.startTime = Date.now();
+    this.startDateTime = new Date();
+    this.startTime = this.startDateTime.getTime();
   }
 
   @Get('/work')
@@ -45,9 +46,16 @@ export class UsersController {
   }
 
   @Get('/time')
-  getUptime(): { uptime: number } {
-    const elapsedTime = Date.now() - this.startTime;
-    return { uptime: elapsedTime };
+  @HttpCode(HttpStatus.OK)
+  getServerStartTime(): { startTime: string; elapsedTime: number } {
+    const currentTime = new Date();
+    const elapsedTimeInSeconds = Math.floor(
+      (currentTime.getTime() - this.startTime) / 1000,
+    );
+    return {
+      startTime: this.startDateTime.toString(),
+      elapsedTime: elapsedTimeInSeconds,
+    };
   }
 
   @ApiOkResponse({ type: SignupResponse })
