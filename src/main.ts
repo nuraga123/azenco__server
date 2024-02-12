@@ -6,6 +6,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
+  const startTime = process.hrtime(); // Засекаем время старта сервера
   const app = await NestFactory.create(AppModule);
   const logger = new Logger('Bootstrap');
 
@@ -55,6 +56,11 @@ async function bootstrap() {
   setInterval(() => {
     logger.log('Server Working !');
   }, 60000);
+
+  // Вычисляем время, затраченное на старт сервера
+  const elapsedTime = process.hrtime(startTime);
+  const elapsedTimeInMs = elapsedTime[0] * 1000 + elapsedTime[1] / 1000000;
+  logger.log(`Server started in ${elapsedTimeInMs} ms`);
 
   // Слушаем на порту 3000
   await app.listen(process.env.PORT || 3000);
