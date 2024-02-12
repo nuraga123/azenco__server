@@ -28,16 +28,26 @@ import { TokenGuard } from 'src/token/token.guard';
 
 @Controller('users')
 export class UsersController {
+  private readonly startTime: number;
+
   constructor(
     private readonly usersService: UsersService,
     private readonly tokenService: TokenService,
-  ) {}
+  ) {
+    this.startTime = Date.now();
+  }
 
   @Get('/work')
   @HttpCode(HttpStatus.OK)
   @Header('Content-type', 'application/json')
   getWorking() {
     return true;
+  }
+
+  @Get('/time')
+  getUptime(): { uptime: number } {
+    const elapsedTime = Date.now() - this.startTime;
+    return { uptime: elapsedTime };
   }
 
   @ApiOkResponse({ type: SignupResponse })
