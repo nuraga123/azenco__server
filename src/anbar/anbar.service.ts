@@ -157,13 +157,13 @@ export class AnbarService {
         Number(currentProduct.price) * Number(transferStockDto.quantity);
 
       // Обновление статуса и количества в "отправляющем" амбаре
-
       fromAnbar.previous_stock = Number(previousStock);
       fromAnbar.previous_total_price = Number(previousTotalPrice);
       fromAnbar.stock =
         Number(fromAnbar.stock) - Number(transferStockDto.quantity);
       fromAnbar.total_price =
         Number(fromAnbar.total_price) - Number(priceAndQuantity);
+
       await fromAnbar.save({ transaction });
 
       // Обновление данных в "получающем" амбаре
@@ -258,5 +258,13 @@ export class AnbarService {
       message: `Заказ для товара ${anbar.name} не найден или уже отменен`,
       orderedState: false,
     };
+  }
+
+  async findOneAnbarId(anbarId: number) {
+    return this.anbarModel.findOne({
+      where: {
+        id: anbarId,
+      },
+    });
   }
 }

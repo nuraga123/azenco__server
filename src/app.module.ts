@@ -12,6 +12,7 @@ import { PaymentModule } from './payment/payment.module';
 import { ProductsModule } from './products/products.module';
 import { TokenModule } from './token/token.module';
 import { JwtModule } from '@nestjs/jwt';
+import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { JwtModule } from '@nestjs/jwt';
     ProductsModule,
     TokenModule,
     AnbarModule,
+    OrderModule,
   ],
 })
 export class AppModule {}

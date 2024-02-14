@@ -10,7 +10,7 @@ export class AnbarController {
   constructor(private readonly anbarService: AnbarService) {}
 
   @Get('all')
-  getAnbars() {
+  getAnbars(): Promise<Anbar[]> {
     return this.anbarService.findAll();
   }
 
@@ -19,7 +19,7 @@ export class AnbarController {
     return this.anbarService.findOne(userId);
   }
 
-  @Post('/add')
+  @Post('add')
   addToAnbar(@Body() addToAnbarDto: AddToAnbarDto): Promise<{
     message: string;
     newAnbar?: Anbar;
@@ -42,5 +42,10 @@ export class AnbarController {
     orderedState: boolean;
   }> {
     return this.anbarService.confirmReceived(confirmReceivedDto);
+  }
+
+  @Get('one-anbar-product')
+  getFindOneAnbarProduct(@Param('id') anbarId: number) {
+    return this.anbarService.findOneAnbarId(anbarId);
   }
 }

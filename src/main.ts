@@ -53,9 +53,14 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('swagger', app, document);
 
-  // Пример вывода каждую минуту
+  // Пример вывода каждые 30 секунд
   setInterval(() => {
     logger.log('Server Working !');
+  }, 35000);
+
+  // Пример вывода каждую минуту
+  setInterval(() => {
+    logger.log('Server Working Two methods !');
   }, 60000);
 
   // Обслуживание статических файлов из папки public
