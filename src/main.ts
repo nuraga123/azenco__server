@@ -60,7 +60,7 @@ async function bootstrap() {
 
   // Пример вывода каждую минуту
   setInterval(() => {
-    logger.log('Server Working Two methods !');
+    logger.log('Server Working Two method !');
   }, 60000);
 
   // Обслуживание статических файлов из папки public
