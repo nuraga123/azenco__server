@@ -1,6 +1,6 @@
 import { IsNumber, IsString, IsNotEmpty } from 'class-validator';
 
-export class CreateOrderDto implements IOrderProps {
+export class CreateOrderDto {
   @IsNotEmpty()
   @IsNumber()
   anbarId: number;
