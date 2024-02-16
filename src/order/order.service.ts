@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Order } from './order.model';
 import { AnbarService } from 'src/anbar/anbar.service';
-import { IOrderProps } from './types';
+import { IOrder } from './types';
 import { UsersService } from 'src/users/users.service';
 
 @Injectable()
@@ -16,53 +16,67 @@ export class OrderService {
 
   // Получение всех записей истории заказов
   async getAllOrders(): Promise<Order[]> {
-    // Возвращаем все записи истории заказов
     return this.OrderModel.findAll();
   }
 
   // Создание новой записи заказа
-  async createOrder(order: IOrderProps): Promise<Order> {
-    const currentProductAnbar = await this.anbarService.findOneAnbarId(
-      order.anbarId,
-    );
+  async createOrder(orderData: IOrder): Promise<Order> {
+    // Извлечение данных из объекта заказа
+    const { anbarId, orderedBy, orderedFrom, stock } = orderData;
 
-    const currentOrderedBy = await this.usersService.findOne({
-      where: {
-        username: order.orderedBy,
-      },
-    });
+    // Поиск информации об анбаре по его идентификатору
+    const currentProductAnbar = await this.anbarService.findOneAnbarId(anbarId);
+    if (!currentProductAnbar) {
+      throw new NotFoundException(`не найден anbarId: ${anbarId}`);
+    }
 
-    const currentOrderedFrom = await this.usersService.findOne({
-      where: {
-        username: order.orderedFrom,
-      },
-    });
+    // Поиск информации о пользователях, совершивших заказ
+    const [currentOrderedBy, currentOrderedFrom] = await Promise.all([
+      this.usersService.findOne({ where: { username: orderedBy } }),
+      this.usersService.findOne({ where: { username: orderedFrom } }),
+    ]);
+    if (!currentOrderedBy || !currentOrderedFrom) {
+      throw new NotFoundException(
+        `Один или несколько пользователей не найдены`,
+      );
+    }
 
+    const totalPrice = +currentProductAnbar.price * +stock;
+    // Создание нового заказа
     const newOrder = await this.OrderModel.create({
-      ...currentProductAnbar,
-      totalPrice: +currentProductAnbar.price * +currentProductAnbar.stock,
+      name: currentProductAnbar.name,
+      azenco__code: currentProductAnbar.azenco__code,
+      unit: currentProductAnbar.unit,
+      price: currentProductAnbar.price,
+      stock,
+      totalPrice,
+      img: currentProductAnbar.img,
       orderedBy: currentOrderedBy.username,
       orderedFrom: currentOrderedFrom.username,
       status: 'Заказ в ожидании',
     });
-
     return newOrder;
   }
 
   // Обновление состояния заказа
-  async updateOrderStatus(orderId: number, newStatus: string): Promise<Order> {
-    // Находим заказ по его идентификатору
+  async updateOrderStatus(orderId: number, newStatus: boolean): Promise<Order> {
+    const ORDER_COMPLETED = 'заказ выполнен';
+    const ORDER_NOT_COMPLETED = 'заказ не завершен';
+
+    // Поиск заказа по его идентификатору
     const order = await this.OrderModel.findByPk(orderId);
 
     if (!order) {
-      // Выбрасываем ошибку, если заказ не найден
-      throw new Error(`Order with ID ${orderId} not found`);
+      throw new NotFoundException(`не найден orderId: ${orderId}`);
     }
-    // Обновляем состояние заказа
-    order.status = newStatus;
-    // Сохраняем изменения в базе данных
-    await order.save();
-    // Возвращаем обновленный заказ
-    return order;
+
+    // Обновление состояния заказа и сохранение изменений
+    if (newStatus) {
+      order.status = ORDER_COMPLETED;
+    } else {
+      order.status = ORDER_NOT_COMPLETED;
+    }
+
+    return order.save();
   }
 }

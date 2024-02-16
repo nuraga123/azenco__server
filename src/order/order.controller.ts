@@ -23,7 +23,7 @@ export class OrderController {
   @Put(':id')
   async updateOrderStatus(
     @Param('id') orderId: number,
-    @Body('status') newStatus: string,
+    @Body('status') newStatus: boolean,
   ): Promise<Order> {
     return this.orderService.updateOrderStatus(orderId, newStatus);
   }

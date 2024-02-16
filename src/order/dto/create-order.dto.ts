@@ -12,4 +12,8 @@ export class CreateOrderDto {
   @IsNotEmpty()
   @IsString()
   orderedFrom: string;
+
+  @IsNotEmpty()
+  @IsNumber()
+  stock: number;
 }
