@@ -3,15 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Server Start Time</title>
+    <title>Azenco сервис</title>
     <style>
       body {
         font-family: Arial, sans-serif;
         text-align: center;
       }
+
       .container {
         margin-top: 100px;
       }
+
       .server-status {
         background-color: yellow;
         width: 100px;
@@ -21,11 +23,12 @@
         margin-top: 20px;
         border: 2px solid black;
       }
+      
     </style>
   </head>
   <body>
     <div class="container">
-      <h1>Сервер запущен!</h1>
+      <h1 id="service">сервис: работает 🎉</h1>
       <p>Начало запуска сервера: <span id="start-time"></span></p>
       <p>Прошло секунд: <span id="elapsed-time"></span></p>
       <div class="server-status" id="server-status"></div>
@@ -34,8 +37,9 @@
     <script>
       async function updateServerStatus(status) {
         const serverStatus = document.getElementById('server-status');
+        const service = document.getElementById('service');
         if (status) {
-          serverStatus.style.backgroundColor = 'green';
+          service.serverStatus.style.backgroundColor = 'green';
         } else {
           serverStatus.style.backgroundColor = 'red';
         }
