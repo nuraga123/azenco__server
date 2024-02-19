@@ -12,6 +12,15 @@
       .container {
         margin-top: 100px;
       }
+      .server-status {
+        background-color: yellow;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-top: 20px;
+        border: 2px solid black;
+      }
     </style>
   </head>
   <body>
@@ -19,19 +28,61 @@
       <h1>Сервер запущен!</h1>
       <p>Начало запуска сервера: <span id="start-time"></span></p>
       <p>Прошло секунд: <span id="elapsed-time"></span></p>
+      <div class="server-status" id="server-status"></div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
-      fetch('/users/time')
-        .then((response) => response.json())
-        .then((startTime) => {
-          console.log(startTime);
-          document.getElementById('start-time').innerText = startTime.startTime;
-          document.getElementById('elapsed-time').innerText =
-            startTime.elapsedTime;
-        })
-        .catch((error) => {
-          console.error('Ошибка при получении времени старта сервера:', error);
-        });
+      async function updateServerStatus(status) {
+        const serverStatus = document.getElementById('server-status');
+        if (status) {
+          serverStatus.style.backgroundColor = 'green';
+        } else {
+          serverStatus.style.backgroundColor = 'red';
+        }
+      }
+
+      async function getTime() {
+        const serverStatus = document.getElementById('server-status');
+        serverStatus.style.backgroundColor = 'yellow';
+        setInterval(
+          () => (serverStatus.style.backgroundColor = 'yellow'),
+          1000,
+        );
+
+        const result = await axios
+          .get('/users/time')
+          .then((response) => {
+            console.log('response');
+            console.log(response.data);
+            const { startTime, elapsedTime } = response.data;
+
+            document.getElementById('start-time').innerText =
+              typeof startTime !== 'undefined'
+                ? startTime
+                : 'сервер не работает';
+            document.getElementById('elapsed-time').innerText =
+              typeof elapsedTime !== 'undefined'
+                ? elapsedTime
+                : 'сервер не работает';
+
+            if (response.data) {
+              updateServerStatus(response.data);
+            } else {
+              serverStatus.style.backgroundColor = 'red';
+              console.log(
+                'Свойство serverStatus не найдено в полученных данных',
+              );
+              return;
+            }
+          })
+          .catch((error) => {
+            console.log('Ошибка при получении времени старта сервера:', error);
+          });
+
+        return result;
+      }
+
+      setInterval(() => getTime(), 2000);
     </script>
   </body>
 </html>
