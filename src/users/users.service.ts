@@ -21,9 +21,11 @@ export class UsersService {
     createUserDto: CreateUserDto,
   ): Promise<User | { warningMessage: string }> {
     const user = new User();
+
     const existingByUserName = await this.findOne({
       where: { username: createUserDto.username },
     });
+
     const existingByEmail = await this.findOne({
       where: { email: createUserDto.email },
     });
