@@ -37,4 +37,30 @@ export class ProductsController {
       return { success: false, error: error.message };
     }
   }
+
+  @Post('/search-name')
+  async searchProductName(@Body() { name }: { name: string }) {
+    try {
+      const currentProduct = await this.productService.findOneByName({
+        where: { name },
+      });
+
+      console.log(currentProduct);
+
+      if (currentProduct.name === name) {
+        return {
+          success: true,
+          currentProduct,
+        };
+      } else {
+        return {
+          success: false,
+          message: `${name} нет с таким именем `,
+        };
+      }
+    } catch (error) {
+      console.log(error);
+      return { success: false, error: error.message };
+    }
+  }
 }

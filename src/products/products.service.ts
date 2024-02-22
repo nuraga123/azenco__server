@@ -55,25 +55,29 @@ export class ProductsService {
     return this.productModel.findOne(filter);
   }
 
-  findProductNameAndAzencoCode(filter: {
-    where: { name?: string; azenco__code?: string };
-  }): Promise<Product | null> {
+  async findOneByName(filter: {
+    where: { name: number | string };
+  }): Promise<Product> {
     return this.productModel.findOne(filter);
+  }
+
+  async findProductAzencoCode(filter: {
+    where: { azenco__code?: string };
+  }): Promise<Product | null> {
+    return await this.productModel.findOne(filter);
   }
 
   async addProduct(
     createProductDto: CreateProductDto,
   ): Promise<{ success: boolean; product?: Product; error?: string }> {
     try {
-      const existingProductName = await this.findProductNameAndAzencoCode({
+      const existingProductName = await this.findOneByName({
         where: { name: createProductDto.name },
       });
 
-      const existingProductAzencoCode = await this.findProductNameAndAzencoCode(
-        {
-          where: { azenco__code: createProductDto.azenco__code },
-        },
-      );
+      const existingProductAzencoCode = await this.findProductAzencoCode({
+        where: { azenco__code: createProductDto.azenco__code },
+      });
 
       if (existingProductName) {
         return {
