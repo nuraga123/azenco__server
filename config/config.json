@@ -1,24 +1,24 @@
 {
   "development": {
     "username": "freedb_nuraga",
-    "password": "8bde#5!7%w6@cQA",
-    "database": "freedb_azenco__db",
+    "password": "$nfGYZZ6Ats5WZ5",
+    "database": "freedb_azenco",
     "host": "sql.freedb.tech",
     "dialect": "mysql",
     "port": 3306
   },
   "test": {
     "username": "freedb_nuraga",
-    "password": "8bde#5!7%w6@cQA",
-    "database": "freedb_azenco__db",
+    "password": "$nfGYZZ6Ats5WZ5",
+    "database": "freedb_azenco",
     "host": "sql.freedb.tech",
     "dialect": "mysql",
     "port": 3306
   },
   "production": {
     "username": "freedb_nuraga",
-    "password": "8bde#5!7%w6@cQA",
-    "database": "freedb_azenco__db",
+    "password": "$nfGYZZ6Ats5WZ5",
+    "database": "freedb_azenco",
     "host": "sql.freedb.tech",
     "dialect": "mysql",
     "port": 3306
