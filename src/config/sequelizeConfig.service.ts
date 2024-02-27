@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { User } from '../users/users.model';
 import {
   SequelizeOptionsFactory,
   SequelizeModuleOptions,
 } from '@nestjs/sequelize';
+import { User } from '../users/users.model';
 
 @Injectable()
 export class SequelizeConfigService implements SequelizeOptionsFactory {
