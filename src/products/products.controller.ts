@@ -4,6 +4,7 @@ import { ProductsService } from './products.service';
 import { IProductsQuery } from './types';
 import { CreateProductDto } from './dto/create-product.dto';
 import { TokenGuard } from 'src/token/token.guard';
+import { Product } from './product.model';
 
 @Controller('products')
 export class ProductsController {
@@ -38,6 +39,7 @@ export class ProductsController {
     }
   }
 
+  @UseGuards(TokenGuard)
   @Post('/search-name')
   async searchProductName(@Body() { name }: { name: string }) {
     try {
@@ -62,5 +64,13 @@ export class ProductsController {
       console.log(error);
       return { success: false, error: error.message };
     }
+  }
+
+  @UseGuards(TokenGuard)
+  @Post('/search-word')
+  async searchProductsByNameArr(
+    @Body('search_word') search_word: string,
+  ): Promise<Product[]> {
+    return this.productService.findByNameAll(search_word);
   }
 }

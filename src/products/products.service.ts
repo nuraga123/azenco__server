@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Product } from './product.model';
 import { Op, Sequelize } from 'sequelize';
+import { Product } from './product.model';
 import { IProductsFilter, IProductsQuery } from './types';
 import { CreateProductDto } from './dto/create-product.dto';
 
@@ -106,5 +106,18 @@ export class ProductsService {
         error: `Ошибка при добавлении продукта: ${error.message}`,
       };
     }
+  }
+
+  async findByNameAll(search_name: string): Promise<Product[]> {
+    // Используем оператор ILIKE для регистронезависимого поиска
+    const searchCondition = {
+      where: {
+        name: {
+          [Op.like]: `%${search_name}%`,
+        },
+      },
+    };
+
+    return this.productModel.findAll(searchCondition);
   }
 }
