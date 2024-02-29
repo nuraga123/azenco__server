@@ -69,7 +69,7 @@ export class ProductsController {
   @UseGuards(TokenGuard)
   @Post('/search-word')
   async searchProductsByNameArr(
-    @Body('search_word') search_word: string,
+    @Body() { search_word }: { search_word: string },
   ): Promise<Product[]> {
     return this.productService.findByNameAll(search_word);
   }
