@@ -4,9 +4,10 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Anbar } from './anbar.model';
 import { UsersService } from 'src/users/users.service';
 import { ProductsService } from 'src/products/products.service';
-import { AddToAnbarDto } from './dto/add-to-anbar';
-import { TransferStockDto } from './dto/transfer-stock-anbar.dto';
 import { ConfirmReceivedDto } from './dto/confirm-received.dto';
+import { HistoryService } from 'src/history/history.service';
+import { TransferStockDto } from './dto/transfer-stock-anbar.dto';
+import { AddToAnbarDto } from './dto/add-to-anbar';
 
 @Injectable()
 export class AnbarService {
@@ -17,6 +18,7 @@ export class AnbarService {
     private anbarModel: typeof Anbar,
     private readonly usersService: UsersService,
     private readonly productsService: ProductsService,
+    private readonly historyService: HistoryService,
   ) {}
 
   // получение всех анбаров
@@ -25,11 +27,39 @@ export class AnbarService {
       return await this.anbarModel.findAll();
     } catch (error) {
       // Обработка ошибок, если они возникнут при выполнении запроса
+      const Logger = this.logger;
+      Logger.log(error);
       throw new Error(`Unable to fetch all Anbars: ${error.message}`);
     }
   }
 
-  // Получить все записи в амбаре для указанного пользователя
+  // поиск амбара по id
+  async findOneAnbarId(anbarId: number): Promise<Anbar> {
+    return this.anbarModel.findOne({
+      where: {
+        id: anbarId,
+      },
+    });
+  }
+
+  // данные об имен пользователей анбара
+  async getAnbarsUsername() {
+    try {
+      const result = await this.anbarModel.findAll({
+        attributes: ['username', 'userId'],
+      });
+      const Logger = this.logger;
+      Logger.log('dd', result);
+      return result;
+    } catch (error) {
+      console.error(error);
+      throw new Error(
+        `Unable to fetch unique usernames from Anbars: ${error.message}`,
+      );
+    }
+  }
+
+  // поиск амбара по userId
   async findOne(userId: number | string): Promise<Anbar[]> {
     return this.anbarModel.findAll({ where: { userId } });
   }
@@ -48,7 +78,7 @@ export class AnbarService {
 
     if (!user || !product) {
       return {
-        message: 'Неверные данные пользователя или товара.',
+        message: 'Неверные данные пользователя или товара!',
       };
     }
 
@@ -82,7 +112,7 @@ export class AnbarService {
       // настоящее время
       stock: Number(addToAnbarDto.stock),
       total_price: Number(product.price) * Number(addToAnbarDto.stock),
-      // по умолчанию гу нового товара нет прошлой истории заказов
+      // по умолчанию у нового товара нет прошлой истории заказов
       previous_stock: 0,
       previous_total_price: 0,
       // Изначально товар не заказан
@@ -143,6 +173,7 @@ export class AnbarService {
           username: transferStockDto.toUsername,
         },
         defaults: {
+          ...currentProduct,
           userId: transferStockDto.toUserId,
           productId: transferStockDto.productId,
           stock: 0,
@@ -168,6 +199,7 @@ export class AnbarService {
 
       // Обновление данных в "получающем" амбаре
       toAnbar.name = currentProduct.name;
+      toAnbar.azenco__code = currentProduct.azenco__code;
       toAnbar.type = currentProduct.type;
       toAnbar.img = currentProduct.images;
       toAnbar.price = Number(currentProduct.price);
@@ -201,11 +233,11 @@ export class AnbarService {
     confirmReceivedDto: ConfirmReceivedDto,
   ): Promise<{ message: string; orderedState: boolean }> {
     const { userId, anbarId } = confirmReceivedDto;
-    const anbar = await this.anbarModel.findByPk(anbarId);
+    const anbar = await this.findOneAnbarId(+anbarId);
 
     if (!anbar) {
       return {
-        message: `Амбар с идентификатором ${anbarId} не найден.`,
+        message: `Амбар ID: ${anbarId} не найден!`,
         orderedState: false,
       };
     }
@@ -215,23 +247,51 @@ export class AnbarService {
       anbar.ordered = false;
       anbar.previous_stock = 0;
       anbar.previous_total_price = 0;
-      await anbar.save();
-      return {
-        message: `товар ${anbar.name} подтвержден полученным !`,
-        orderedState: false,
-      };
+
+      // Создаем запись в истории
+      await this.historyService.createHistory(
+        `товар ${anbar.name} подтвержден полученным !`,
+        anbar.username,
+        userId,
+      );
+
+      // Если весь товар из амбара был заказан и подтвержден,
+      // удаляем запись амбара
+      const Logger = this.logger;
+      Logger.log(`anbar.stock === 0`);
+      Logger.log(anbar.stock === 0);
+      if (+anbar.stock === 0) {
+        await anbar.destroy();
+
+        return {
+          message: `Амбар для товара ${anbar.name} удален, так как весь товар был заказан и подтвержден полученным!`,
+          orderedState: false,
+        };
+      } else {
+        await anbar.save();
+        return {
+          message: `товар ${anbar.name} подтвержден полученным !`,
+          orderedState: false,
+        };
+      }
     }
   }
 
-  //
+  // отмена заказа
   async cancelOrder(
     anbarId: number,
   ): Promise<{ message: string; orderedState: boolean }> {
-    const anbar = await this.anbarModel.findByPk(anbarId);
+    const anbar = await this.anbarModel.findOne({
+      where: {
+        id: anbarId,
+      },
+    });
+    Logger.log(anbar);
+    Logger.log(anbarId);
 
     if (!anbar) {
       return {
-        message: `Амбар с идентификатором ${anbarId} не найден.`,
+        message: `Амбар с anbarId ${anbarId}  не найден`,
         orderedState: false,
       };
     }
@@ -258,13 +318,5 @@ export class AnbarService {
       message: `Заказ для товара ${anbar.name} не найден или уже отменен`,
       orderedState: false,
     };
-  }
-
-  async findOneAnbarId(anbarId: number) {
-    return this.anbarModel.findOne({
-      where: {
-        id: anbarId,
-      },
-    });
   }
 }

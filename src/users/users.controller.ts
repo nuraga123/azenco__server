@@ -10,11 +10,11 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
+import { ApiBody, ApiOkResponse } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LocalAuthGuard } from '../auth/local.auth.guard';
-import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
-import { ApiBody, ApiOkResponse } from '@nestjs/swagger';
+
 import {
   LoginCheckResponse,
   LoginUserRequest,
@@ -23,6 +23,7 @@ import {
   SignupResponse,
 } from './types';
 
+import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
 import { TokenService } from 'src/token/token.service';
 import { TokenGuard } from 'src/token/token.guard';
 
@@ -80,6 +81,7 @@ export class UsersController {
   @HttpCode(200)
   @UseGuards(AuthenticatedGuard)
   loginCheck(@Request() req) {
+    console.log(req);
     return req.user;
   }
 
@@ -98,6 +100,26 @@ export class UsersController {
   }
 
   @UseGuards(TokenGuard)
+  @Post('/secret-word')
+  resetPassword(
+    @Body()
+    {
+      userSecret,
+      userId,
+      newPassword,
+    }: {
+      userSecret: string;
+      userId: number;
+      newPassword: string;
+    },
+  ) {
+    return this.usersService.updateUserPassword(
+      userSecret,
+      userId,
+      newPassword,
+    );
+  }
+
   @Post('validate-token')
   async validateToken(@Body() { token }: { token: string }) {
     try {

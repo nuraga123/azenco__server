@@ -9,12 +9,22 @@ import { Anbar } from './anbar.model';
 export class AnbarController {
   constructor(private readonly anbarService: AnbarService) {}
 
+  @Get('usernames')
+  getHello() {
+    return this.anbarService.getAnbarsUsername();
+  }
+
   @Get('all')
   getAnbars(): Promise<Anbar[]> {
     return this.anbarService.findAll();
   }
 
   @Get(':id')
+  getFindOneAnbarProduct(@Param('id') anbarId: number): Promise<Anbar> {
+    return this.anbarService.findOneAnbarId(anbarId);
+  }
+
+  @Get('user-id/:id')
   getAnbarOne(@Param('id') userId: string): Promise<Anbar[]> {
     return this.anbarService.findOne(userId);
   }
@@ -36,7 +46,7 @@ export class AnbarController {
     return this.anbarService.transferStock(transferStockDto);
   }
 
-  @Post('confirm-received')
+  @Post('confirm-order-received')
   confirmReceived(@Body() confirmReceivedDto: ConfirmReceivedDto): Promise<{
     message: string;
     orderedState: boolean;
@@ -44,8 +54,11 @@ export class AnbarController {
     return this.anbarService.confirmReceived(confirmReceivedDto);
   }
 
-  @Get('one-anbar-product')
-  getFindOneAnbarProduct(@Param('id') anbarId: number) {
-    return this.anbarService.findOneAnbarId(anbarId);
+  @Post('cancel-order')
+  cancelOrder(@Body('anbarId') anbarId: number): Promise<{
+    message: string;
+    orderedState: boolean;
+  }> {
+    return this.anbarService.cancelOrder(anbarId);
   }
 }

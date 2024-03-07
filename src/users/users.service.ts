@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/sequelize';
 import * as bcrypt from 'bcrypt';
 import { User } from './users.model';
@@ -9,12 +10,13 @@ export class UsersService {
   constructor(
     @InjectModel(User)
     private userModel: typeof User,
+    private configService: ConfigService,
   ) {}
 
-  findOne(filter: {
+  async findOne(filter: {
     where: { id?: string; username?: string; email?: string };
   }): Promise<User> {
-    return this.userModel.findOne({ ...filter });
+    return await this.userModel.findOne({ ...filter });
   }
 
   async create(
@@ -51,5 +53,36 @@ export class UsersService {
     const usersData = await this.userModel.findAll();
     const result = usersData.filter((item) => item.id === userId);
     return result[0];
+  }
+
+  async updateUserPassword(
+    userSecret: string,
+    userId: number,
+    newPassword: string,
+  ): Promise<{ User: User; message: string } | { message: string }> {
+    // Находим пользователя по его userId
+    const user = await this.findUserOne(userId);
+    const consoleLogger = new Logger('UsersService');
+    consoleLogger.log(user);
+    if (!user) {
+      return { message: 'Пользователья не существует' };
+    }
+
+    if (!newPassword) {
+      return { message: 'new password не существует' };
+    }
+
+    const secretWord = this.configService.get<string>('SECRET');
+    if (secretWord === userSecret) {
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      // Обновляем пароль пользователя в базе данных
+      user.password = hashedPassword;
+      await user.save();
+
+      // Возвращаем обновленного пользователя
+      return { ...user, message: 'пароль обнавлен' };
+    } else {
+      return { message: 'неправильное секретное слово' };
+    }
   }
 }
