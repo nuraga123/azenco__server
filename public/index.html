@@ -102,7 +102,7 @@
             const service = document.getElementById('service');
             if (response.data) {
               updateServerStatus(response.data);
-              service.textContent = 'сервис работает 😊';
+              service.textContent = 'сервер работает 😊';
 
               if (startTime && elapsedTime) {
                 formatTime(startTime).then((formattedTime) => {

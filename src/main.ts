@@ -1,11 +1,10 @@
-import * as session from 'express-session';
-import * as passport from 'passport';
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as session from 'express-session';
 import * as express from 'express';
-import * as path from 'path';
+import * as passport from 'passport';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -55,16 +54,16 @@ async function bootstrap() {
 
   // Пример вывода каждые 30 секунд
   setInterval(() => {
-    logger.log('Server Working !');
-  }, 35000);
+    logger.log('Server Working 30s!');
+  }, 30000);
 
   // Пример вывода каждую минуту
   setInterval(() => {
-    logger.log('Server Working Two method !');
-  }, 60000);
+    logger.log('Server Working Two method 40s!');
+  }, 40000);
 
   // Обслуживание статических файлов из папки public
-  app.use(express.static(path.join(__dirname, '..', 'public')));
+  app.use(express.static('public'));
 
   // Слушаем на порту 3000
   await app.listen(process.env.PORT || 3000);
