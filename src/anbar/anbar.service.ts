@@ -43,14 +43,26 @@ export class AnbarService {
   }
 
   // данные об имен пользователей анбара
-  async getAnbarsUsername() {
+  async getAnbarsUsername(nameToDelete: string): Promise<any[]> {
     try {
-      const result = await this.anbarModel.findAll({
+      const anbars = await this.anbarModel.findAll({
         attributes: ['username', 'userId'],
       });
-      const Logger = this.logger;
-      Logger.log('dd', result);
-      return result;
+
+      const uniqueEntries = [
+        ...new Map(anbars.map((item) => [item.userId, item])).values(),
+      ];
+
+      const filteredEntries = uniqueEntries.filter(
+        (item) => item.username !== nameToDelete,
+      );
+
+      this.logger.log(
+        `Unique usernames from Anbars (excluding "${nameToDelete}"):`,
+        filteredEntries,
+      );
+
+      return filteredEntries;
     } catch (error) {
       console.error(error);
       throw new Error(

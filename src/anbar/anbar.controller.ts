@@ -9,9 +9,9 @@ import { Anbar } from './anbar.model';
 export class AnbarController {
   constructor(private readonly anbarService: AnbarService) {}
 
-  @Get('usernames')
-  getHello() {
-    return this.anbarService.getAnbarsUsername();
+  @Post('usernames')
+  getHello(@Body('name') name: string) {
+    return this.anbarService.getAnbarsUsername(name);
   }
 
   @Get('all')
