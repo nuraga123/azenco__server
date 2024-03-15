@@ -30,7 +30,7 @@ export class Anbar extends Model {
   total_price: number;
 
   @Column
-  img: string;
+  images: string;
 
   @Column({ defaultValue: false })
   ordered: boolean;
@@ -43,4 +43,7 @@ export class Anbar extends Model {
 
   @Column({ defaultValue: 0 })
   previous_stock: number;
+
+  @Column({ defaultValue: false })
+  isComeProduct: boolean;
 }

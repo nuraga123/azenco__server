@@ -8,6 +8,12 @@ import { ConfirmReceivedDto } from './dto/confirm-received.dto';
 import { HistoryService } from 'src/history/history.service';
 import { TransferStockDto } from './dto/transfer-stock-anbar.dto';
 import { AddToAnbarDto } from './dto/add-to-anbar';
+import { AxiosError } from 'axios';
+
+interface IAnbarUsername {
+  username: string;
+  userId: number;
+}
 
 @Injectable()
 export class AnbarService {
@@ -22,14 +28,13 @@ export class AnbarService {
   ) {}
 
   // получение всех анбаров
-  async findAll(): Promise<Anbar[]> {
+  async findAll(): Promise<Anbar[] | { errorMessage: string }> {
     try {
       return await this.anbarModel.findAll();
     } catch (error) {
       // Обработка ошибок, если они возникнут при выполнении запроса
-      const Logger = this.logger;
-      Logger.log(error);
-      throw new Error(`Unable to fetch all Anbars: ${error.message}`);
+      this.logger.log((error as Error).message);
+      return { errorMessage: `${(error as AxiosError).message}` };
     }
   }
 
@@ -43,31 +48,43 @@ export class AnbarService {
   }
 
   // данные об имен пользователей анбара
-  async getAnbarsUsername(nameToDelete: string): Promise<any[]> {
+  async getAnbarsUsername(
+    nameToDelete: string,
+  ): Promise<IAnbarUsername[] | { errorMessage: string }> {
     try {
-      const anbars = await this.anbarModel.findAll({
+      const anbars: IAnbarUsername[] = await this.anbarModel.findAll({
         attributes: ['username', 'userId'],
       });
 
-      const uniqueEntries = [
+      if (!anbars.length) {
+        return { errorMessage: 'Нет данных' };
+      }
+
+      const uniqueEntries: IAnbarUsername[] = [
         ...new Map(anbars.map((item) => [item.userId, item])).values(),
       ];
 
-      const filteredEntries = uniqueEntries.filter(
+      if (!uniqueEntries.length) {
+        return { errorMessage: 'Нет уникальных записей' };
+      }
+
+      const filteredEntries: IAnbarUsername[] = uniqueEntries.filter(
         (item) => item.username !== nameToDelete,
       );
 
       this.logger.log(
-        `Unique usernames from Anbars (excluding "${nameToDelete}"):`,
+        `Уникальные имена пользователей из Anbars (за исключением «${nameToDelete}»)`,
         filteredEntries,
       );
 
       return filteredEntries;
     } catch (error) {
-      console.error(error);
-      throw new Error(
-        `Unable to fetch unique usernames from Anbars: ${error.message}`,
-      );
+      const errorMessage = (error as AxiosError).message;
+      this.logger.log(`Ошибка getAnbarsUsername: ${errorMessage}`);
+
+      return {
+        errorMessage: 'Невозможно получить имена пользователей',
+      };
     }
   }
 
@@ -84,13 +101,19 @@ export class AnbarService {
       where: { username: addToAnbarDto.username },
     });
 
+    if (!user) {
+      return {
+        message: 'Неверные данные пользователя!',
+      };
+    }
+
     const product = await this.productsService.findOneProduct({
       where: { id: addToAnbarDto.productId },
     });
 
-    if (!user || !product) {
+    if (!product) {
       return {
-        message: 'Неверные данные пользователя или товара!',
+        message: 'Неверные данные товара!',
       };
     }
 
@@ -104,31 +127,31 @@ export class AnbarService {
     if (existingAnbar) {
       return {
         message:
-          'Запись в амбаре уже существует для данного пользователя и продукта.',
+          'Запись в амбаре уже существует для данного пользователя и продукта!',
       };
     }
 
     // Создаем запись о товаре в амбаре
-    const newAnbar = await this.anbarModel.create({
+    const newAnbar: Anbar = await this.anbarModel.create({
       userId: user.id,
       username: user.username,
       productId: product.id,
       azenco__code: product.azenco__code,
       name: product.name,
       type: product.type,
-      img: product.images,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      images: product.images,
       unit: product.unit,
       price: Number(product.price),
-      // настоящее время
       stock: Number(addToAnbarDto.stock),
       total_price: Number(product.price) * Number(addToAnbarDto.stock),
-      // по умолчанию у нового товара нет прошлой истории заказов
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      // сосотояния до заказа
       previous_stock: 0,
       previous_total_price: 0,
-      // Изначально товар не заказан
+      // по умолчанию новый анбар не может быть заказан
       ordered: false,
+      isComeProduct: false,
     });
 
     newAnbar.save();
@@ -330,5 +353,102 @@ export class AnbarService {
       message: `Заказ для товара ${anbar.name} не найден или уже отменен`,
       orderedState: false,
     };
+  }
+
+  async requestStockTransfer(
+    fromUsername: string,
+    toUsername: string,
+    productId: number,
+    quantity: number,
+  ): Promise<{ message: string }> {
+    try {
+      // Получаем информацию о пользователях и товаре
+      const fromUser = await this.usersService.findOne({
+        where: { username: fromUsername },
+      });
+
+      const toUser = await this.usersService.findOne({
+        where: { username: toUsername },
+      });
+      const product = await this.productsService.findOneProduct({
+        where: { id: productId },
+      });
+
+      if (!fromUser || !toUser || !product) {
+        throw new Error('Invalid user or product');
+      }
+
+      // Создаем запись о заказе на передачу товара
+      // и отправляем запрос второму пользователю
+      const newRequest = await this.historyService.createHistory(
+        `Request to transfer ${quantity} ${product.name} from ${fromUser.username} to ${toUser.username}`,
+        fromUser.username,
+        toUser.id,
+        true, // Здесь можно добавить статус ожидания подтверждения
+      );
+
+      return { message: 'Transfer request sent' };
+    } catch (error) {
+      this.logger.error(`Error requesting stock transfer: ${error.message}`);
+      throw new Error('Failed to request stock transfer');
+    }
+  }
+
+  async confirmStockTransfer(
+    fromUsername: string,
+    toUsername: string,
+    productId: number,
+    quantity: number,
+    confirmation: boolean,
+  ): Promise<{ message: string }> {
+    try {
+      // Обрабатываем ответ от второго пользователя
+      // о согласии или отказе на передачу товара
+      if (confirmation) {
+        // Если пользователь согласен, выполняем передачу товара
+        // Например, можно вызвать метод для фактической передачи товара
+        return { message: 'Stock transfer confirmed' };
+      } else {
+        // Если пользователь отказывается, отменяем передачу товара
+        // Например, можно вызвать метод для отмены заказа на передачу товара
+        return { message: 'Stock transfer declined' };
+      }
+    } catch (error) {
+      this.logger.error(`Error confirming stock transfer: ${error.message}`);
+      throw new Error('Failed to confirm stock transfer');
+    }
+  }
+
+  async confirmStockReceived(
+    username: string,
+    productId: number,
+    quantityReceived: number,
+  ): Promise<{ message: string }> {
+    try {
+      // Обрабатываем подтверждение получения товара
+      // и обновляем количество товара у обоих пользователей
+      // Например, можно вызвать метод для обновления количества товара в амбаре
+      return { message: 'Stock received confirmed' };
+    } catch (error) {
+      this.logger.error(`Error confirming stock received: ${error.message}`);
+      throw new Error('Failed to confirm stock received');
+    }
+  }
+
+  async cancelStockTransfer(
+    fromUsername: string,
+    toUsername: string,
+    productId: number,
+    quantity: number,
+  ): Promise<{ message: string }> {
+    try {
+      // Отменяем заказ на передачу товара
+      // и возвращаем товар обратно в амбар отправителя
+      // Например, можно вызвать метод для отмены заказа и возврата товара
+      return { message: 'Stock transfer canceled' };
+    } catch (error) {
+      this.logger.error(`Error canceling stock transfer: ${error.message}`);
+      throw new Error('Failed to cancel stock transfer');
+    }
   }
 }

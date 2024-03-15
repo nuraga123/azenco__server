@@ -13,7 +13,7 @@ export interface IAnbars {
   azenco__code: string;
   images: string;
   ordered: boolean;
-}
+  pendingConfirmation: boolean;
 
 export interface ITransferAnbar extends IAnbars {
   productId: number;
