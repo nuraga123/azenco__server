@@ -50,7 +50,7 @@ export class OrderService {
       price: currentProductAnbar.price,
       stock,
       totalPrice,
-      img: currentProductAnbar.img,
+      img: currentProductAnbar.images,
       orderedBy: currentOrderedBy.username,
       orderedFrom: currentOrderedFrom.username,
       status: 'Заказ в ожидании',

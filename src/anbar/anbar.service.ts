@@ -9,11 +9,7 @@ import { HistoryService } from 'src/history/history.service';
 import { TransferStockDto } from './dto/transfer-stock-anbar.dto';
 import { AddToAnbarDto } from './dto/add-to-anbar';
 import { AxiosError } from 'axios';
-
-interface IAnbarUsername {
-  username: string;
-  userId: number;
-}
+import { IAnbarsUsername, IAnbarsUsernameResponse } from './types';
 
 @Injectable()
 export class AnbarService {
@@ -28,13 +24,12 @@ export class AnbarService {
   ) {}
 
   // получение всех анбаров
-  async findAll(): Promise<Anbar[] | { errorMessage: string }> {
+  async findAll(): Promise<Anbar[]> {
     try {
       return await this.anbarModel.findAll();
     } catch (error) {
       // Обработка ошибок, если они возникнут при выполнении запроса
       this.logger.log((error as Error).message);
-      return { errorMessage: `${(error as AxiosError).message}` };
     }
   }
 
@@ -50,25 +45,31 @@ export class AnbarService {
   // данные об имен пользователей анбара
   async getAnbarsUsername(
     nameToDelete: string,
-  ): Promise<IAnbarUsername[] | { errorMessage: string }> {
+  ): Promise<IAnbarsUsernameResponse> {
     try {
-      const anbars: IAnbarUsername[] = await this.anbarModel.findAll({
+      const anbars: IAnbarsUsername[] = await this.anbarModel.findAll({
         attributes: ['username', 'userId'],
       });
 
       if (!anbars.length) {
-        return { errorMessage: 'Нет данных' };
+        return {
+          usernameArray: [],
+          errorMessage: 'Нет данных',
+        };
       }
 
-      const uniqueEntries: IAnbarUsername[] = [
+      const uniqueEntries: IAnbarsUsername[] = [
         ...new Map(anbars.map((item) => [item.userId, item])).values(),
       ];
 
       if (!uniqueEntries.length) {
-        return { errorMessage: 'Нет уникальных записей' };
+        return {
+          usernameArray: [],
+          errorMessage: 'Нет уникальных записей',
+        };
       }
 
-      const filteredEntries: IAnbarUsername[] = uniqueEntries.filter(
+      const filteredEntries: IAnbarsUsername[] = uniqueEntries.filter(
         (item) => item.username !== nameToDelete,
       );
 
@@ -77,12 +78,13 @@ export class AnbarService {
         filteredEntries,
       );
 
-      return filteredEntries;
+      return { usernameArray: filteredEntries };
     } catch (error) {
       const errorMessage = (error as AxiosError).message;
       this.logger.log(`Ошибка getAnbarsUsername: ${errorMessage}`);
 
       return {
+        usernameArray: [],
         errorMessage: 'Невозможно получить имена пользователей',
       };
     }
@@ -236,7 +238,7 @@ export class AnbarService {
       toAnbar.name = currentProduct.name;
       toAnbar.azenco__code = currentProduct.azenco__code;
       toAnbar.type = currentProduct.type;
-      toAnbar.img = currentProduct.images;
+      toAnbar.images = currentProduct.images;
       toAnbar.price = Number(currentProduct.price);
       toAnbar.unit = currentProduct.unit;
 
@@ -353,102 +355,5 @@ export class AnbarService {
       message: `Заказ для товара ${anbar.name} не найден или уже отменен`,
       orderedState: false,
     };
-  }
-
-  async requestStockTransfer(
-    fromUsername: string,
-    toUsername: string,
-    productId: number,
-    quantity: number,
-  ): Promise<{ message: string }> {
-    try {
-      // Получаем информацию о пользователях и товаре
-      const fromUser = await this.usersService.findOne({
-        where: { username: fromUsername },
-      });
-
-      const toUser = await this.usersService.findOne({
-        where: { username: toUsername },
-      });
-      const product = await this.productsService.findOneProduct({
-        where: { id: productId },
-      });
-
-      if (!fromUser || !toUser || !product) {
-        throw new Error('Invalid user or product');
-      }
-
-      // Создаем запись о заказе на передачу товара
-      // и отправляем запрос второму пользователю
-      const newRequest = await this.historyService.createHistory(
-        `Request to transfer ${quantity} ${product.name} from ${fromUser.username} to ${toUser.username}`,
-        fromUser.username,
-        toUser.id,
-        true, // Здесь можно добавить статус ожидания подтверждения
-      );
-
-      return { message: 'Transfer request sent' };
-    } catch (error) {
-      this.logger.error(`Error requesting stock transfer: ${error.message}`);
-      throw new Error('Failed to request stock transfer');
-    }
-  }
-
-  async confirmStockTransfer(
-    fromUsername: string,
-    toUsername: string,
-    productId: number,
-    quantity: number,
-    confirmation: boolean,
-  ): Promise<{ message: string }> {
-    try {
-      // Обрабатываем ответ от второго пользователя
-      // о согласии или отказе на передачу товара
-      if (confirmation) {
-        // Если пользователь согласен, выполняем передачу товара
-        // Например, можно вызвать метод для фактической передачи товара
-        return { message: 'Stock transfer confirmed' };
-      } else {
-        // Если пользователь отказывается, отменяем передачу товара
-        // Например, можно вызвать метод для отмены заказа на передачу товара
-        return { message: 'Stock transfer declined' };
-      }
-    } catch (error) {
-      this.logger.error(`Error confirming stock transfer: ${error.message}`);
-      throw new Error('Failed to confirm stock transfer');
-    }
-  }
-
-  async confirmStockReceived(
-    username: string,
-    productId: number,
-    quantityReceived: number,
-  ): Promise<{ message: string }> {
-    try {
-      // Обрабатываем подтверждение получения товара
-      // и обновляем количество товара у обоих пользователей
-      // Например, можно вызвать метод для обновления количества товара в амбаре
-      return { message: 'Stock received confirmed' };
-    } catch (error) {
-      this.logger.error(`Error confirming stock received: ${error.message}`);
-      throw new Error('Failed to confirm stock received');
-    }
-  }
-
-  async cancelStockTransfer(
-    fromUsername: string,
-    toUsername: string,
-    productId: number,
-    quantity: number,
-  ): Promise<{ message: string }> {
-    try {
-      // Отменяем заказ на передачу товара
-      // и возвращаем товар обратно в амбар отправителя
-      // Например, можно вызвать метод для отмены заказа и возврата товара
-      return { message: 'Stock transfer canceled' };
-    } catch (error) {
-      this.logger.error(`Error canceling stock transfer: ${error.message}`);
-      throw new Error('Failed to cancel stock transfer');
-    }
   }
 }

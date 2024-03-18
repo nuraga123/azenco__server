@@ -14,6 +14,7 @@ export interface IAnbars {
   images: string;
   ordered: boolean;
   pendingConfirmation: boolean;
+}
 
 export interface ITransferAnbar extends IAnbars {
   productId: number;
@@ -56,4 +57,14 @@ export interface ITransferStokAnbar {
   fromAnbar: ITransferAnbar;
   toAnbar: ITransferAnbar;
   message: string;
+}
+
+export interface IAnbarsUsername {
+  username: string;
+  userId: number;
+}
+
+export interface IAnbarsUsernameResponse {
+  usernameArray: IAnbarsUsername[];
+  errorMessage?: string;
 }

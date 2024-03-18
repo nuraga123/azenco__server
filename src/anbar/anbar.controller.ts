@@ -4,13 +4,16 @@ import { AddToAnbarDto } from './dto/add-to-anbar';
 import { TransferStockDto } from './dto/transfer-stock-anbar.dto';
 import { ConfirmReceivedDto } from './dto/confirm-received.dto';
 import { Anbar } from './anbar.model';
+import { IAnbarsUsernameResponse } from './types';
 
 @Controller('anbar')
 export class AnbarController {
   constructor(private readonly anbarService: AnbarService) {}
 
   @Post('usernames')
-  getHello(@Body('name') name: string) {
+  getAnbarsUsernames(
+    @Body('name') name: string,
+  ): Promise<IAnbarsUsernameResponse> {
     return this.anbarService.getAnbarsUsername(name);
   }
 
