@@ -1,15 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
+import { AxiosError } from 'axios';
 
+import { IAnbarsUsername, IAnbarsUsernameResponse } from './types';
 import { Anbar } from './anbar.model';
 import { UsersService } from 'src/users/users.service';
+import { HistoryService } from 'src/history/history.service';
 import { ProductsService } from 'src/products/products.service';
 import { ConfirmReceivedDto } from './dto/confirm-received.dto';
-import { HistoryService } from 'src/history/history.service';
 import { TransferStockDto } from './dto/transfer-stock-anbar.dto';
-import { AddToAnbarDto } from './dto/add-to-anbar';
-import { AxiosError } from 'axios';
-import { IAnbarsUsername, IAnbarsUsernameResponse } from './types';
+import { NewAnbarDto } from './dto/new-anbar.dto';
 
 @Injectable()
 export class AnbarService {
@@ -22,7 +22,6 @@ export class AnbarService {
     private readonly productsService: ProductsService,
     private readonly historyService: HistoryService,
   ) {}
-
   // получение всех анбаров
   async findAll(): Promise<Anbar[]> {
     try {
@@ -53,7 +52,7 @@ export class AnbarService {
 
       if (!anbars.length) {
         return {
-          usernameArray: [],
+          usernamesArray: [],
           errorMessage: 'Нет данных',
         };
       }
@@ -64,7 +63,7 @@ export class AnbarService {
 
       if (!uniqueEntries.length) {
         return {
-          usernameArray: [],
+          usernamesArray: [],
           errorMessage: 'Нет уникальных записей',
         };
       }
@@ -78,89 +77,138 @@ export class AnbarService {
         filteredEntries,
       );
 
-      return { usernameArray: filteredEntries };
+      return { usernamesArray: filteredEntries };
     } catch (error) {
       const errorMessage = (error as AxiosError).message;
       this.logger.log(`Ошибка getAnbarsUsername: ${errorMessage}`);
 
       return {
-        usernameArray: [],
-        errorMessage: 'Невозможно получить имена пользователей',
+        usernamesArray: [],
+        errorMessage: `Ошибка getAnbarsUsername: ${errorMessage}`,
       };
     }
   }
 
-  // поиск амбара по userId
-  async findOne(userId: number | string): Promise<Anbar[]> {
-    return this.anbarModel.findAll({ where: { userId } });
+  // Поиск продуктов по userId в анбаре
+  async findAllByUserId(userId: number): Promise<Anbar[]> {
+    return await this.anbarModel.findAll({ where: { userId } });
   }
 
   // Добавить товар в амбар
-  async addAnbar(
-    addToAnbarDto: AddToAnbarDto,
+  async createNewAnbar(
+    newAnbarDto: NewAnbarDto,
   ): Promise<{ message: string; newAnbar?: Anbar }> {
-    const user = await this.usersService.findOne({
-      where: { username: addToAnbarDto.username },
-    });
+    try {
+      const { stock, userId, productId } = newAnbarDto;
 
-    if (!user) {
-      return {
-        message: 'Неверные данные пользователя!',
-      };
-    }
+      if (typeof stock !== 'number' || isNaN(stock)) {
+        return {
+          message: `Некорректное значение для поля stock`,
+        };
+      }
 
-    const product = await this.productsService.findOneProduct({
-      where: { id: addToAnbarDto.productId },
-    });
+      if (typeof userId !== 'number' || isNaN(userId)) {
+        return {
+          message: `Некорректное значение для поля userId`,
+        };
+      }
 
-    if (!product) {
-      return {
-        message: 'Неверные данные товара!',
-      };
-    }
+      if (typeof productId !== 'number' || isNaN(productId)) {
+        return {
+          message: `Некорректное значение для поля productId`,
+        };
+      }
 
-    const existingAnbar = await this.anbarModel.findOne({
-      where: {
+      const user = await this.usersService.findOne({ where: { id: userId } });
+      if (!user) {
+        return {
+          message: `Пользователь с ID ${userId} не найден`,
+        };
+      }
+
+      const product = await this.productsService.findOneProduct({
+        where: { id: productId },
+      });
+
+      if (!product) {
+        return {
+          message: `Товар с ID ${productId} не найден`,
+        };
+      }
+
+      const isPieceUnit = product.unit === 'ədəd';
+      const isWeightUnit = product.unit === 'kg';
+      const isLengthUnit = product.unit === 'metr';
+
+      // Получаем дробную часть числа
+      const decimalPart = stock.toString().split('.')[1];
+      this.logger.log(decimalPart);
+
+      if (decimalPart && decimalPart.length >= 4) {
+        this.logger.log(
+          `decimalPart.length >= 4: ${decimalPart.length >= 4} ${stock}`,
+        );
+      }
+
+      if (decimalPart && decimalPart.length >= 3) {
+        this.logger.log(
+          `decimalPart.length >= 3: ${decimalPart.length >= 3} ${stock}`,
+        );
+      }
+
+      if (isWeightUnit && stock <= 0.001 && decimalPart.length < 4) {
+        return {
+          message: `Минимальное количество для единицы измерения 0.001 kg (1 грамм)`,
+        };
+      }
+
+      if (isLengthUnit && stock <= 0.01 && decimalPart.length < 3) {
+        return {
+          message: `Минимальное количество для единицы измерения 0.01 metr (1 см)`,
+        };
+      }
+
+      if (isPieceUnit && !Number.isInteger(stock)) {
+        return {
+          message:
+            'Количество товара должно быть целым числом из за того что товар тип штучный',
+        };
+      }
+
+      if (stock <= 0) {
+        return {
+          message: 'Количество товара должно быть больше 0',
+        };
+      }
+
+      const newAnbar = await this.anbarModel.create({
         userId: user.id,
+        username: user.username,
         productId: product.id,
-      },
-    });
+        azenco__code: product.azenco__code,
+        name: product.name,
+        type: product.type,
+        images: product.images,
+        unit: product.unit,
+        price: +product.price,
+        stock,
+        total_price: +product.price * stock,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        previous_stock: 0,
+        previous_total_price: 0,
+        ordered: false,
+        isComeProduct: true,
+      });
 
-    if (existingAnbar) {
       return {
-        message:
-          'Запись в амбаре уже существует для данного пользователя и продукта!',
+        message: `Товар добавлен в анбар ${newAnbar.username} | ${newAnbar.name} | ${newAnbar.stock} ${product.unit}`,
+        newAnbar,
       };
+    } catch (error) {
+      this.logger.error(error.message);
+      return { message: error.message };
     }
-
-    // Создаем запись о товаре в амбаре
-    const newAnbar: Anbar = await this.anbarModel.create({
-      userId: user.id,
-      username: user.username,
-      productId: product.id,
-      azenco__code: product.azenco__code,
-      name: product.name,
-      type: product.type,
-      images: product.images,
-      unit: product.unit,
-      price: Number(product.price),
-      stock: Number(addToAnbarDto.stock),
-      total_price: Number(product.price) * Number(addToAnbarDto.stock),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      // сосотояния до заказа
-      previous_stock: 0,
-      previous_total_price: 0,
-      // по умолчанию новый анбар не может быть заказан
-      ordered: false,
-      isComeProduct: false,
-    });
-
-    newAnbar.save();
-    return {
-      message: `Товар добавлен в анбар ${newAnbar.username} | ${newAnbar.name} ${newAnbar.stock} ${product.unit}`,
-      newAnbar,
-    };
   }
 
   // Передача товара между амбарами

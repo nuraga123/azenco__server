@@ -14,7 +14,7 @@ export class UsersService {
   ) {}
 
   async findOne(filter: {
-    where: { id?: string; username?: string; email?: string };
+    where: { id?: number; username?: string; email?: string };
   }): Promise<User> {
     return await this.userModel.findOne({ ...filter });
   }

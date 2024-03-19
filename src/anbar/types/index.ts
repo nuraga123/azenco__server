@@ -65,6 +65,6 @@ export interface IAnbarsUsername {
 }
 
 export interface IAnbarsUsernameResponse {
-  usernameArray: IAnbarsUsername[];
+  usernamesArray: IAnbarsUsername[];
   errorMessage?: string;
 }

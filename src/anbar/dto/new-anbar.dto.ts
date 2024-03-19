@@ -1,14 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional } from 'class-validator';
 
-export class AddToAnbarDto {
-  @ApiProperty({ example: 'Ivan' })
-  @IsNotEmpty()
-  readonly username: string;
-
+export class NewAnbarDto {
   @ApiProperty({ example: 1 })
   @IsOptional()
-  userId?: number;
+  readonly userId: number;
 
   @ApiProperty({ example: 1 })
   @IsNotEmpty()

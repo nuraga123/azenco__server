@@ -5,9 +5,6 @@ export class Anbar extends Model {
   @Column
   userId: number;
 
-  @Column({ defaultValue: 0 })
-  productId: number;
-
   @Column
   username: string;
 
@@ -20,23 +17,20 @@ export class Anbar extends Model {
   @Column
   type: string;
 
-  @Column({ defaultValue: 0 })
-  price: number;
-
-  @Column({ defaultValue: 0 })
-  stock: number;
-
-  @Column({ defaultValue: 0 })
-  total_price: number;
-
-  @Column
-  images: string;
-
-  @Column({ defaultValue: false })
-  ordered: boolean;
-
   @Column
   unit: string;
+
+  @Column
+  productId: number;
+
+  @Column
+  price: number;
+
+  @Column
+  stock: number;
+
+  @Column
+  total_price: number;
 
   @Column({ defaultValue: 0 })
   previous_total_price: number;
@@ -45,5 +39,11 @@ export class Anbar extends Model {
   previous_stock: number;
 
   @Column({ defaultValue: false })
+  ordered: boolean;
+
+  @Column({ defaultValue: true })
   isComeProduct: boolean;
+
+  @Column({ defaultValue: '' })
+  images: string;
 }
