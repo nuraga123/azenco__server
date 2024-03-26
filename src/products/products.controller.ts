@@ -16,23 +16,25 @@ export class ProductsController {
     return this.productService.paginateAndFilterOrSortProducts(query);
   }
 
-  @UseGuards(TokenGuard)
   @Get('find/:id')
-  getOneProduct(@Param('id') id: string) {
-    return this.productService.findOneProduct({ where: { id } });
+  getOneProduct(@Param('id') id: number) {
+    return this.productService.findOneProduct(id);
   }
 
   @UseGuards(TokenGuard)
   @Post('/add')
-  async addProduct(@Body() createProductDto: CreateProductDto) {
+  addProduct(@Body() createProductDto: CreateProductDto) {
+    return this.productService.addProduct(createProductDto);
+  }
+
+  @UseGuards(TokenGuard)
+  @Post('/fullname')
+  async searchProductName(@Body('name') name: string) {
     try {
-      const product = await this.productService.addProduct(createProductDto);
-
-      if (product.success) {
-        return { success: true, product };
-      }
-
-      return { success: false, error: product.error };
+      const searchProduct = await this.productService.findOneByName(name);
+      return searchProduct.name
+        ? searchProduct
+        : `не найден имя продукта: ${name}`;
     } catch (error) {
       console.log(error);
       return { success: false, error: error.message };
@@ -40,37 +42,10 @@ export class ProductsController {
   }
 
   @UseGuards(TokenGuard)
-  @Post('/search-name')
-  async searchProductName(@Body() { name }: { name: string }) {
-    try {
-      const currentProduct = await this.productService.findOneByName({
-        where: { name },
-      });
-
-      console.log(currentProduct);
-
-      if (currentProduct.name === name) {
-        return {
-          success: true,
-          currentProduct,
-        };
-      } else {
-        return {
-          success: false,
-          message: `${name} нет с таким именем `,
-        };
-      }
-    } catch (error) {
-      console.log(error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  @UseGuards(TokenGuard)
-  @Post('/search-word')
-  async searchProductsByNameArr(
-    @Body() { search_word }: { search_word: string },
+  @Post('/partname')
+  async searchPartByNameProducts(
+    @Body('partname') partname: string,
   ): Promise<Product[]> {
-    return this.productService.findByNameAll(search_word);
+    return this.productService.findAllPartByNameProducts(partname);
   }
 }

@@ -126,9 +126,7 @@ export class AnbarService {
         };
       }
 
-      const product = await this.productsService.findOneProduct({
-        where: { id: productId },
-      });
+      const product = await this.productsService.findOneProduct(productId);
 
       if (!product) {
         return {
@@ -224,9 +222,7 @@ export class AnbarService {
         where: { username: transferStockDto.fromUsername },
       });
 
-      const currentProduct = await this.productsService.findOneProduct({
-        where: { id: transferStockDto.productId },
-      });
+      const currentProduct = await this.productsService.findOneProduct(transferStockDto.productId);
 
       const fromAnbar = await this.anbarModel.findOne({
         where: {

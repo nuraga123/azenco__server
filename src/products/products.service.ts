@@ -1,16 +1,23 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Op, Sequelize } from 'sequelize';
+import { Op, Sequelize, where } from 'sequelize';
 import { Product } from './product.model';
 import { IProductsFilter, IProductsQuery } from './types';
 import { CreateProductDto } from './dto/create-product.dto';
 
 @Injectable()
 export class ProductsService {
+  private logger = new Logger('ProductsService');
+
   constructor(
     @InjectModel(Product)
     private productModel: typeof Product,
   ) {}
+
+  async processProductPrice(product: Product): Promise<Product> {
+    const { dataValues } = product;
+    return { ...dataValues, price: +product.price } as Product;
+  }
 
   async paginateAndFilterOrSortProducts(query: IProductsQuery): Promise<{
     count: number;
@@ -41,55 +48,71 @@ export class ProductsService {
 
     const orderDirection = query.sortBy === 'asc' ? 'asc' : 'desc';
 
-    return this.productModel.findAndCountAll({
+    const products = await this.productModel.findAndCountAll({
       limit,
       offset,
       where: filter,
       order: [[Sequelize.literal('CAST(price AS DECIMAL)'), orderDirection]],
     });
+
+    products.rows.forEach((item) => this.processProductPrice(item));
+
+    return products;
   }
 
-  async findOneProduct(filter: {
-    where: { id: number | string };
-  }): Promise<Product | null> {
-    return this.productModel.findOne(filter);
+  async findOneProduct(id: number): Promise<Product> {
+    const product = await this.productModel.findOne({ where: { id } });
+    return this.processProductPrice(product);
   }
 
-  async findOneByName(filter: {
-    where: { name: number | string };
-  }): Promise<Product> {
-    return this.productModel.findOne(filter);
+  async findOneByName(name: string): Promise<Product> {
+    const product = await this.productModel.findOne({ where: { name } });
+    return this.processProductPrice(product);
   }
 
-  async findProductAzencoCode(filter: {
-    where: { azenco__code?: string };
-  }): Promise<Product | null> {
-    return await this.productModel.findOne(filter);
+  async findProductAzencoCode(azenco__code: string): Promise<Product | null> {
+    const product = await this.productModel.findOne({
+      where: { azenco__code },
+    });
+    return this.processProductPrice(product);
   }
 
   async addProduct(
     createProductDto: CreateProductDto,
   ): Promise<{ success: boolean; product?: Product; error?: string }> {
     try {
-      const existingProductName = await this.findOneByName({
-        where: { name: createProductDto.name },
-      });
+      const { name, azenco__code, price } = createProductDto;
 
-      const existingProductAzencoCode = await this.findProductAzencoCode({
-        where: { azenco__code: createProductDto.azenco__code },
-      });
-
-      if (existingProductName) {
+      if (typeof price !== 'number') {
         return {
           success: false,
-          error: `Продукт с именем ${createProductDto.name} уже существует`,
+          error: `цена продукта не число: ${price} !`,
         };
       }
+
+      if (price === 0) {
+        return {
+          success: false,
+          error: 'цена = 0 !',
+        };
+      }
+
+      const existingProductName = await this.findOneByName(name);
+      if (existingProductName) {
+        this.logger.log(existingProductName);
+        return {
+          success: false,
+          error: `Продукт с именем ${name} уже существует`,
+        };
+      }
+
+      const existingProductAzencoCode =
+        await this.findProductAzencoCode(azenco__code);
 
       if (existingProductAzencoCode) {
         return {
           success: false,
-          error: `Продукт с кодом azenco__code: ${createProductDto.azenco__code} уже существует `,
+          error: `Продукт с кодом azenco__code: ${azenco__code} уже существует `,
         };
       }
 
@@ -97,9 +120,11 @@ export class ProductsService {
         ...createProductDto,
       });
 
+      this.logger.log(price);
+      this.logger.log(product);
       return { success: true, product };
     } catch (error) {
-      console.log(error);
+      console.error(error);
 
       return {
         success: false,
@@ -108,16 +133,16 @@ export class ProductsService {
     }
   }
 
-  async findByNameAll(search_name: string): Promise<Product[]> {
-    // Используем оператор ILIKE для регистронезависимого поиска
-    const searchCondition = {
+  async findAllPartByNameProducts(partname: string): Promise<Product[]> {
+    const searchProductsWord = await this.productModel.findAll({
       where: {
         name: {
-          [Op.like]: `%${search_name}%`,
+          [Op.like]: `%${partname}%`,
         },
       },
-    };
+    });
 
-    return this.productModel.findAll(searchCondition);
+    searchProductsWord.forEach(this.processProductPrice);
+    return searchProductsWord;
   }
 }

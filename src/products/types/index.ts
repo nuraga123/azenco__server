@@ -1,4 +1,5 @@
 import { Op } from 'sequelize';
+import { Product } from '../product.model';
 
 export interface IProduct {
   id: number;
@@ -8,6 +9,12 @@ export interface IProduct {
   price: number;
   unit: string;
   images: string;
+}
+
+export interface AddProductResult {
+  success: boolean;
+  product?: Product;
+  error?: string;
 }
 
 export interface IProductsFilter {

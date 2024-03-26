@@ -27,11 +27,9 @@ export class AnbarShoppingCartService {
       },
     });
 
-    const product = await this.productsService.findOneProduct({
-      where: {
-        id: addAnbarToCartDto.productId,
-      },
-    });
+    const product = await this.productsService.findOneProduct(
+      addAnbarToCartDto.productId,
+    );
 
     cart.userId = user.id;
     cart.productId = product.id;
