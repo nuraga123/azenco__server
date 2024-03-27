@@ -1,10 +1,19 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { Param, Query } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { IProductsQuery } from './types';
 import { CreateProductDto } from './dto/create-product.dto';
 import { TokenGuard } from 'src/token/token.guard';
 import { Product } from './product.model';
+import { UpdateProductDto } from './dto/update-product.dto';
 
 @Controller('products')
 export class ProductsController {
@@ -16,19 +25,20 @@ export class ProductsController {
     return this.productService.paginateAndFilterOrSortProducts(query);
   }
 
+  @UseGuards(TokenGuard)
   @Get('find/:id')
   getOneProduct(@Param('id') id: number) {
     return this.productService.findOneProduct(id);
   }
 
   @UseGuards(TokenGuard)
-  @Post('/add')
+  @Post('add')
   addProduct(@Body() createProductDto: CreateProductDto) {
     return this.productService.addProduct(createProductDto);
   }
 
   @UseGuards(TokenGuard)
-  @Post('/fullname')
+  @Post('search-name')
   async searchProductName(@Body('name') name: string) {
     try {
       const searchProduct = await this.productService.findOneByName(name);
@@ -42,10 +52,25 @@ export class ProductsController {
   }
 
   @UseGuards(TokenGuard)
-  @Post('/partname')
+  @Post('search-part-name')
   async searchPartByNameProducts(
-    @Body('partname') partname: string,
+    @Body('part_name') part_name: string,
   ): Promise<Product[]> {
-    return this.productService.findAllPartByNameProducts(partname);
+    return this.productService.findAllPartByNameProducts(part_name);
+  }
+
+  @UseGuards(TokenGuard)
+  @Delete('remove/:id')
+  async removeProduct(@Param('id') id: number) {
+    return this.productService.removeProductId(id);
+  }
+
+  @UseGuards(TokenGuard)
+  @Put('update/:id')
+  async updateProduct(
+    @Param('id') id: number,
+    @Body() updateProductDto: UpdateProductDto,
+  ): Promise<{ success: boolean; product?: Product; error?: string }> {
+    return await this.productService.update(id, updateProductDto);
   }
 }

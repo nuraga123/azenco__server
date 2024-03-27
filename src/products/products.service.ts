@@ -1,9 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Op, Sequelize, where } from 'sequelize';
+import { Op, Sequelize } from 'sequelize';
 import { Product } from './product.model';
 import { IProductsFilter, IProductsQuery } from './types';
 import { CreateProductDto } from './dto/create-product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
 
 @Injectable()
 export class ProductsService {
@@ -12,11 +13,14 @@ export class ProductsService {
   constructor(
     @InjectModel(Product)
     private productModel: typeof Product,
-  ) {}
+  ) { }
 
   async processProductPrice(product: Product): Promise<Product> {
-    const { dataValues } = product;
-    return { ...dataValues, price: +product.price } as Product;
+    if (product?.price) {
+      product.price = Number(product.price);
+      return product;
+    }
+    return product;
   }
 
   async paginateAndFilterOrSortProducts(query: IProductsQuery): Promise<{
@@ -24,7 +28,7 @@ export class ProductsService {
     rows: Product[];
   }> {
     const limit = +query.limit;
-    const offset = +query.offset * 20;
+    const offset = +query.offset * 3;
 
     const filter = {} as Partial<IProductsFilter>;
 
@@ -55,7 +59,7 @@ export class ProductsService {
       order: [[Sequelize.literal('CAST(price AS DECIMAL)'), orderDirection]],
     });
 
-    products.rows.forEach((item) => this.processProductPrice(item));
+    products.rows.forEach(this.processProductPrice);
 
     return products;
   }
@@ -81,8 +85,53 @@ export class ProductsService {
     createProductDto: CreateProductDto,
   ): Promise<{ success: boolean; product?: Product; error?: string }> {
     try {
-      const { name, azenco__code, price } = createProductDto;
+      const { name, azenco__code, price, type, unit } = createProductDto;
 
+      // проверки имени на валидность
+      if (typeof name !== 'string') {
+        return {
+          success: false,
+          error: `цена продукта не число: ${price} !`,
+        };
+      }
+
+      if (name.length <= 3) {
+        return {
+          success: false,
+          error: `название продукта должно быть больше 2 символов !`,
+        };
+      }
+
+      if (name.length >= 100) {
+        return {
+          success: false,
+          error: `название продукта должно быть меньше 100 символов !`,
+        };
+      }
+
+      // проверки azenco__code на валидность
+      if (typeof azenco__code !== 'string') {
+        return {
+          success: false,
+          error: `цена продукта не число: ${price} !`,
+        };
+      }
+
+      if (azenco__code.length < 9) {
+        return {
+          success: false,
+          error: `название продукта должно быть больше 8 символов !`,
+        };
+      }
+
+      if (azenco__code.length > 9) {
+        return {
+          success: false,
+          error: `название продукта должно быть меньше 9 символов !`,
+        };
+      }
+
+      // проверки цены на валидность
       if (typeof price !== 'number') {
         return {
           success: false,
@@ -90,13 +139,30 @@ export class ProductsService {
         };
       }
 
-      if (price === 0) {
+      if (price <= 0) {
         return {
           success: false,
-          error: 'цена = 0 !',
+          error: 'цена не должна быть равен или меньше 0 !',
         };
       }
 
+      // проверка типа продукта
+      if (type.length <= 1 || typeof type !== 'string') {
+        return {
+          success: false,
+          error: 'type не должен быть больше 1 и должен быть строкой!',
+        };
+      }
+
+      // проверка unit продукта
+      if (unit.length <= 1 || typeof unit !== 'string') {
+        return {
+          success: false,
+          error: 'unit не должен быть больше 1 и должен быть строкой!',
+        };
+      }
+
+      // проверка повторных данных имени и azenco__code
       const existingProductName = await this.findOneByName(name);
       if (existingProductName) {
         this.logger.log(existingProductName);
@@ -121,7 +187,7 @@ export class ProductsService {
       });
 
       this.logger.log(price);
-      this.logger.log(product);
+      this.logger.log({ ...product.dataValues });
       return { success: true, product };
     } catch (error) {
       console.error(error);
@@ -144,5 +210,104 @@ export class ProductsService {
 
     searchProductsWord.forEach(this.processProductPrice);
     return searchProductsWord;
+  }
+
+  async removeProductId(id: number) {
+    const findProduct = await this.findOneProduct(id);
+    if (findProduct) {
+      findProduct.destroy();
+      return `${findProduct.name} удален !`;
+    } else {
+      return 'не найден продукт';
+    }
+  }
+
+  async update(
+    id: number,
+    updateProductDto: UpdateProductDto,
+  ): Promise<{ success: boolean; product?: Product; error?: string }> {
+    try {
+      const { name, azenco__code, price, type, unit } = updateProductDto;
+
+      // Проверка имени продукта
+      if (typeof name !== 'string' || name.length <= 2 || name.length >= 100) {
+        return {
+          success: false,
+          error: 'Название продукта должно быть строкой от 3 до 99 символов',
+        };
+      }
+
+      // Проверка кода azenco
+      if (
+        azenco__code &&
+        (typeof azenco__code !== 'string' || azenco__code.length !== 9)
+      ) {
+        return {
+          success: false,
+          error: 'Код azenco должен быть строкой из 9 символов',
+        };
+      }
+
+      // Проверка цены продукта
+      if (price && (typeof price !== 'number' || isNaN(price) || price <= 0)) {
+        return {
+          success: false,
+          error: 'Цена продукта должна быть числом больше 0',
+        };
+      }
+
+      // Проверка типа продукта
+      if (type && (typeof type !== 'string' || type.length <= 1)) {
+        return {
+          success: false,
+          error: 'Тип продукта должен быть строкой длиной больше 1 символа',
+        };
+      }
+
+      // Проверка единицы измерения продукта
+      if (unit && (typeof unit !== 'string' || unit.length <= 1)) {
+        return {
+          success: false,
+          error:
+            'Единица измерения продукта должна быть строкой длиной больше 1 символа',
+        };
+      }
+
+      const product = await this.findOneProduct(id);
+      this.logger.log({ ...product });
+
+      if (!product) {
+        return {
+          success: false,
+          error: `Продукт с ID ${id} не найден`,
+        };
+      }
+
+      // Проверка на идентичность свойств нового объекта существующему объекту
+      if (
+        (name && name === product.name) ||
+        (azenco__code && azenco__code === product.azenco__code) ||
+        (price && price === product.price) ||
+        (type && type === product.type) ||
+        (unit && unit === product.unit)
+      ) {
+        return {
+          success: false,
+          error: `Данные совпадают с существующими данными: name=${name}, type=${type}, unit=${unit}, azenco__code=${azenco__code}, price=${price}`,
+        };
+      }
+
+      // Обновление продукта
+      const updatedProduct: Product = await product.update(updateProductDto);
+
+      this.logger.log(`Продукт с ID ${id} обновлен`);
+      return { success: true, product: updatedProduct };
+    } catch (error) {
+      console.error(error);
+      return {
+        success: false,
+        error: `Ошибка при обновлении продукта: ${error.message} `,
+      };
+    }
   }
 }
