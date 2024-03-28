@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { Param, Query } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { IProductsQuery } from './types';
+import { IProductResponse, IProductsQuery } from './types';
 import { CreateProductDto } from './dto/create-product.dto';
 import { TokenGuard } from 'src/token/token.guard';
 import { Product } from './product.model';
@@ -21,13 +21,16 @@ export class ProductsController {
 
   @UseGuards(TokenGuard)
   @Get()
-  paginateAndFilterOrSort(@Query() query: IProductsQuery) {
+  paginateAndFilterOrSort(@Query() query: IProductsQuery): Promise<{
+    count: number;
+    rows: Product[];
+  }> {
     return this.productService.paginateAndFilterOrSortProducts(query);
   }
 
   @UseGuards(TokenGuard)
   @Get('find/:id')
-  getOneProduct(@Param('id') id: number) {
+  getOneProduct(@Param('id') id: number): Promise<IProductResponse> {
     return this.productService.findOneProduct(id);
   }
 
@@ -39,16 +42,10 @@ export class ProductsController {
 
   @UseGuards(TokenGuard)
   @Post('search-name')
-  async searchProductName(@Body('name') name: string) {
-    try {
-      const searchProduct = await this.productService.findOneByName(name);
-      return searchProduct.name
-        ? searchProduct
-        : `не найден имя продукта: ${name}`;
-    } catch (error) {
-      console.log(error);
-      return { success: false, error: error.message };
-    }
+  async searchProductName(
+    @Body('name') name: string,
+  ): Promise<IProductResponse> {
+    return this.productService.findOneByName(name);
   }
 
   @UseGuards(TokenGuard)
@@ -62,7 +59,7 @@ export class ProductsController {
   @UseGuards(TokenGuard)
   @Delete('remove/:id')
   async removeProduct(@Param('id') id: number) {
-    return this.productService.removeProductId(id);
+    return await this.productService.removeProduct(id);
   }
 
   @UseGuards(TokenGuard)
@@ -70,7 +67,7 @@ export class ProductsController {
   async updateProduct(
     @Param('id') id: number,
     @Body() updateProductDto: UpdateProductDto,
-  ): Promise<{ success: boolean; product?: Product; error?: string }> {
-    return await this.productService.update(id, updateProductDto);
+  ) {
+    return await this.productService.updateProduct(id, updateProductDto);
   }
 }

@@ -1,5 +1,7 @@
 import { Op } from 'sequelize';
 import { Product } from '../product.model';
+import { CreateProductDto } from '../dto/create-product.dto';
+import { UpdateProductDto } from '../dto/update-product.dto';
 
 export interface IProduct {
   id: number;
@@ -11,10 +13,19 @@ export interface IProduct {
   images: string;
 }
 
-export interface AddProductResult {
-  success: boolean;
+export interface IProductResponse {
   product?: Product;
   error?: string;
+}
+
+export interface IAddAndUpdateProduct extends IProductResponse {
+  message?: string;
+  success: boolean;
+}
+
+export interface IValidateProduct {
+  productDto: CreateProductDto | UpdateProductDto;
+  updatedIdProduct?: number;
 }
 
 export interface IProductsFilter {

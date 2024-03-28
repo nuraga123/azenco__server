@@ -126,7 +126,7 @@ export class AnbarService {
         };
       }
 
-      const product = await this.productsService.findOneProduct(productId);
+      const { product } = await this.productsService.findOneProduct(productId);
 
       if (!product) {
         return {
@@ -222,13 +222,15 @@ export class AnbarService {
         where: { username: transferStockDto.fromUsername },
       });
 
-      const currentProduct = await this.productsService.findOneProduct(transferStockDto.productId);
+      const { product } = await this.productsService.findOneProduct(
+        transferStockDto.productId,
+      );
 
       const fromAnbar = await this.anbarModel.findOne({
         where: {
           userId: fromUser.id,
           username: fromUser.username,
-          productId: currentProduct.id,
+          productId: product.id,
           // Проверяем, что товар не заказан
           ordered: false,
         },
@@ -254,7 +256,7 @@ export class AnbarService {
           username: transferStockDto.toUsername,
         },
         defaults: {
-          ...currentProduct,
+          ...product,
           userId: transferStockDto.toUserId,
           productId: transferStockDto.productId,
           stock: 0,
@@ -266,7 +268,7 @@ export class AnbarService {
       });
 
       const priceAndQuantity =
-        Number(currentProduct.price) * Number(transferStockDto.quantity);
+        Number(product.price) * Number(transferStockDto.quantity);
 
       // Обновление статуса и количества в "отправляющем" амбаре
       fromAnbar.previous_stock = Number(previousStock);
@@ -279,12 +281,12 @@ export class AnbarService {
       await fromAnbar.save({ transaction });
 
       // Обновление данных в "получающем" амбаре
-      toAnbar.name = currentProduct.name;
-      toAnbar.azenco__code = currentProduct.azenco__code;
-      toAnbar.type = currentProduct.type;
-      toAnbar.images = currentProduct.images;
-      toAnbar.price = Number(currentProduct.price);
-      toAnbar.unit = currentProduct.unit;
+      toAnbar.name = product.name;
+      toAnbar.azenco__code = product.azenco__code;
+      toAnbar.type = product.type;
+      toAnbar.images = product.images;
+      toAnbar.price = Number(product.price);
+      toAnbar.unit = product.unit;
 
       toAnbar.stock = Number(toAnbar.stock) + Number(transferStockDto.quantity);
       toAnbar.total_price =
@@ -293,7 +295,7 @@ export class AnbarService {
 
       await transaction.commit();
 
-      const successMessage = `${toAnbar.username} заказал у ${fromAnbar.username} | ${currentProduct.name}: ${transferStockDto.quantity} ${currentProduct.unit}`;
+      const successMessage = `${toAnbar.username} заказал у ${fromAnbar.username} | ${product.name}: ${transferStockDto.quantity} ${product.unit}`;
 
       return {
         fromAnbar,

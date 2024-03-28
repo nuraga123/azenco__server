@@ -1,21 +1,23 @@
-import { Table, Model, Column } from 'sequelize-typescript';
+import { Table, Model, Column, Unique } from 'sequelize-typescript';
 
 @Table
 export class Product extends Model {
+  @Unique
   @Column
   name: string;
 
+  @Unique
   @Column
-  type: string;
+  azenco__code: string;
 
   @Column
   price: number;
 
   @Column
-  unit: string;
+  type: string;
 
   @Column
-  azenco__code: string;
+  unit: string;
 
   @Column
   images: string;
