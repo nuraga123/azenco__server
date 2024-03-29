@@ -25,7 +25,7 @@ export interface IAddAndUpdateProduct extends IProductResponse {
 
 export interface IValidateProduct {
   productDto: CreateProductDto | UpdateProductDto;
-  updatedIdProduct?: number;
+  productId?: number;
 }
 
 export interface IProductsFilter {

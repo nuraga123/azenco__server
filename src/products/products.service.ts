@@ -64,70 +64,140 @@ export class ProductsService {
     return { product };
   }
 
-  async validateProductData({
-    productDto,
-    updatedIdProduct,
-  }: IValidateProduct): Promise<string> {
+  async validateAddProduct({ productDto }: IValidateProduct): Promise<string> {
     const { name, azenco__code, price, type, unit } = productDto;
 
+    // Инициализация пустого массива для хранения ошибок
+    const errors: string[] = [];
+
+    // Проверка наличия и корректности имени продукта
     if (typeof name !== 'string' || name.length < 3 || name.length > 100) {
-      return 'Название продукта должно быть строкой от 3 до 100 символов';
+      errors.push('Название продукта должно быть строкой от 3 до 100 символов');
     }
 
+    // Проверка наличия и корректности кода Azenco
     if (typeof azenco__code !== 'string' || azenco__code.length !== 9) {
-      return 'Код Azenco должен состоять из 9 символов';
+      errors.push('Код Azenco должен состоять из 9 символов');
     }
 
+    // Проверка наличия и корректности цены
     if (typeof price !== 'number' || isNaN(price) || price <= 0) {
-      return 'Цена должна быть числом больше 0';
+      errors.push('Цена должна быть числом больше 0');
     }
 
+    // Проверка наличия и корректности типа продукта
     if (typeof type !== 'string' || type.length <= 1) {
-      return 'Тип должен быть строкой длиной больше 1 символа';
+      errors.push('Тип должен быть строкой длиной больше 1 символа');
     }
 
+    // Проверка наличия и корректности единицы измерения
     if (typeof unit !== 'string' || unit.length <= 1) {
-      return 'Единица измерения должна быть строкой длиной больше 1 символа';
+      errors.push(
+        'Единица измерения должна быть строкой длиной больше 1 символа',
+      );
     }
 
-    if (!updatedIdProduct) {
+    // Проверка наличия продукта с таким же именем
+    const existingProductName = await this.findOneByName(name);
+    if (existingProductName?.product) {
+      errors.push('ProductName уже есть в базе данных');
+    }
+
+    // Проверка наличия продукта с таким же кодом Azenco
+    const existingProductAzencoCode =
+      await this.findProductByAzencoCode(azenco__code);
+    if (existingProductAzencoCode?.product) {
+      errors.push('Azenco Code уже есть в базе данных');
+    }
+
+    // Возврат ошибок, если они были обнаружены
+    if (errors.length > 0) {
+      return errors.join(', ');
+    }
+
+    // Если ошибок нет, возвращаем пустую строку (нет ошибок)
+    return '';
+  }
+
+  async validateUpdateProduct({
+    productDto,
+    productId,
+  }: IValidateProduct): Promise<string> {
+    // Извлечение параметров продукта из объекта DTO
+    const { name, azenco__code, price, type, unit } = productDto;
+    // Получение существующего продукта по ID
+    const { product } = await this.findOneProduct(productId);
+
+    // Проверка наличия продукта для обновления
+    if (!product) {
+      return 'Продукт для обновления не найден';
+    }
+
+    // Инициализация пустого массива для хранения ошибок
+    const errors: string[] = [];
+
+    // Проверка и коррекция имени продукта, если оно передано для обновления
+    if (name && name === product.name) {
+      // Проверка, что новое имя не совпадает с текущим именем продукта
       const existingProductName = await this.findOneByName(name);
       if (existingProductName?.product) {
-        return 'ProductName уже есть в базе данных';
+        errors.push('название продукта уже есть в базе данных');
       }
+      errors.push('название продукта не обновлен');
+    }
 
+    // Проверка и коррекция кода Azenco, если он передан для обновления
+    if (azenco__code && azenco__code === product.azenco__code) {
+      // Проверка, что новый код Azenco не совпадает с текущим кодом
       const existingProductAzencoCode =
         await this.findProductByAzencoCode(azenco__code);
-
       if (existingProductAzencoCode?.product) {
-        return 'Azenco Code уже есть в базе данных';
+        errors.push('Azenco Code уже есть в базе данных');
       }
+      errors.push('Azenco Code не обновлен');
     }
 
-    if (updatedIdProduct) {
-      const { product } = await this.findOneProduct(updatedIdProduct);
-
-      if (name && name === product.name) {
-        return 'Старое название продукта уже используется';
+    //Проверка и коррекция цены продукта, если она передана для обновления
+    this.logger.log('Проверка и коррекция цены продукта');
+    this.logger.log(price);
+    this.logger.log(typeof price !== 'number' || isNaN(price) || price <= 0);
+    if (price && typeof price !== 'number') {
+      if (isNaN(price) || price <= 0) {
+        this.logger.log(price);
+        errors.push('Цена должна быть числом больше 0');
+      } else if (price === product.price) {
+        errors.push('Цена старая');
       }
-
-      if (azenco__code && azenco__code === product.azenco__code) {
-        return 'Старый код Azenco уже используется';
-      }
-
-      if (price && price === product.price) {
-        return 'Старая цена продукта уже используется';
-      }
-
-      if (type && type === product.type) {
-        return 'Старый тип продукта уже используется';
-      }
-
-      if (unit && unit === product.unit) {
-        return 'Старая единица измерения продукта уже используется';
-      }
+      return '';
     }
-    return;
+
+    // Проверка и коррекция типа продукта, если он передан для обновления
+    if (type && type === product.type) {
+      // Проверка, что новый тип не совпадает с текущим типом продукта
+      if (typeof type !== 'string' || type.length <= 1) {
+        errors.push('Тип должен быть строкой длиной больше 1 символа');
+      }
+      errors.push('Тип не обновлен');
+    }
+
+    // Проверка и коррекция единицы измерения, если она передана для обновления
+    if (unit && unit === product.unit) {
+      // Проверка, что новая единица измерения не совпадает с текущей
+      if (typeof unit !== 'string' || unit.length <= 1) {
+        errors.push(
+          'Единица измерения должна быть строкой длиной больше 1 символа',
+        );
+      }
+      errors.push('Единица измерения не обновлено');
+    }
+
+    // Возврат ошибок, если они были обнаружены
+    if (errors.length > 0) {
+      return errors.join(', ');
+    }
+
+    // Если ошибок нет, возвращаем пустую строку (нет ошибок)
+    return '';
   }
 
   async paginateAndFilterOrSortProducts(
@@ -171,42 +241,46 @@ export class ProductsService {
   }
 
   async addProduct(
-    createProductDto: CreateProductDto,
+    productDto: CreateProductDto,
   ): Promise<IAddAndUpdateProduct> {
-    const validationError = await this.validateProductData({
-      productDto: createProductDto,
-    });
+    const validationError = await this.validateAddProduct({ productDto });
     if (validationError) {
       return { error: validationError, success: false };
     }
 
-    const product = await this.productModel.create({ ...createProductDto });
+    const product = await this.productModel.create({ ...productDto });
     return { success: true, message: `Создан товар ${product.name}`, product };
   }
 
   async updateProduct(
-    id: number,
-    updateProductDto: UpdateProductDto,
+    productId: number,
+    productDto: UpdateProductDto,
   ): Promise<IAddAndUpdateProduct> {
-    const { product, error } = await this.findOneProduct(id);
-    if (!product) return { success: false, error };
+    // Находим продукт по его идентификатору
+    const { product } = await this.findOneProduct(productId);
 
-    const validationError = await this.validateProductData({
-      productDto: updateProductDto,
-      updatedIdProduct: +id,
+    // Проверяем валидность данных для обновления продукта
+    const validationError = await this.validateUpdateProduct({
+      productDto,
+      productId,
     });
 
+    // Если есть ошибки валидации, возвращаем их
     if (validationError) return { success: false, error: validationError };
 
-    const updatedProduct = await product.update(updateProductDto);
+    // Обновляем данные продукта с использованием предоставленных данных
+    const updatedProduct = await product.update(productDto);
+
+    // Обрабатываем цену продукта (возможно, применяем какие-то дополнительные действия)
     this.processProductPrice(updatedProduct);
 
-    // Сохраняем обновленный продукт
+    // Сохраняем обновленный продукт в базе данных
     await updatedProduct.save();
 
+    // Возвращаем успешный результат обновления продукта
     return {
       success: true,
-      message: `Успешно обнавлен ${updatedProduct.name}`,
+      message: `Успешно обновлен ${updatedProduct.name}`,
       product: updatedProduct,
     };
   }
