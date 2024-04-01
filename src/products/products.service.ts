@@ -127,15 +127,10 @@ export class ProductsService {
     const { name, azenco__code, price, type, unit } = productDto;
     // Получение существующего продукта по ID
     const { product } = await this.findOneProduct(productId);
-
     // Проверка наличия продукта для обновления
-    if (!product) {
-      return 'Продукт для обновления не найден';
-    }
-
+    if (!product) return 'Продукт для обновления не найден';
     // Инициализация пустого массива для хранения ошибок
     const errors: string[] = [];
-
     // Проверка и коррекция имени продукта, если оно передано для обновления
     if (name && name === product.name) {
       // Проверка, что новое имя не совпадает с текущим именем продукта
@@ -161,15 +156,20 @@ export class ProductsService {
     this.logger.log('Проверка и коррекция цены продукта');
     this.logger.log(price);
     this.logger.log(typeof price !== 'number' || isNaN(price) || price <= 0);
-    if (price && typeof price !== 'number') {
-      if (isNaN(price) || price <= 0) {
-        this.logger.log(price);
-        errors.push('Цена должна быть числом больше 0');
-      } else if (price === product.price) {
-        errors.push('Цена старая');
-      }
-      return '';
+
+    if (typeof price !== 'number') {
+      errors.push('Цена должна быть числом');
     }
+
+    // if (price && typeof price !== 'number') {
+    //   if (isNaN(price) || price <= 0) {
+    //     this.logger.log(price);
+    //     errors.push('Цена должна быть числом больше 0');
+    //   } else if (price === product.price) {
+    //     errors.push('Цена старая');
+    //   }
+    //   return '';
+    // }
 
     // Проверка и коррекция типа продукта, если он передан для обновления
     if (type && type === product.type) {
