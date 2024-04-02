@@ -57,6 +57,14 @@ export class ProductsController {
   }
 
   @UseGuards(TokenGuard)
+  @Post('search-azenco__code')
+  async searchAzencoCodeProduct(
+    @Body('azenco__code') azenco__code: string,
+  ): Promise<IProductResponse> {
+    return this.productService.findProductByAzencoCode(azenco__code);
+  }
+
+  @UseGuards(TokenGuard)
   @Delete('remove/:id')
   async removeProduct(@Param('id') id: number) {
     return await this.productService.removeProduct(id);

@@ -14,7 +14,7 @@ import {
 
 @Injectable()
 export class ProductsService {
-  private readonly logger = new Logger(ProductsService.name);
+  private readonly logger = new Logger('ProductsService');
 
   constructor(
     @InjectModel(Product)
@@ -22,27 +22,19 @@ export class ProductsService {
   ) {}
 
   processProductPrice(product: Product): void {
-    if (product && product.price) {
-      product.price = Number(product.price);
-    }
+    if (product && product?.price) product.price = +product.price;
   }
 
   async findOneProduct(id: number): Promise<IProductResponse> {
     const product = await this.productModel.findByPk(id);
-    if (!product) {
-      return { error: `Продукт с ID ${id} не найден` };
-    }
+    if (!product) return { error: `Продукт с ID ${id} не найден` };
     this.processProductPrice(product);
     return { product };
   }
 
   async findOneByName(name: string): Promise<IProductResponse> {
     const product = await this.productModel.findOne({ where: { name } });
-
-    if (!product) {
-      return { error: `Продукт с именем777 ${name} не найден` };
-    }
-
+    if (!product) return { error: `Продукт с именем ${name} не найден` };
     this.processProductPrice(product);
     return { product };
   }
@@ -152,43 +144,38 @@ export class ProductsService {
       errors.push('Azenco Code не обновлен');
     }
 
-    //Проверка и коррекция цены продукта, если она передана для обновления
-    this.logger.log('Проверка и коррекция цены продукта');
-    this.logger.log(price);
-    this.logger.log(typeof price !== 'number' || isNaN(price) || price <= 0);
-
-    if (typeof price !== 'number') {
+    //Проверка и коррекция цены продукта
+    if (price && typeof price !== 'number') {
       errors.push('Цена должна быть числом');
+      if (price === product.price) {
+        errors.push('старая цена напишите другую цену');
+      }
     }
 
-    // if (price && typeof price !== 'number') {
-    //   if (isNaN(price) || price <= 0) {
-    //     this.logger.log(price);
-    //     errors.push('Цена должна быть числом больше 0');
-    //   } else if (price === product.price) {
-    //     errors.push('Цена старая');
-    //   }
-    //   return '';
-    // }
+    if (price && price <= 0) {
+      errors.push('Цена должна быть больше 0');
+    }
 
     // Проверка и коррекция типа продукта, если он передан для обновления
-    if (type && type === product.type) {
+    if (type && !type) {
       // Проверка, что новый тип не совпадает с текущим типом продукта
       if (typeof type !== 'string' || type.length <= 1) {
         errors.push('Тип должен быть строкой длиной больше 1 символа');
       }
-      errors.push('Тип не обновлен');
-    }
 
+      if (type === product.type) {
+        errors.push('старый тип');
+      }
+      errors.push('нет данных типа');
+    }
     // Проверка и коррекция единицы измерения, если она передана для обновления
     if (unit && unit === product.unit) {
       // Проверка, что новая единица измерения не совпадает с текущей
-      if (typeof unit !== 'string' || unit.length <= 1) {
-        errors.push(
-          'Единица измерения должна быть строкой длиной больше 1 символа',
-        );
-      }
       errors.push('Единица измерения не обновлено');
+    }
+
+    if (unit && typeof unit !== 'string') {
+      errors.push('Единица измерения должна быть строкой');
     }
 
     // Возврат ошибок, если они были обнаружены
@@ -286,12 +273,8 @@ export class ProductsService {
   }
 
   async removeProduct(id: number): Promise<string | { error: string }> {
-    const productPromise = await this.findOneProduct(id);
-    if ('error' in productPromise) {
-      return { error: productPromise.error };
-    }
-    const product = productPromise.product;
-
+    const { product, error } = await this.findOneProduct(id);
+    if (error) return { error };
     await product.destroy();
     return `Продукт "${product.name}" удален успешно`;
   }

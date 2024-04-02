@@ -13,7 +13,7 @@ import { NewAnbarDto } from './dto/new-anbar.dto';
 
 @Injectable()
 export class AnbarService {
-  private logger = new Logger('AnbarService');
+  private readonly logger = new Logger('AnbarService');
 
   constructor(
     @InjectModel(Anbar)

@@ -1,19 +1,17 @@
 import { Op, WhereOptions } from 'sequelize';
 
-export interface IAnbars {
-  id: number;
+export interface IAnbar {
   productId: number;
-  name: string;
-  type: string;
-  price: number;
+  userId: number;
+  username: string;
   stock: number;
   total_price: number;
-  username: string;
-  unit: string;
-  azenco__code: string;
-  images: string;
   ordered: boolean;
-  pendingConfirmation: boolean;
+}
+
+export interface IAnbars {
+  rows: IAnbar[];
+  count: number;
 }
 
 export interface ITransferAnbar extends IAnbars {
