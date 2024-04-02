@@ -1,16 +1,13 @@
 import { registerAs } from '@nestjs/config';
 import { Dialect } from 'sequelize';
-import { database } from '../../database';
-
-const { dialect, database__name, host, port, password, username } = database;
 
 export const sqlConfig = registerAs('database', () => ({
-  dialect: <Dialect>process.env.SQL_DIALECT || 'mysql' || dialect,
-  host,
-  port,
-  username,
-  password: password,
-  database: database__name,
+  dialect: <Dialect>process.env.SQL_DIALECT || 'mysql',
+  host: process.env.DATABASE_HOST,
+  port: process.env.DATABASE_PORT,
+  username: process.env.DATABASE_USER,
+  password: process.env.DATABASE_PASSWORD,
+  database: process.env.DATABASE_NAME,
   autoLoadEntities: true,
   synchronize: true,
 }));
