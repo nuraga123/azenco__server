@@ -41,9 +41,6 @@ export class Anbar extends Model {
   @Column({ defaultValue: false })
   ordered: boolean;
 
-  @Column({ defaultValue: true })
-  isComeProduct: boolean;
-
   @Column({ defaultValue: '' })
   img: string;
 }

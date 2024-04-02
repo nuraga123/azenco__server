@@ -56,6 +56,15 @@ export class ProductsService {
     return { product };
   }
 
+  async findProductByType(
+    type: string,
+  ): Promise<Product[] | { error: string }> {
+    const products = await this.productModel.findAll({ where: { type } });
+    if (!products?.length) return { error: `Продукт с type ${type} не найден` };
+    products.forEach(this.processProductPrice);
+    return products;
+  }
+
   async validateAddProduct({ productDto }: IValidateProduct): Promise<string> {
     const { name, azenco__code, price, type, unit } = productDto;
 

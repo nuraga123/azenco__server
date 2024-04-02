@@ -3,17 +3,13 @@ import { IsNumber, IsString, IsNotEmpty } from 'class-validator';
 export class CreateOrderDto {
   @IsNotEmpty()
   @IsNumber()
-  anbarId: number;
-
-  @IsNotEmpty()
-  @IsString()
-  orderedBy: string;
-
-  @IsNotEmpty()
-  @IsString()
-  orderedFrom: string;
+  anbarIdOrder: number;
 
   @IsNotEmpty()
   @IsNumber()
-  stock: number;
+  userIdOrder: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  quantity: number;
 }

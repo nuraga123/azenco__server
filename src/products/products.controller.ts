@@ -65,6 +65,12 @@ export class ProductsController {
   }
 
   @UseGuards(TokenGuard)
+  @Post('search-type')
+  async searchTypeProduct(@Body('type') type: string) {
+    return this.productService.findProductByType(type);
+  }
+
+  @UseGuards(TokenGuard)
   @Delete('remove/:id')
   async removeProduct(@Param('id') id: number) {
     return await this.productService.removeProduct(id);
