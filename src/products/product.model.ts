@@ -20,5 +20,5 @@ export class Product extends Model {
   unit: string;
 
   @Column
-  images: string;
+  img: string;
 }

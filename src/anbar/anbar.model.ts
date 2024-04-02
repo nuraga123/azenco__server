@@ -33,14 +33,17 @@ export class Anbar extends Model {
   total_price: number;
 
   @Column({ defaultValue: 0 })
-  previous_stock: number;
+  previous_total_price: number;
 
   @Column({ defaultValue: 0 })
-  previous_total_price: number;
+  previous_stock: number;
 
   @Column({ defaultValue: false })
   ordered: boolean;
 
+  @Column({ defaultValue: true })
+  isComeProduct: boolean;
+
   @Column({ defaultValue: '' })
-  images: string;
+  img: string;
 }

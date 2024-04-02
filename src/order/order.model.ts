@@ -11,11 +11,11 @@ export class Order extends Model<Order> {
   @Column
   azenco__code: string;
 
-  @Column({ defaultValue: 0 })
-  price: number;
+  @Column
+  quantity: number;
 
-  @Column({ defaultValue: 0 })
-  stock: number;
+  @Column
+  price: number;
 
   @Column
   totalPrice: number;

@@ -186,7 +186,7 @@ export class AnbarService {
         azenco__code: product.azenco__code,
         name: product.name,
         type: product.type,
-        images: product.images,
+        img: product.img,
         unit: product.unit,
         price: +product.price,
         stock,
@@ -284,7 +284,7 @@ export class AnbarService {
       toAnbar.name = product.name;
       toAnbar.azenco__code = product.azenco__code;
       toAnbar.type = product.type;
-      toAnbar.images = product.images;
+      toAnbar.img = product.img;
       toAnbar.price = Number(product.price);
       toAnbar.unit = product.unit;
 
