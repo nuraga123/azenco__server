@@ -1,11 +1,11 @@
 import { IsNumber, IsNotEmpty } from 'class-validator';
 
-export class ConfirmOrderAnbarDto {
+export class ConfirmSendOrderDto {
   @IsNotEmpty()
   @IsNumber()
   anbarIdOrder: number;
 
   @IsNotEmpty()
   @IsNumber()
-  orderIdOrder: number;
+  orderId: number;
 }

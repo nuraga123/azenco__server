@@ -1,9 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
+
 import { Order } from './order.model';
 import { AnbarService } from 'src/anbar/anbar.service';
 import { UsersService } from 'src/users/users.service';
+import { HistoryService } from 'src/history/history.service';
+
 import { CreateOrderDto } from './dto/create-order.dto';
+import { ConfirmSendOrderDto } from './dto/confirm-send-order.dto';
+import { CancelSendOrderDto } from './dto/cancel-send-order.dto';
+import { StatusOrderText } from './status';
 
 @Injectable()
 export class OrderService {
@@ -13,6 +19,7 @@ export class OrderService {
     private readonly OrderModel: typeof Order,
     private readonly anbarService: AnbarService,
     private readonly usersService: UsersService,
+    private readonly historyService: HistoryService,
   ) {}
 
   // Получение всех записей истории заказов
@@ -20,18 +27,13 @@ export class OrderService {
     return this.OrderModel.findAll();
   }
 
-  async createOrderAnbar({
-    userIdOrder,
-    anbarIdOrder,
-    quantity,
-  }: {
-    userIdOrder: number;
-    anbarIdOrder: number;
-    quantity: number;
-  }): Promise<{ order?: Order; message?: string; error?: string }> {
-    const anbar = await this.anbarService.findOneAnbarId(anbarIdOrder);
+  async createOrderAnbar(
+    createOrderDto: CreateOrderDto,
+  ): Promise<{ order?: Order; message?: string; error?: string }> {
+    const { anbarFromId, userById, quantity } = createOrderDto;
+    const anbar = await this.anbarService.findOneAnbarId(anbarFromId);
     const client = await this.usersService.findOne({
-      where: { id: +userIdOrder },
+      where: { id: +userById },
     });
 
     if (anbar && anbar.stock && anbar.stock < quantity) {
@@ -49,38 +51,41 @@ export class OrderService {
     this.logger.log(anbar);
     if (anbar && anbar?.username && client && client?.username && quantity) {
       const order = await this.OrderModel.create({
+        status: 'created', // статус заказа создан
         orderedBy: client.username,
         orderedFrom: anbar.username,
         quantity: +quantity,
-        unit: anbar.unit,
-        name: anbar.name,
-        status: 'created', // статус заказа создан
-        azenco__code: anbar.azenco__code,
         price: +anbar.price,
         totalPrice: +quantity * +anbar.price,
+        unit: anbar.unit,
+        name: anbar.name,
+        azenco__code: anbar.azenco__code,
         img: anbar.img,
       });
 
       order.save();
+      const message: string = `заказ создан! Заказчик: ${client.username} хочет у ${anbar.username}: ${quantity} ${anbar.unit} ${anbar.name}`;
 
-      return {
-        message: `заказ создан! Заказчик: ${client.username} хочет у ${anbar.username}: ${quantity} ${anbar.unit} ${anbar.name}`,
-        order,
-      };
+      await this.historyService.createHistory(
+        message,
+        client.username,
+        client.id,
+      );
+
+      return { message, order };
     }
   }
 
-  async confirmOrderAnbar({
-    orderIdOrder,
-    anbarIdOrder,
-  }: {
-    orderIdOrder: number;
-    anbarIdOrder: number;
-  }): Promise<{ order?: Order; message?: string; error?: string }> {
+  async confirmOrderAnbar(
+    confirmSendOrderDto: ConfirmSendOrderDto,
+  ): Promise<{ order?: Order; message?: string; error?: string }> {
     try {
+      const { orderId, anbarIdOrder } = confirmSendOrderDto;
+      if (!orderId || !anbarIdOrder) return { error: 'пустые данные' };
+
       // Получить информацию о заказе из базы данных
       const order = await this.OrderModel.findOne({
-        where: { id: orderIdOrder },
+        where: { id: orderId },
       });
       if (!order) return { error: 'Заказ не найден' };
 
@@ -93,6 +98,9 @@ export class OrderService {
       // Вычесть сумму, которую захотел заказчик, из остатков на складе
       if (+anbar.stock < +order.quantity)
         return { error: 'Недостаточно товара на складе' };
+
+      if (order.status !== 'created')
+        return { error: 'статус должен быт заказ создан' };
 
       anbar.previous_stock = +anbar.stock;
       anbar.previous_total_price = +anbar.total_price;
@@ -116,6 +124,47 @@ export class OrderService {
     } catch (error) {
       // Обработать ошибку, если она возникла
       return { error: `Ошибка при подтверждении заказа: ${error.message}` };
+    }
+  }
+
+  async cancelOrderAnbar(
+    cancelOrderDto: CancelSendOrderDto,
+  ): Promise<{ order?: Order; message?: string; error?: string }> {
+    try {
+      const { orderId, cancelOrderText } = cancelOrderDto;
+      if (!orderId || !cancelOrderText)
+        return { error: 'вводные данные пустые' };
+      // Найти заказ в базе данных
+      const order = await this.OrderModel.findOne({
+        where: { id: orderId },
+      });
+
+      // Проверить, существует ли заказ с указанным идентификатором
+      if (!order) return { error: 'Заказ не найден' };
+
+      // Проверить, был ли заказ уже отправлен
+      if (order.status !== StatusOrderText.created) {
+        return { error: 'Отмена невозможна, так как заказ уже отправлен' };
+      }
+
+      order.status = StatusOrderText.cancelled_by_anbar;
+
+      await order.save();
+
+      const message: string = `Заказ отменен! Сотрудник анбара ${order.orderedFrom} не принял заказ на ${order.quantity} ${order.unit} ${order.name} по причине: ${cancelOrderText}`;
+
+      const { id } = await this.usersService.findOne({
+        where: { username: order.orderedFrom },
+      });
+
+      await this.historyService.createHistory(message, order.orderedFrom, id);
+
+      // Вернуть сообщение об успешной отмене заказа
+      return { message, order };
+    } catch (error) {
+      return {
+        error: `Ошибка Сервера при отмене заказа: ${(error as Error).message}`,
+      };
     }
   }
 }
