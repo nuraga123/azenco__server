@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { Order } from './order.model';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { ConfirmSendOrderDto } from './dto/confirm-send-order.dto';
 import { CancelSendOrderDto } from './dto/cancel-send-order.dto';
+import { IOrderQuery, IOrdersResponse } from './types';
 
 @Controller('order')
 export class OrderController {
@@ -11,8 +12,8 @@ export class OrderController {
 
   // Обработчик GET запроса для получения всех заказов
   @Get('all')
-  async getAllOrders(): Promise<Order[]> {
-    return this.orderService.getAllOrders();
+  async getAllOrders(@Query() query: IOrderQuery): Promise<IOrdersResponse> {
+    return this.orderService.getOrdersPaginateAndSort(query);
   }
 
   // Обработчик POST запроса для создания нового заказа

@@ -26,8 +26,17 @@ export class Anbar extends Model {
   @Column
   price: number;
 
+  // количество пригодных товаров
   @Column
   stock: number;
+
+  // количество непригодных товаров
+  @Column({ defaultValue: 0 })
+  nonUsableStock: number;
+
+  // количество потерянных товаров
+  @Column({ defaultValue: 0 })
+  lostStock: number;
 
   @Column
   total_price: number;

@@ -1,34 +1,53 @@
-import { Table, Column, Model } from 'sequelize-typescript';
+import { Table, Column, Model, DataType } from 'sequelize-typescript';
+import { StatusOrderType } from './types';
 
 @Table
 export class Order extends Model<Order> {
-  @Column
-  status: string;
+  @Column({
+    type: DataType.ENUM(
+      'created',
+      'sent_to_customer',
+      'cancelled_by_customer',
+      'cancelled_by_anbar',
+      'received_by_customer',
+      'refunded',
+    ),
+  })
+  status: StatusOrderType; // Используем тип IStatusOrderTypes
 
-  @Column
+  @Column(DataType.STRING)
   name: string;
 
-  @Column
+  @Column(DataType.STRING)
   azenco__code: string;
 
-  @Column
+  @Column({ type: DataType.DECIMAL(20, 3) })
   quantity: number;
 
-  @Column
+  @Column({ type: DataType.DECIMAL(20, 2) })
   price: number;
 
-  @Column
-  totalPrice: number;
+  @Column(DataType.DECIMAL)
+  total_price: number;
 
-  @Column
-  orderedBy: string;
+  // заказчик
+  @Column(DataType.NUMBER)
+  clientId: number;
+  // заказчик
+  @Column(DataType.NUMBER)
+  clientName: number;
 
-  @Column
-  orderedFrom: string;
+  // отправитель
+  @Column(DataType.NUMBER)
+  anbarById: number;
 
-  @Column
+  // отправитель
+  @Column(DataType.STRING)
+  anbarByName: string;
+
+  @Column(DataType.STRING)
   unit: string;
 
-  @Column
+  @Column(DataType.STRING)
   img: string;
 }

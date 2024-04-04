@@ -22,6 +22,7 @@ export class AnbarService {
     private readonly productsService: ProductsService,
     private readonly historyService: HistoryService,
   ) {}
+
   // получение всех анбаров
   async findAll(): Promise<Anbar[]> {
     try {

@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
+import { AxiosError } from 'axios';
 
 import { Order } from './order.model';
 import { AnbarService } from 'src/anbar/anbar.service';
@@ -9,22 +10,58 @@ import { HistoryService } from 'src/history/history.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { ConfirmSendOrderDto } from './dto/confirm-send-order.dto';
 import { CancelSendOrderDto } from './dto/cancel-send-order.dto';
-import { StatusOrderText } from './status';
+import { IOrderQuery, IOrderResponse, IOrdersResponse } from './types';
 
 @Injectable()
 export class OrderService {
   private readonly logger = new Logger(OrderService.name);
+
   constructor(
     @InjectModel(Order)
-    private readonly OrderModel: typeof Order,
-    private readonly anbarService: AnbarService,
+    private readonly orderModel: typeof Order,
     private readonly usersService: UsersService,
+    private readonly anbarService: AnbarService,
     private readonly historyService: HistoryService,
-  ) {}
+  ) { }
 
-  // Получение всех записей истории заказов
-  async getAllOrders(): Promise<Order[]> {
-    return this.OrderModel.findAll();
+  returnedErrosMesage(error: any): {
+    error_message: string;
+  } {
+    this.logger.log(error)
+    return { error_message: (error as AxiosError).message }
+  }
+
+  // Получение всех записей заказов
+  async getOrdersPaginateAndSort(
+    query: IOrderQuery,
+  ): Promise<IOrdersResponse> {
+    try {
+      const { count, rows } = await this.orderModel.findAndCountAll({
+        limit: +query.limit,
+        offset: +query.offset * 10,
+      });
+
+      return { count, rows }
+    } catch (error) {
+      return this.returnedErrosMesage(error)
+    }
+  }
+
+  async findOrderId(orderId: number): Promise<IOrderResponse> {
+    const order = await this.orderModel.findByPk(orderId)
+    if (!order) return { error_message: 'Заказ не найден!' }
+    return { order }
+  }
+
+  async findOrderByClientId(orderedBy: number) {
+
+    const { count, rows } = await this.orderModel.findAndCountAll({
+      where: {
+        c
+      }
+      limit: +query.limit,
+      offset: +query.offset * 10,
+    });
   }
 
   async createOrderAnbar(
@@ -42,21 +79,15 @@ export class OrderService {
       };
     }
 
-    if (anbar && anbar.ordered) {
-      return {
-        error: `заказ невозможен, так как товар уже заказан`,
-      };
-    }
-
     this.logger.log(anbar);
     if (anbar && anbar?.username && client && client?.username && quantity) {
-      const order = await this.OrderModel.create({
+      const order = await this.orderModel.create({
         status: 'created', // статус заказа создан
         orderedBy: client.username,
         orderedFrom: anbar.username,
         quantity: +quantity,
         price: +anbar.price,
-        totalPrice: +quantity * +anbar.price,
+        total_price: +quantity * +anbar.price,
         unit: anbar.unit,
         name: anbar.name,
         azenco__code: anbar.azenco__code,
@@ -143,11 +174,13 @@ export class OrderService {
       if (!order) return { error: 'Заказ не найден' };
 
       // Проверить, был ли заказ уже отправлен
-      if (order.status !== StatusOrderText.created) {
-        return { error: 'Отмена невозможна, так как заказ уже отправлен' };
+      if (order.status !== ) {
+        return {
+          error: `Отмена невозможна, так как cтатус заказа: ${order.status}`,
+        };
       }
 
-      order.status = StatusOrderText.cancelled_by_anbar;
+      order.status = 'sent_to_customer';
 
       await order.save();
 
