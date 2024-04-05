@@ -8,7 +8,7 @@ export class Product extends Model {
 
   @Unique
   @Column
-  azenco__code: string;
+  azencoCode: string;
 
   @Column
   price: number;

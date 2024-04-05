@@ -12,7 +12,7 @@ export class Anbar extends Model {
   name: string;
 
   @Column
-  azenco__code: string;
+  azencoCode: string;
 
   @Column
   type: string;
@@ -39,13 +39,15 @@ export class Anbar extends Model {
   lostStock: number;
 
   @Column
-  total_price: number;
+  totalPrice: number;
 
+  // до заказа общая цена продукта
   @Column({ defaultValue: 0 })
-  previous_total_price: number;
+  previousTotalPrice: number;
 
+  // до заказа количество продуктов
   @Column({ defaultValue: 0 })
-  previous_stock: number;
+  previousStock: number;
 
   @Column({ defaultValue: false })
   ordered: boolean;

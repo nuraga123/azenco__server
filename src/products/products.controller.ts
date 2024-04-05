@@ -6,14 +6,20 @@ import {
   Post,
   Put,
   UseGuards,
+  Param,
+  Query,
 } from '@nestjs/common';
-import { Param, Query } from '@nestjs/common';
+
+import {
+  ICountAndRowsProductsResponse,
+  IProductResponse,
+  IProductsQuery,
+  IProductsResponse,
+} from './types';
 import { ProductsService } from './products.service';
-import { IProductResponse, IProductsQuery } from './types';
 import { CreateProductDto } from './dto/create-product.dto';
-import { TokenGuard } from 'src/token/token.guard';
-import { Product } from './product.model';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { TokenGuard } from 'src/token/token.guard';
 
 @Controller('products')
 export class ProductsController {
@@ -21,10 +27,9 @@ export class ProductsController {
 
   @UseGuards(TokenGuard)
   @Get()
-  paginateAndFilterOrSort(@Query() query: IProductsQuery): Promise<{
-    count: number;
-    rows: Product[];
-  }> {
+  paginateAndFilterOrSort(
+    @Query() query: IProductsQuery,
+  ): Promise<ICountAndRowsProductsResponse> {
     return this.productService.paginateAndFilterOrSortProducts(query);
   }
 
@@ -42,32 +47,32 @@ export class ProductsController {
 
   @UseGuards(TokenGuard)
   @Post('search-name')
-  async searchProductName(
+  async searchOneProductName(
     @Body('name') name: string,
   ): Promise<IProductResponse> {
-    return this.productService.findOneByName(name);
+    return await this.productService.findByNameProduct(name);
   }
 
   @UseGuards(TokenGuard)
   @Post('search-part-name')
   async searchPartByNameProducts(
     @Body('part_name') part_name: string,
-  ): Promise<Product[]> {
+  ): Promise<IProductsResponse> {
     return this.productService.findAllPartByNameProducts(part_name);
   }
 
   @UseGuards(TokenGuard)
-  @Post('search-azenco__code')
+  @Post('search-azenco-code')
   async searchAzencoCodeProduct(
-    @Body('azenco__code') azenco__code: string,
+    @Body('azencoCode') azencoCode: string,
   ): Promise<IProductResponse> {
-    return this.productService.findProductByAzencoCode(azenco__code);
+    return this.productService.findByAzencoCodeProduct(azencoCode);
   }
 
   @UseGuards(TokenGuard)
   @Post('search-type')
   async searchTypeProduct(@Body('type') type: string) {
-    return this.productService.findProductByType(type);
+    return this.productService.findByTypeProducts(type);
   }
 
   @UseGuards(TokenGuard)

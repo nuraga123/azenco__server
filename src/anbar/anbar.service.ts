@@ -184,7 +184,7 @@ export class AnbarService {
         userId: user.id,
         username: user.username,
         productId: product.id,
-        azenco__code: product.azenco__code,
+        azenco__code: product.azencoCode,
         name: product.name,
         type: product.type,
         img: product.img,
@@ -242,7 +242,7 @@ export class AnbarService {
       }
 
       const previousStock = fromAnbar.stock;
-      const previousTotalPrice = fromAnbar.total_price;
+      const previousTotalPrice = fromAnbar.totalPrice;
 
       console.log(previousStock, previousTotalPrice);
       if (!fromAnbar || fromAnbar.stock < transferStockDto.quantity) {
@@ -272,26 +272,26 @@ export class AnbarService {
         Number(product.price) * Number(transferStockDto.quantity);
 
       // Обновление статуса и количества в "отправляющем" амбаре
-      fromAnbar.previous_stock = Number(previousStock);
-      fromAnbar.previous_total_price = Number(previousTotalPrice);
+      fromAnbar.previousStock = Number(previousStock);
+      fromAnbar.previousTotalPrice = Number(previousTotalPrice);
       fromAnbar.stock =
         Number(fromAnbar.stock) - Number(transferStockDto.quantity);
-      fromAnbar.total_price =
-        Number(fromAnbar.total_price) - Number(priceAndQuantity);
+      fromAnbar.totalPrice =
+        Number(fromAnbar.totalPrice) - Number(priceAndQuantity);
 
       await fromAnbar.save({ transaction });
 
       // Обновление данных в "получающем" амбаре
       toAnbar.name = product.name;
-      toAnbar.azenco__code = product.azenco__code;
+      toAnbar.azencoCode = product.azencoCode;
       toAnbar.type = product.type;
       toAnbar.img = product.img;
       toAnbar.price = Number(product.price);
       toAnbar.unit = product.unit;
 
       toAnbar.stock = Number(toAnbar.stock) + Number(transferStockDto.quantity);
-      toAnbar.total_price =
-        Number(toAnbar.total_price) + Number(priceAndQuantity);
+      toAnbar.totalPrice =
+        Number(toAnbar.totalPrice) + Number(priceAndQuantity);
       await toAnbar.save({ transaction: transaction });
 
       await transaction.commit();
@@ -329,8 +329,8 @@ export class AnbarService {
     if (anbar.ordered && anbar.userId === userId) {
       // Подтверждаем получение товара
       anbar.ordered = false;
-      anbar.previous_stock = 0;
-      anbar.previous_total_price = 0;
+      anbar.previousStock = 0;
+      anbar.previousTotalPrice = 0;
 
       // Создаем запись в истории
       await this.historyService.createHistory(
@@ -382,13 +382,13 @@ export class AnbarService {
 
     if (anbar.ordered) {
       // Возвращаем товар в исходный амбар
-      anbar.stock = Number(anbar.previous_stock);
-      anbar.total_price = Number(anbar.previous_total_price);
+      anbar.stock = Number(anbar.previousStock);
+      anbar.totalPrice = Number(anbar.previousTotalPrice);
 
       // Сбрасываем статус заказа
       anbar.ordered = false;
-      anbar.previous_stock = 0;
-      anbar.previous_total_price = 0;
+      anbar.previousStock = 0;
+      anbar.previousTotalPrice = 0;
 
       await anbar.save();
 

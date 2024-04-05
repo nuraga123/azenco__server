@@ -3,7 +3,7 @@ import { IsNotEmpty, IsString, IsNumber, IsOptional } from 'class-validator';
 export class CreateProductDto {
   @IsNotEmpty()
   @IsString()
-  readonly azenco__code: string;
+  readonly azencoCode: string;
 
   @IsNotEmpty()
   @IsString()

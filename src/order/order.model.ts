@@ -13,13 +13,25 @@ export class Order extends Model<Order> {
       'refunded',
     ),
   })
-  status: StatusOrderType; // Используем тип IStatusOrderTypes
+  status: StatusOrderType;
 
-  @Column(DataType.STRING)
+  @Column(DataType.INTEGER)
+  clientId: number;
+
+  @Column(DataType.TEXT)
+  clientName: string;
+
+  @Column(DataType.INTEGER)
+  anbarId: number;
+
+  @Column(DataType.TEXT)
+  anbarUsername: string;
+
+  @Column(DataType.TEXT)
   name: string;
 
   @Column(DataType.STRING)
-  azenco__code: string;
+  azencoCode: string;
 
   @Column({ type: DataType.DECIMAL(20, 3) })
   quantity: number;
@@ -27,27 +39,15 @@ export class Order extends Model<Order> {
   @Column({ type: DataType.DECIMAL(20, 2) })
   price: number;
 
-  @Column(DataType.DECIMAL)
-  total_price: number;
-
-  // заказчик
-  @Column(DataType.NUMBER)
-  clientId: number;
-  // заказчик
-  @Column(DataType.NUMBER)
-  clientName: number;
-
-  // отправитель
-  @Column(DataType.NUMBER)
-  anbarById: number;
-
-  // отправитель
-  @Column(DataType.STRING)
-  anbarByName: string;
+  @Column(DataType.DECIMAL(20, 2))
+  totalPrice: number;
 
   @Column(DataType.STRING)
   unit: string;
 
   @Column(DataType.STRING)
   img: string;
+
+  @Column(DataType.TEXT)
+  description: string;
 }

@@ -18,13 +18,27 @@ export interface IProductResponse {
   error?: string;
 }
 
+export interface IProductsResponse {
+  products?: Product[];
+  error?: string;
+}
+
+export interface ICountAndRowsProductsResponse {
+  rows?: Product[];
+  count: number;
+}
+
 export interface IAddAndUpdateProduct extends IProductResponse {
   message?: string;
   success: boolean;
 }
 
-export interface IValidateProduct {
-  productDto: CreateProductDto | UpdateProductDto;
+export interface IValidateCreateProduct {
+  productDto: CreateProductDto;
+}
+
+export interface IValidateUpdateProduct {
+  productDto: UpdateProductDto;
   productId?: number;
 }
 

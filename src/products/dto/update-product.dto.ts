@@ -3,7 +3,7 @@ import { IsString, IsNumber, IsOptional } from 'class-validator';
 export class UpdateProductDto {
   @IsOptional()
   @IsString()
-  readonly azenco__code?: string;
+  readonly azencoCode?: string;
 
   @IsOptional()
   @IsString()

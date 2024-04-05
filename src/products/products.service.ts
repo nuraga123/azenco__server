@@ -7,9 +7,12 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import {
   IAddAndUpdateProduct,
   IProductResponse,
+  ICountAndRowsProductsResponse,
   IProductsFilter,
   IProductsQuery,
-  IValidateProduct,
+  IProductsResponse,
+  IValidateUpdateProduct,
+  IValidateCreateProduct,
 } from './types';
 
 @Injectable()
@@ -32,41 +35,36 @@ export class ProductsService {
     return { product };
   }
 
-  async findOneByName(name: string): Promise<IProductResponse> {
+  async findByNameProduct(name: string): Promise<IProductResponse> {
     const product = await this.productModel.findOne({ where: { name } });
     if (!product) return { error: `Продукт с именем ${name} не найден` };
     this.processProductPrice(product);
     return { product };
   }
 
-  async findProductByAzencoCode(
-    azenco__code: string,
-  ): Promise<IProductResponse> {
+  async findByAzencoCodeProduct(azencoCode: string): Promise<IProductResponse> {
     const product = await this.productModel.findOne({
-      where: { azenco__code },
+      where: { azencoCode },
     });
 
-    if (!product) {
-      return {
-        error: `Продукт с кодом Azenco ${azenco__code} не найден`,
-      };
-    }
+    if (!product)
+      return { error: `Продукт с кодом Azenco ${azencoCode} не найден` };
 
     this.processProductPrice(product);
     return { product };
   }
 
-  async findProductByType(
-    type: string,
-  ): Promise<Product[] | { error: string }> {
+  async findByTypeProducts(type: string): Promise<IProductsResponse> {
     const products = await this.productModel.findAll({ where: { type } });
     if (!products?.length) return { error: `Продукт с type ${type} не найден` };
     products.forEach(this.processProductPrice);
-    return products;
+    return { products };
   }
 
-  async validateAddProduct({ productDto }: IValidateProduct): Promise<string> {
-    const { name, azenco__code, price, type, unit } = productDto;
+  async validateAddProduct({
+    productDto,
+  }: IValidateCreateProduct): Promise<string> {
+    const { name, azencoCode, price, type, unit } = productDto;
 
     // Инициализация пустого массива для хранения ошибок
     const errors: string[] = [];
@@ -77,7 +75,7 @@ export class ProductsService {
     }
 
     // Проверка наличия и корректности кода Azenco
-    if (typeof azenco__code !== 'string' || azenco__code.length !== 9) {
+    if (typeof azencoCode !== 'string' || azencoCode.length !== 9) {
       errors.push('Код Azenco должен состоять из 9 символов');
     }
 
@@ -99,14 +97,14 @@ export class ProductsService {
     }
 
     // Проверка наличия продукта с таким же именем
-    const existingProductName = await this.findOneByName(name);
+    const existingProductName = await this.findByNameProduct(name);
     if (existingProductName?.product) {
       errors.push('ProductName уже есть в базе данных');
     }
 
     // Проверка наличия продукта с таким же кодом Azenco
     const existingProductAzencoCode =
-      await this.findProductByAzencoCode(azenco__code);
+      await this.findByAzencoCodeProduct(azencoCode);
     if (existingProductAzencoCode?.product) {
       errors.push('Azenco Code уже есть в базе данных');
     }
@@ -123,9 +121,12 @@ export class ProductsService {
   async validateUpdateProduct({
     productDto,
     productId,
-  }: IValidateProduct): Promise<string> {
+  }: IValidateUpdateProduct): Promise<string> {
     // Извлечение параметров продукта из объекта DTO
-    const { name, azenco__code, price, type, unit } = productDto;
+    const { name, azencoCode, price, type, unit } = productDto;
+
+    if (name) return 'нет имени';
+
     // Получение существующего продукта по ID
     const { product } = await this.findOneProduct(productId);
     // Проверка наличия продукта для обновления
@@ -135,7 +136,7 @@ export class ProductsService {
     // Проверка и коррекция имени продукта, если оно передано для обновления
     if (name && name === product.name) {
       // Проверка, что новое имя не совпадает с текущим именем продукта
-      const existingProductName = await this.findOneByName(name);
+      const existingProductName = await this.findByNameProduct(name);
       if (existingProductName?.product) {
         errors.push('название продукта уже есть в базе данных');
       }
@@ -143,10 +144,10 @@ export class ProductsService {
     }
 
     // Проверка и коррекция кода Azenco, если он передан для обновления
-    if (azenco__code && azenco__code === product.azenco__code) {
+    if (azencoCode && azencoCode === product.azencoCode) {
       // Проверка, что новый код Azenco не совпадает с текущим кодом
       const existingProductAzencoCode =
-        await this.findProductByAzencoCode(azenco__code);
+        await this.findByAzencoCodeProduct(azencoCode);
       if (existingProductAzencoCode?.product) {
         errors.push('Azenco Code уже есть в базе данных');
       }
@@ -198,7 +199,7 @@ export class ProductsService {
 
   async paginateAndFilterOrSortProducts(
     query: IProductsQuery,
-  ): Promise<{ count: number; rows: Product[] }> {
+  ): Promise<ICountAndRowsProductsResponse> {
     const { limit, offset, sortBy, priceFrom, priceTo, bolt, PRR, earring } =
       query;
 
@@ -288,14 +289,22 @@ export class ProductsService {
     return `Продукт "${product.name}" удален успешно`;
   }
 
-  async findAllPartByNameProducts(partname: string): Promise<Product[]> {
+  async findAllPartByNameProducts(
+    part_name: string,
+  ): Promise<IProductsResponse> {
     const products = await this.productModel.findAll({
       where: {
-        name: { [Op.like]: `%${partname}%` },
+        name: { [Op.like]: `%${part_name}%` },
       },
     });
 
+    if (!products.length) {
+      return {
+        error: `нет существует тип ${part_name} `,
+      };
+    }
+
     products.forEach(this.processProductPrice);
-    return products;
+    return { products };
   }
 }

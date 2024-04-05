@@ -1,13 +1,13 @@
 import { IsNumber, IsNotEmpty } from 'class-validator';
 
-export class CreateOrderDto {
+export class NewOrderDto {
   @IsNotEmpty()
   @IsNumber()
-  anbarFromId: number;
+  anbarId: number;
 
   @IsNotEmpty()
   @IsNumber()
-  userById: number;
+  clientId: number;
 
   @IsNotEmpty()
   @IsNumber()
