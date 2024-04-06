@@ -9,7 +9,6 @@ import {
   Param,
   Query,
 } from '@nestjs/common';
-
 import {
   ICountAndRowsProductsResponse,
   IProductResponse,

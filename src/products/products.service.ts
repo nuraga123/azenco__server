@@ -11,9 +11,11 @@ import {
   IProductsFilter,
   IProductsQuery,
   IProductsResponse,
-  IValidateUpdateProduct,
   IValidateCreateProduct,
+  IError,
 } from './types';
+import { validate } from 'class-validator';
+import { AxiosError } from 'axios';
 
 @Injectable()
 export class ProductsService {
@@ -24,39 +26,49 @@ export class ProductsService {
     private readonly productModel: typeof Product,
   ) {}
 
-  processProductPrice(product: Product): void {
+  // возврашает ошибку
+  async errorsMessage(e: any): Promise<IError> {
+    this.logger.log(e);
+    return { error: (e as AxiosError).message };
+  }
+
+  // возврашает продукт с типом price: number
+  async processProductPrice(product: Product): Promise<{ product: Product }> {
     if (product && product?.price) product.price = +product.price;
+    return { product };
   }
 
   async findOneProduct(id: number): Promise<IProductResponse> {
-    const product = await this.productModel.findByPk(id);
-    if (!product) return { error: `Продукт с ID ${id} не найден` };
-    this.processProductPrice(product);
-    return { product };
+    try {
+      const product = await this.productModel.findByPk(id);
+      if (!product) return { error: `Продукт с ID ${id} не найден` };
+      return this.processProductPrice(product);
+    } catch (e) {
+      return this.errorsMessage(e);
+    }
   }
 
   async findByNameProduct(name: string): Promise<IProductResponse> {
     const product = await this.productModel.findOne({ where: { name } });
     if (!product) return { error: `Продукт с именем ${name} не найден` };
-    this.processProductPrice(product);
-    return { product };
+    return this.processProductPrice(product);
   }
 
   async findByAzencoCodeProduct(azencoCode: string): Promise<IProductResponse> {
-    const product = await this.productModel.findOne({
-      where: { azencoCode },
-    });
+    const product = await this.productModel.findOne({ where: { azencoCode } });
 
-    if (!product)
+    if (!product) {
       return { error: `Продукт с кодом Azenco ${azencoCode} не найден` };
+    }
 
-    this.processProductPrice(product);
-    return { product };
+    return this.processProductPrice(product);
   }
 
   async findByTypeProducts(type: string): Promise<IProductsResponse> {
     const products = await this.productModel.findAll({ where: { type } });
+
     if (!products?.length) return { error: `Продукт с type ${type} не найден` };
+
     products.forEach(this.processProductPrice);
     return { products };
   }
@@ -110,88 +122,7 @@ export class ProductsService {
     }
 
     // Возврат ошибок, если они были обнаружены
-    if (errors.length > 0) {
-      return errors.join(', ');
-    }
-
-    // Если ошибок нет, возвращаем пустую строку (нет ошибок)
-    return '';
-  }
-
-  async validateUpdateProduct({
-    productDto,
-    productId,
-  }: IValidateUpdateProduct): Promise<string> {
-    // Извлечение параметров продукта из объекта DTO
-    const { name, azencoCode, price, type, unit } = productDto;
-
-    if (name) return 'нет имени';
-
-    // Получение существующего продукта по ID
-    const { product } = await this.findOneProduct(productId);
-    // Проверка наличия продукта для обновления
-    if (!product) return 'Продукт для обновления не найден';
-    // Инициализация пустого массива для хранения ошибок
-    const errors: string[] = [];
-    // Проверка и коррекция имени продукта, если оно передано для обновления
-    if (name && name === product.name) {
-      // Проверка, что новое имя не совпадает с текущим именем продукта
-      const existingProductName = await this.findByNameProduct(name);
-      if (existingProductName?.product) {
-        errors.push('название продукта уже есть в базе данных');
-      }
-      errors.push('название продукта не обновлен');
-    }
-
-    // Проверка и коррекция кода Azenco, если он передан для обновления
-    if (azencoCode && azencoCode === product.azencoCode) {
-      // Проверка, что новый код Azenco не совпадает с текущим кодом
-      const existingProductAzencoCode =
-        await this.findByAzencoCodeProduct(azencoCode);
-      if (existingProductAzencoCode?.product) {
-        errors.push('Azenco Code уже есть в базе данных');
-      }
-      errors.push('Azenco Code не обновлен');
-    }
-
-    //Проверка и коррекция цены продукта
-    if (price && typeof price !== 'number') {
-      errors.push('Цена должна быть числом');
-      if (price === product.price) {
-        errors.push('старая цена напишите другую цену');
-      }
-    }
-
-    if (price && price <= 0) {
-      errors.push('Цена должна быть больше 0');
-    }
-
-    // Проверка и коррекция типа продукта, если он передан для обновления
-    if (type && !type) {
-      // Проверка, что новый тип не совпадает с текущим типом продукта
-      if (typeof type !== 'string' || type.length <= 1) {
-        errors.push('Тип должен быть строкой длиной больше 1 символа');
-      }
-
-      if (type === product.type) {
-        errors.push('старый тип');
-      }
-      errors.push('нет данных типа');
-    }
-    // Проверка и коррекция единицы измерения, если она передана для обновления
-    if (unit && unit === product.unit) {
-      // Проверка, что новая единица измерения не совпадает с текущей
-      errors.push('Единица измерения не обновлено');
-    }
-
-    if (unit && typeof unit !== 'string') {
-      errors.push('Единица измерения должна быть строкой');
-    }
-
-    // Возврат ошибок, если они были обнаружены
-    if (errors.length > 0) {
-      return errors.join(', ');
-    }
+    if (errors.length > 0) return errors.join(', ');
 
     // Если ошибок нет, возвращаем пустую строку (нет ошибок)
     return '';
@@ -211,9 +142,7 @@ export class ProductsService {
       };
     }
 
-    if (bolt) {
-      filter.bolt = JSON.parse(decodeURIComponent(bolt));
-    }
+    if (bolt) filter.bolt = JSON.parse(decodeURIComponent(bolt));
 
     if (PRR) {
       filter.PRR = JSON.parse(decodeURIComponent(PRR));
@@ -225,25 +154,22 @@ export class ProductsService {
 
     const orderDirection = sortBy === 'asc' ? 'asc' : 'desc';
 
-    const { count, rows: products } = await this.productModel.findAndCountAll({
+    const { count, rows } = await this.productModel.findAndCountAll({
       limit: +limit,
       offset: +offset * 3,
       where: filter,
       order: [[Sequelize.literal('CAST(price AS DECIMAL)'), orderDirection]],
     });
 
-    products.forEach(this.processProductPrice);
-
-    return { count, rows: products };
+    rows.forEach(this.processProductPrice);
+    return { count, rows };
   }
 
   async addProduct(
     productDto: CreateProductDto,
   ): Promise<IAddAndUpdateProduct> {
     const validationError = await this.validateAddProduct({ productDto });
-    if (validationError) {
-      return { error: validationError, success: false };
-    }
+    if (validationError) return { error: validationError, success: false };
 
     const product = await this.productModel.create({ ...productDto });
     return { success: true, message: `Создан товар ${product.name}`, product };
@@ -253,33 +179,53 @@ export class ProductsService {
     productId: number,
     productDto: UpdateProductDto,
   ): Promise<IAddAndUpdateProduct> {
-    // Находим продукт по его идентификатору
-    const { product } = await this.findOneProduct(productId);
+    try {
+      // Находим продукт по его идентификатору
+      const { product } = await this.findOneProduct(productId);
 
-    // Проверяем валидность данных для обновления продукта
-    const validationError = await this.validateUpdateProduct({
-      productDto,
-      productId,
-    });
+      if (!product) {
+        return {
+          success: false,
+          error: 'Продукт не найден',
+        };
+      }
 
-    // Если есть ошибки валидации, возвращаем их
-    if (validationError) return { success: false, error: validationError };
+      // Проверяем каждое поле productDto и устанавливаем его значение из product, если не передано
+      Object.keys(productDto).forEach((key) => {
+        if (productDto[key] === undefined || productDto[key] === '') {
+          productDto[key] = product[key];
+        }
+      });
 
-    // Обновляем данные продукта с использованием предоставленных данных
-    const updatedProduct = await product.update(productDto);
+      // Проверяем валидацию productDto
+      const errors = await validate(productDto);
 
-    // Обрабатываем цену продукта (возможно, применяем какие-то дополнительные действия)
-    this.processProductPrice(updatedProduct);
+      if (errors.length > 0) {
+        return {
+          success: false,
+          message: 'Ошибка валидации',
+          error: errors
+            .map((error) => Object.values(error.constraints))
+            .flat()
+            .join('! '),
+        };
+      }
 
-    // Сохраняем обновленный продукт в базе данных
-    await updatedProduct.save();
+      // Обрабатываем цену продукта (возможно, применяем какие-то дополнительные действия)
+      this.processProductPrice(product);
 
-    // Возвращаем успешный результат обновления продукта
-    return {
-      success: true,
-      message: `Успешно обновлен ${updatedProduct.name}`,
-      product: updatedProduct,
-    };
+      // Сохраняем обновленный продукт в базе данных
+      await product.save();
+
+      // Возвращаем успешный результат обновления продукта
+      return {
+        success: true,
+        message: `Успешно обновлен ${product.name}`,
+        product: product,
+      };
+    } catch (e) {
+      return this.errorsMessage(e);
+    }
   }
 
   async removeProduct(id: number): Promise<string | { error: string }> {

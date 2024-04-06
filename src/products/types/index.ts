@@ -13,24 +13,26 @@ export interface IProduct {
   images: string;
 }
 
-export interface IProductResponse {
+export interface IError {
+  error?: string;
+}
+
+export interface IProductResponse extends IError {
   product?: Product;
-  error?: string;
 }
 
-export interface IProductsResponse {
+export interface IProductsResponse extends IError {
   products?: Product[];
-  error?: string;
 }
 
-export interface ICountAndRowsProductsResponse {
+export interface ICountAndRowsProductsResponse extends IError {
   rows?: Product[];
   count: number;
 }
 
-export interface IAddAndUpdateProduct extends IProductResponse {
+export interface IAddAndUpdateProduct extends IProductResponse, IError {
   message?: string;
-  success: boolean;
+  success?: boolean;
 }
 
 export interface IValidateCreateProduct {

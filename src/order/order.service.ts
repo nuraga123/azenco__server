@@ -23,7 +23,7 @@ export class OrderService {
   ) {}
 
   // возврашает ошибку
-  errorsMessage(e: any): { error_message: string } {
+  async errorsMessage(e: any): Promise<{ error_message: string }> {
     this.logger.log(e);
     return { error_message: (e as AxiosError).message };
   }

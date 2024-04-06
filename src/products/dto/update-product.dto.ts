@@ -1,27 +1,27 @@
-import { IsString, IsNumber, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsString, IsNumber, IsOptional } from 'class-validator';
 
 export class UpdateProductDto {
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
-  readonly azencoCode?: string;
+  azencoCode?: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
-  readonly name?: string;
+  name?: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
-  readonly type?: string;
+  type?: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
-  readonly unit?: string;
+  unit?: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsNumber()
-  readonly price?: number;
+  price?: number;
 
   @IsOptional()
   @IsString()
-  readonly images?: string;
+  img?: string;
 }
