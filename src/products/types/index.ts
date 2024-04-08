@@ -27,7 +27,7 @@ export interface IProductsResponse extends IError {
 
 export interface ICountAndRowsProductsResponse extends IError {
   rows?: Product[];
-  count: number;
+  count?: number;
 }
 
 export interface IAddAndUpdateProduct extends IProductResponse, IError {

@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op, Sequelize } from 'sequelize';
+import { AxiosError } from 'axios';
+
 import { Product } from './product.model';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -14,8 +16,6 @@ import {
   IValidateCreateProduct,
   IError,
 } from './types';
-import { validate } from 'class-validator';
-import { AxiosError } from 'axios';
 
 @Injectable()
 export class ProductsService {
@@ -24,20 +24,23 @@ export class ProductsService {
   constructor(
     @InjectModel(Product)
     private readonly productModel: typeof Product,
-  ) {}
+  ) {
+    /**/
+  }
 
-  // возврашает ошибку
+  // Метод для обработки ошибок
   async errorsMessage(e: any): Promise<IError> {
     this.logger.log(e);
     return { error: (e as AxiosError).message };
   }
 
-  // возврашает продукт с типом price: number
+  // Метод для обработки цены продукта
   async processProductPrice(product: Product): Promise<{ product: Product }> {
     if (product && product?.price) product.price = +product.price;
     return { product };
   }
 
+  // Метод для поиска продукта по его идентификатору
   async findOneProduct(id: number): Promise<IProductResponse> {
     try {
       const product = await this.productModel.findByPk(id);
@@ -48,31 +51,51 @@ export class ProductsService {
     }
   }
 
+  // Метод для поиска продукта по его имени
   async findByNameProduct(name: string): Promise<IProductResponse> {
-    const product = await this.productModel.findOne({ where: { name } });
-    if (!product) return { error: `Продукт с именем ${name} не найден` };
-    return this.processProductPrice(product);
-  }
-
-  async findByAzencoCodeProduct(azencoCode: string): Promise<IProductResponse> {
-    const product = await this.productModel.findOne({ where: { azencoCode } });
-
-    if (!product) {
-      return { error: `Продукт с кодом Azenco ${azencoCode} не найден` };
+    try {
+      const product = await this.productModel.findOne({ where: { name } });
+      if (!product) return { error: `Продукт с именем ${name} не найден` };
+      return this.processProductPrice(product);
+    } catch (e) {
+      return this.errorsMessage(e);
     }
-
-    return this.processProductPrice(product);
   }
 
+  // Метод для поиска продукта по его коду Azenco
+  async findByAzencoCodeProduct(azencoCode: string): Promise<IProductResponse> {
+    try {
+      const product = await this.productModel.findOne({
+        where: { azencoCode },
+      });
+
+      if (!product) {
+        return { error: `Продукт с кодом Azenco ${azencoCode} не найден` };
+      }
+
+      return this.processProductPrice(product);
+    } catch (e) {
+      return this.errorsMessage(e);
+    }
+  }
+
+  // Метод для поиска продуктов по их типу
   async findByTypeProducts(type: string): Promise<IProductsResponse> {
-    const products = await this.productModel.findAll({ where: { type } });
+    try {
+      const products = await this.productModel.findAll({ where: { type } });
 
-    if (!products?.length) return { error: `Продукт с type ${type} не найден` };
+      if (!products?.length) {
+        return { error: `Продукт с type ${type} не найден` };
+      }
 
-    products.forEach(this.processProductPrice);
-    return { products };
+      products.forEach(this.processProductPrice);
+      return { products };
+    } catch (e) {
+      return this.errorsMessage(e);
+    }
   }
 
+  // Метод для валидации данных нового продукта
   async validateAddProduct({
     productDto,
   }: IValidateCreateProduct): Promise<string> {
@@ -128,94 +151,124 @@ export class ProductsService {
     return '';
   }
 
+  // Метод для пагинации, фильтрации или сортировки продуктов
   async paginateAndFilterOrSortProducts(
     query: IProductsQuery,
   ): Promise<ICountAndRowsProductsResponse> {
-    const { limit, offset, sortBy, priceFrom, priceTo, bolt, PRR, earring } =
-      query;
+    try {
+      const { limit, offset, sortBy, priceFrom, priceTo, bolt, PRR, earring } =
+        query;
 
-    const filter: Partial<IProductsFilter> = {};
+      if (!limit && !offset) {
+        const { count, rows } = await this.productModel.findAndCountAll({
+          limit: 20,
+          offset: 0,
+        });
 
-    if (priceFrom && priceTo) {
-      filter.price = {
-        [Op.between]: [+priceFrom, +priceTo],
-      };
+        rows.forEach(this.processProductPrice);
+        return { count, rows };
+      }
+
+      const filter: Partial<IProductsFilter> = {};
+
+      if (priceFrom && priceTo) {
+        filter.price = {
+          [Op.between]: [+priceFrom, +priceTo],
+        };
+      }
+
+      if (bolt) filter.bolt = JSON.parse(decodeURIComponent(bolt));
+
+      if (PRR) {
+        filter.PRR = JSON.parse(decodeURIComponent(PRR));
+      }
+
+      if (earring) {
+        filter.earring = JSON.parse(decodeURIComponent(earring));
+      }
+
+      const orderDirection = sortBy === 'asc' ? 'asc' : 'desc';
+
+      const { count, rows } = await this.productModel.findAndCountAll({
+        limit: +limit,
+        offset: +offset * 3,
+        where: filter,
+        order: [[Sequelize.literal('CAST(price AS DECIMAL)'), orderDirection]],
+      });
+
+      rows.forEach(this.processProductPrice);
+      return { count, rows };
+    } catch (e) {
+      return this.errorsMessage(e);
     }
-
-    if (bolt) filter.bolt = JSON.parse(decodeURIComponent(bolt));
-
-    if (PRR) {
-      filter.PRR = JSON.parse(decodeURIComponent(PRR));
-    }
-
-    if (earring) {
-      filter.earring = JSON.parse(decodeURIComponent(earring));
-    }
-
-    const orderDirection = sortBy === 'asc' ? 'asc' : 'desc';
-
-    const { count, rows } = await this.productModel.findAndCountAll({
-      limit: +limit,
-      offset: +offset * 3,
-      where: filter,
-      order: [[Sequelize.literal('CAST(price AS DECIMAL)'), orderDirection]],
-    });
-
-    rows.forEach(this.processProductPrice);
-    return { count, rows };
   }
 
+  // Метод для добавления нового продукта
   async addProduct(
     productDto: CreateProductDto,
   ): Promise<IAddAndUpdateProduct> {
-    const validationError = await this.validateAddProduct({ productDto });
-    if (validationError) return { error: validationError, success: false };
+    try {
+      const validationError = await this.validateAddProduct({ productDto });
+      if (validationError) return { error: validationError, success: false };
 
-    const product = await this.productModel.create({ ...productDto });
-    return { success: true, message: `Создан товар ${product.name}`, product };
+      const product = await this.productModel.create({ ...productDto });
+      return {
+        success: true,
+        message: `Создан товар ${product.name}`,
+        product,
+      };
+    } catch (e) {
+      return this.errorsMessage(e);
+    }
   }
 
+  // Метод для обновления информации о продукте
   async updateProduct(
     productId: number,
     productDto: UpdateProductDto,
   ): Promise<IAddAndUpdateProduct> {
     try {
       // Находим продукт по его идентификатору
-      const { product } = await this.findOneProduct(productId);
+      const { product, error } = await this.findOneProduct(productId);
 
-      if (!product) {
-        return {
-          success: false,
-          error: 'Продукт не найден',
-        };
-      }
+      if (error) return { success: false, error };
 
-      // Проверяем каждое поле productDto и устанавливаем его значение из product, если не передано
-      Object.keys(productDto).forEach((key) => {
-        if (productDto[key] === undefined || productDto[key] === '') {
-          productDto[key] = product[key];
-        }
-      });
+      // Обновляем поля продукта на основе данных из DTO
+      product.name =
+        productDto.name && productDto.name.length > 2
+          ? productDto.name
+          : product.name;
 
-      // Проверяем валидацию productDto
-      const errors = await validate(productDto);
+      product.azencoCode =
+        productDto.azencoCode && productDto.azencoCode.length > 2
+          ? productDto.azencoCode
+          : product.azencoCode;
 
-      if (errors.length > 0) {
-        return {
-          success: false,
-          message: 'Ошибка валидации',
-          error: errors
-            .map((error) => Object.values(error.constraints))
-            .flat()
-            .join('! '),
-        };
-      }
+      product.price =
+        productDto.price && productDto.price > 0
+          ? +productDto.price
+          : +product.price;
 
-      // Обрабатываем цену продукта (возможно, применяем какие-то дополнительные действия)
-      this.processProductPrice(product);
+      product.type =
+        productDto.type && productDto.type.length >= 1
+          ? productDto.type
+          : product.type;
+
+      product.unit =
+        productDto.unit && productDto.unit.length >= 1
+          ? productDto.unit
+          : product.unit;
+
+      product.img =
+        productDto.img && productDto.img.length >= 1
+          ? productDto.img
+          : product.img;
 
       // Сохраняем обновленный продукт в базе данных
       await product.save();
+
+      // Обрабатываем цену продукта (возможно, применяем какие-то дополнительные действия)
+      await this.processProductPrice(product);
 
       // Возвращаем успешный результат обновления продукта
       return {
@@ -228,29 +281,35 @@ export class ProductsService {
     }
   }
 
-  async removeProduct(id: number): Promise<string | { error: string }> {
-    const { product, error } = await this.findOneProduct(id);
-    if (error) return { error };
-    await product.destroy();
-    return `Продукт "${product.name}" удален успешно`;
-  }
-
+  // Метод для поиска продуктов по части имени
   async findAllPartByNameProducts(
     part_name: string,
   ): Promise<IProductsResponse> {
-    const products = await this.productModel.findAll({
-      where: {
-        name: { [Op.like]: `%${part_name}%` },
-      },
-    });
+    try {
+      const products = await this.productModel.findAll({
+        where: {
+          name: { [Op.like]: `%${part_name}%` },
+        },
+      });
 
-    if (!products.length) {
-      return {
-        error: `нет существует тип ${part_name} `,
-      };
+      if (!products.length) return { error: `не существует ${part_name} ` };
+
+      products.forEach(this.processProductPrice);
+      return { products };
+    } catch (e) {
+      return this.errorsMessage(e);
     }
+  }
 
-    products.forEach(this.processProductPrice);
-    return { products };
+  // Метод для удаления продукта
+  async removeProduct(id: number): Promise<string | IError> {
+    try {
+      const { product, error } = await this.findOneProduct(id);
+      if (error) return { error };
+      await product.destroy();
+      return `Продукт "${product.name}" удален успешно`;
+    } catch (e) {
+      return this.errorsMessage(e);
+    }
   }
 }
