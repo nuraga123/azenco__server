@@ -3,16 +3,6 @@ import { Product } from '../product.model';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
 
-export interface IProduct {
-  id: number;
-  azenco__code: string;
-  name: string;
-  type: string;
-  price: number;
-  unit: string;
-  images: string;
-}
-
 export interface IError {
   error?: string;
 }
@@ -35,12 +25,12 @@ export interface IAddAndUpdateProduct extends IProductResponse, IError {
   success?: boolean;
 }
 
-export interface IValidateCreateProduct {
+export interface IValidateProduct {
   productDto: CreateProductDto;
 }
 
-export interface IValidateUpdateProduct {
-  productDto: UpdateProductDto;
+export interface IUpdateProduct {
+  updatedProduct: UpdateProductDto;
   productId?: number;
 }
 
@@ -60,4 +50,8 @@ export interface IProductsQuery {
   bolt?: string;
   PRR?: string;
   earring?: string;
+}
+
+export interface IDeleteProduct extends IError {
+  message?: string;
 }

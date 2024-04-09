@@ -5,7 +5,6 @@ import { AxiosError } from 'axios';
 
 import { Product } from './product.model';
 import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
 import {
   IAddAndUpdateProduct,
   IProductResponse,
@@ -13,8 +12,10 @@ import {
   IProductsFilter,
   IProductsQuery,
   IProductsResponse,
-  IValidateCreateProduct,
+  IValidateProduct,
   IError,
+  IDeleteProduct,
+  IUpdateProduct,
 } from './types';
 
 @Injectable()
@@ -95,10 +96,28 @@ export class ProductsService {
     }
   }
 
+  // Метод для поиска продуктов по части имени
+  async findAllPartByNameProducts(
+    part_name: string,
+  ): Promise<IProductsResponse> {
+    try {
+      const products = await this.productModel.findAll({
+        where: {
+          name: { [Op.like]: `%${part_name}%` },
+        },
+      });
+
+      if (!products.length) return { error: `не существует ${part_name} ` };
+
+      products.forEach(this.processProductPrice);
+      return { products };
+    } catch (e) {
+      return this.errorsMessage(e);
+    }
+  }
+
   // Метод для валидации данных нового продукта
-  async validateAddProduct({
-    productDto,
-  }: IValidateCreateProduct): Promise<string> {
+  async validateProduct({ productDto }: IValidateProduct): Promise<string> {
     const { name, azencoCode, price, type, unit } = productDto;
 
     // Инициализация пустого массива для хранения ошибок
@@ -208,7 +227,7 @@ export class ProductsService {
     productDto: CreateProductDto,
   ): Promise<IAddAndUpdateProduct> {
     try {
-      const validationError = await this.validateAddProduct({ productDto });
+      const validationError = await this.validateProduct({ productDto });
       if (validationError) return { error: validationError, success: false };
 
       const product = await this.productModel.create({ ...productDto });
@@ -223,10 +242,10 @@ export class ProductsService {
   }
 
   // Метод для обновления информации о продукте
-  async updateProduct(
-    productId: number,
-    productDto: UpdateProductDto,
-  ): Promise<IAddAndUpdateProduct> {
+  async updateProduct({
+    productId,
+    updatedProduct,
+  }: IUpdateProduct): Promise<IAddAndUpdateProduct> {
     try {
       // Находим продукт по его идентификатору
       const { product, error } = await this.findOneProduct(productId);
@@ -235,33 +254,33 @@ export class ProductsService {
 
       // Обновляем поля продукта на основе данных из DTO
       product.name =
-        productDto.name && productDto.name.length > 2
-          ? productDto.name
+        updatedProduct.name && updatedProduct.name.length > 2
+          ? updatedProduct.name
           : product.name;
 
       product.azencoCode =
-        productDto.azencoCode && productDto.azencoCode.length > 2
-          ? productDto.azencoCode
+        updatedProduct.azencoCode && updatedProduct.azencoCode.length > 2
+          ? updatedProduct.azencoCode
           : product.azencoCode;
 
       product.price =
-        productDto.price && productDto.price > 0
-          ? +productDto.price
+        updatedProduct.price && updatedProduct.price > 0
+          ? +updatedProduct.price
           : +product.price;
 
       product.type =
-        productDto.type && productDto.type.length >= 1
-          ? productDto.type
+        updatedProduct.type && updatedProduct.type.length >= 1
+          ? updatedProduct.type
           : product.type;
 
       product.unit =
-        productDto.unit && productDto.unit.length >= 1
-          ? productDto.unit
+        updatedProduct.unit && updatedProduct.unit.length >= 1
+          ? updatedProduct.unit
           : product.unit;
 
       product.img =
-        productDto.img && productDto.img.length >= 1
-          ? productDto.img
+        updatedProduct.img && updatedProduct.img.length >= 1
+          ? updatedProduct.img
           : product.img;
 
       // Сохраняем обновленный продукт в базе данных
@@ -281,33 +300,13 @@ export class ProductsService {
     }
   }
 
-  // Метод для поиска продуктов по части имени
-  async findAllPartByNameProducts(
-    part_name: string,
-  ): Promise<IProductsResponse> {
-    try {
-      const products = await this.productModel.findAll({
-        where: {
-          name: { [Op.like]: `%${part_name}%` },
-        },
-      });
-
-      if (!products.length) return { error: `не существует ${part_name} ` };
-
-      products.forEach(this.processProductPrice);
-      return { products };
-    } catch (e) {
-      return this.errorsMessage(e);
-    }
-  }
-
   // Метод для удаления продукта
-  async removeProduct(id: number): Promise<string | IError> {
+  async removeProduct(id: number): Promise<IDeleteProduct> {
     try {
       const { product, error } = await this.findOneProduct(id);
       if (error) return { error };
       await product.destroy();
-      return `Продукт "${product.name}" удален успешно`;
+      return { message: `Продукт "${product.name}" удален успешно` };
     } catch (e) {
       return this.errorsMessage(e);
     }

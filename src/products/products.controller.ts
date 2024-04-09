@@ -13,7 +13,7 @@ import {
 import {
   IAddAndUpdateProduct,
   ICountAndRowsProductsResponse,
-  IError,
+  IDeleteProduct,
   IProductResponse,
   IProductsQuery,
   IProductsResponse,
@@ -99,9 +99,12 @@ export class ProductsController {
   @Put('update/:id')
   updateProduct(
     @Param('id') id: number,
-    @Body() updateProductDto: UpdateProductDto,
+    @Body() updatedProduct: UpdateProductDto,
   ): Promise<IAddAndUpdateProduct> {
-    return this.productService.updateProduct(id, updateProductDto);
+    return this.productService.updateProduct({
+      productId: +id,
+      updatedProduct,
+    });
   }
 
   /* DELETE запрос */
@@ -109,7 +112,7 @@ export class ProductsController {
   // Удаление продукта по его идентификатору
   @UseGuards(TokenGuard)
   @Delete('remove/:id')
-  removeProduct(@Param('id') id: number): Promise<string | IError> {
+  removeProduct(@Param('id') id: number): Promise<IDeleteProduct> {
     return this.productService.removeProduct(id);
   }
 }
