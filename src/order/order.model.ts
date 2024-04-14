@@ -5,7 +5,7 @@ import { StatusOrderType } from './types';
 export class Order extends Model<Order> {
   @Column({
     type: DataType.ENUM(
-      'created',
+      'new',
       'sent_to_customer',
       'cancelled_by_customer',
       'cancelled_by_anbar',
@@ -19,7 +19,7 @@ export class Order extends Model<Order> {
   clientId: number;
 
   @Column(DataType.TEXT)
-  clientName: string;
+  clientUserName: string;
 
   @Column(DataType.INTEGER)
   anbarId: number;
@@ -45,9 +45,15 @@ export class Order extends Model<Order> {
   @Column(DataType.STRING)
   unit: string;
 
-  @Column(DataType.STRING)
-  img: string;
-
   @Column(DataType.TEXT)
   description: string;
+  
+  @Column(DataType.TEXT)
+  anbarLocation: string;
+  
+  @Column(DataType.TEXT)
+  clientLocation: string;
+
+  @Column({ defaultValue: '' })
+  img: string;
 }

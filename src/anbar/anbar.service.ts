@@ -100,7 +100,7 @@ export class AnbarService {
     newAnbarDto: NewAnbarDto,
   ): Promise<{ message: string; newAnbar?: Anbar }> {
     try {
-      const { stock, userId, productId } = newAnbarDto;
+      const { stock, userId, productId, location } = newAnbarDto;
 
       if (typeof stock !== 'number' || isNaN(stock)) {
         return {
@@ -180,24 +180,23 @@ export class AnbarService {
         };
       }
 
-      const newAnbar = await this.anbarModel.create({
+      const newAnbar: Anbar = await this.anbarModel.create({
         userId: user.id,
         username: user.username,
         productId: product.id,
-        azenco__code: product.azencoCode,
+        azencoCode: product.azencoCode,
         name: product.name,
         type: product.type,
         img: product.img,
         unit: product.unit,
         price: +product.price,
         stock,
-        total_price: +product.price * stock,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        previous_stock: 0,
-        previous_total_price: 0,
+        totalPrice: +product.price * +stock,
+        previousStock: 0,
+        previousTotalPrice: 0,
         ordered: false,
         isComeProduct: true,
+        location
       });
 
       return {

@@ -1,7 +1,7 @@
 import { Order } from '../order.model';
 
 export type StatusOrderType =
-  | 'created'
+  | 'new'
   | 'sent_to_customer'
   | 'cancelled_by_customer'
   | 'cancelled_by_anbar'

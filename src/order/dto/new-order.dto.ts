@@ -1,4 +1,4 @@
-import { IsNumber, IsNotEmpty } from 'class-validator';
+import { IsNumber, IsNotEmpty, IsString } from 'class-validator';
 
 export class NewOrderDto {
   @IsNotEmpty()
@@ -12,6 +12,10 @@ export class NewOrderDto {
   @IsNotEmpty()
   @IsNumber()
   quantity: number;
+
+  @IsNotEmpty()
+  @IsString()
+  clientLocation: string;
 }
 
 export const order = {

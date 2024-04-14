@@ -1,4 +1,4 @@
-import { Table, Model, Column } from 'sequelize-typescript';
+import { Table, Model, Column, DataType } from 'sequelize-typescript';
 
 @Table
 export class Anbar extends Model {
@@ -54,4 +54,7 @@ export class Anbar extends Model {
 
   @Column({ defaultValue: '' })
   img: string;
+
+  @Column(DataType.TEXT)
+  location: string;  
 }

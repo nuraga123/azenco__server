@@ -31,12 +31,19 @@ import { TokenGuard } from 'src/token/token.guard';
 export class UsersController {
   private readonly startTime: number;
   private readonly startDateTime: Date;
+
   constructor(
     private readonly usersService: UsersService,
     private readonly tokenService: TokenService,
   ) {
     this.startDateTime = new Date();
     this.startTime = this.startDateTime.getTime();
+  }
+
+  @Get('all')
+  @HttpCode(HttpStatus.OK)
+  getUsers() {
+    return this.usersService.getUsers();
   }
 
   @Get('/work')
@@ -78,7 +85,7 @@ export class UsersController {
 
   @ApiOkResponse({ type: LoginCheckResponse })
   @Get('/login-check')
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   @UseGuards(AuthenticatedGuard)
   loginCheck(@Request() req) {
     console.log(req);
@@ -86,10 +93,15 @@ export class UsersController {
   }
 
   @Get(':id')
-  getAll(@Param('id') userId: string) {
-    const usersData = this.usersService.findUserOne(+userId);
+  getAll(@Param('id') id: string) {
+    const usersData = this.usersService.findUserOne(+id);
     console.log(usersData);
     return usersData;
+  }
+
+  @Get('remove/:id')
+  removeUser(@Param('id') id: number) {
+    return this.usersService.removeUserById(+id); 
   }
 
   @ApiOkResponse({ type: LogoutUserResponse })

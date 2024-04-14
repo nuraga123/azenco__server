@@ -54,6 +54,7 @@ export class OrderService {
     }
   }
 
+  // все заказы одного клиента
   async findOrderByClientId(clientId: number) {
     try {
       return await this.orderModel.findAll({
@@ -64,52 +65,48 @@ export class OrderService {
     }
   }
 
-  async createOrderAnbar(newOrderDto: NewOrderDto): Promise<IOrderResponse> {
+  // создаеться заказ
+  async create(newOrderDto: NewOrderDto): Promise<IOrderResponse> {
     try {
-      const { anbarId, clientId, quantity } = newOrderDto;
+      const { anbarId, clientId, quantity, clientLocation } =
+        newOrderDto;
 
+      // находим анбар с продуктом по anbarId в базе данных
       const anbar = await this.anbarService.findOneAnbarId(anbarId);
+      // находим клиента  в базе данных
+      const client = await this.usersService.findOneById(clientId);
 
-      const client = await this.usersService.findOne({
-        where: { id: +clientId },
-      });
-
-      if (anbar && +anbar.stock && +anbar.stock < quantity) {
+      // проверка сток не равен 0 и не больше чем просит заказчик
+      if (anbar && +anbar?.stock && +anbar?.stock < quantity) {
         return {
           error_message: `заказ невозможен, так как число товара всего ${+anbar.stock}`,
         };
       }
 
-      const message: string = `заказ создан! Заказчик: ${client.username} хочет у ${anbar.username}: ${quantity} ${anbar.unit} ${anbar.name}`;
+      const message: string = `заказ создан!`;
 
-      if (anbar && anbar?.username && client && client?.username && quantity) {
-        const order = await this.orderModel.create({
-          // статус заказа создан
-          status: 'created',
-          clientName: client.username,
-          clientId: client.id,
-          anbarUsername: anbar.username,
-          anbarId: anbar.id,
-          quantity: +quantity,
-          price: +anbar.price,
-          totalPrice: +quantity * +anbar.price,
-          unit: anbar.unit,
-          name: anbar.name,
-          azencoCode: anbar.azencoCode,
-          img: anbar.img,
-          description: message,
-        });
+      const order = await this.orderModel.create({
+        status: 'new',
+        clientId: +client.id,
+        clientUserName: client.username,
+        anbarId: +anbar.id,
+        anbarUsername: anbar.username,
+        name: anbar.name,
+        azencoCode: anbar.azencoCode,
+        price: +anbar.price,
+        totalPrice: +quantity * +anbar.price,
+        unit: anbar.unit,
+        img: anbar.img,
+        description: message,
+        quantity: +quantity,
+        anbarLocation: anbar.location,
+        clientLocation,
+      });
 
-        order.save();
-
-        await this.historyService.createHistory(
-          message,
-          client.username,
-          client.id,
-        );
-
-        return { message, order };
-      }
+      return {
+        message,
+        order,
+      };
     } catch (e) {
       return this.errorsMessage(e);
     }
@@ -140,7 +137,7 @@ export class OrderService {
         return { error: 'Недостаточно товара на складе' };
       }
 
-      if (order.status !== 'created') {
+      if (order.status !== 'new') {
         return { error: 'статус должен новый заказ' };
       }
       anbar.previousStock = +anbar.stock;
@@ -151,7 +148,7 @@ export class OrderService {
       anbar.totalPrice = +sum * +anbar.price;
       anbar.ordered = true;
       await anbar.save();
-      const message = `Заказ успешно подтвержден! Складчик: ${anbar.username} принял и отправил Заказчику: ${order.clientName}: ${+order.quantity} ${anbar.unit} ${anbar.name}`;
+      const message = `Заказ успешно подтвержден! Складчик: ${anbar.username} принял и отправил Заказчику: ${order.clientUserName}: ${+order.quantity} ${anbar.unit} ${anbar.name}`;
       // Обновить статус заказа на "отправил заказчику"
       order.status = 'sent_to_customer';
       order.description = message;
@@ -164,7 +161,7 @@ export class OrderService {
     }
   }
 
-  async cancelOrderAnbar(
+  async cancelOrderAnbarUser(
     cancelOrderDto: CancelSendOrderDto,
   ): Promise<{ order?: Order; message?: string; error?: string }> {
     try {
@@ -180,7 +177,7 @@ export class OrderService {
       if (!order) return { error: 'Заказ не найден' };
 
       // Проверить, был ли заказ уже отправлен
-      if (order.status !== 'created') {
+      if (order.status !== 'new') {
         return {
           error: `Отмена невозможна, так как cтатус заказа: ${order.status}`,
         };
@@ -191,12 +188,6 @@ export class OrderService {
       await order.save();
 
       const message: string = `Заказ отменен! Сотрудник анбара ${order.anbarUsername} не принял заказ на ${order.quantity} ${order.unit} ${order.name} по причине: ${cancelOrderText}`;
-
-      const { id } = await this.usersService.findOne({
-        where: { username: order.clientName },
-      });
-
-      await this.historyService.createHistory(message, order.anbarUsername, id);
 
       // Вернуть сообщение об успешной отмене заказа
       return { message, order };

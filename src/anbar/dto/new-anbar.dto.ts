@@ -13,4 +13,8 @@ export class NewAnbarDto {
   @ApiProperty({ example: 1 })
   @IsNotEmpty()
   readonly stock: number;
+ 
+  @ApiProperty({ example: 1 })
+  @IsNotEmpty()
+  readonly location: string;
 }

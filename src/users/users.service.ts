@@ -7,6 +7,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
 export class UsersService {
+  private readonly consoleLogger = new Logger(UsersService.name);
   constructor(
     @InjectModel(User)
     private userModel: typeof User,
@@ -17,6 +18,10 @@ export class UsersService {
     where: { id?: number; username?: string; email?: string };
   }): Promise<User> {
     return await this.userModel.findOne({ ...filter });
+  }
+
+  async findOneById(id: number): Promise<User> {
+    return await this.userModel.findOne({ where: { id } });
   }
 
   async create(
@@ -62,8 +67,7 @@ export class UsersService {
   ): Promise<{ User: User; message: string } | { message: string }> {
     // Находим пользователя по его userId
     const user = await this.findUserOne(userId);
-    const consoleLogger = new Logger('UsersService');
-    consoleLogger.log(user);
+    this.consoleLogger.log(user);
     if (!user) {
       return { message: 'Пользователья не существует' };
     }
@@ -84,5 +88,19 @@ export class UsersService {
     } else {
       return { message: 'неправильное секретное слово' };
     }
+  }
+
+  getUsers() {
+    return this.userModel.findAll();
+  }
+
+  async removeUserById(id: number) {
+    if (isNaN(id)) return { errorMessage: 'не число nan!' };
+    if (id <= 0) return { errorMessage: 'id должно быть больше 0 !' };
+    const removeUser = await this.userModel.findByPk(id);
+    if (!removeUser) return { errorMessage: `нет в базе ${id}!` };
+    this.consoleLogger.log({ ...removeUser });
+    removeUser.destroy();
+    return `${removeUser.username} удален`;
   }
 }
