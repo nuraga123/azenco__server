@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { User } from '../users.model';
 
 export class LoginUserRequest {
   @ApiProperty({ example: 'Ivan' })
@@ -64,4 +65,12 @@ export class SignupResponse {
 
   @ApiProperty({ example: '2023-03-17T17:23:33.502Z' })
   createdAt: string;
+}
+
+export interface IUserErrorMessage {
+  error_message?: string;
+}
+
+export interface IUserResponce extends IUserErrorMessage {
+  user?: User;
 }

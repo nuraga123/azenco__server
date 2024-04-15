@@ -1,27 +1,22 @@
 import { Op, WhereOptions } from 'sequelize';
+import { Anbar } from '../anbar.model';
 
-export interface IAnbar {
-  productId: number;
-  userId: number;
-  username: string;
-  stock: number;
-  total_price: number;
-  ordered: boolean;
+export interface IAnbarErrorMessage {
+  error_message?: string;
 }
 
-export interface IAnbars {
-  rows: IAnbar[];
+export interface IAnbarResponce extends IAnbarErrorMessage {
+  anbar?: Anbar;
+  message?: string;
+}
+
+export interface IAnbarsResponce extends IAnbarErrorMessage {
+  anbars?: Anbar[];
+}
+
+export interface ICountAndRowsAnbarsResponce {
+  rows: Anbar[];
   count: number;
-}
-
-export interface ITransferAnbar extends IAnbars {
-  productId: number;
-  name: string;
-  price: number;
-  stock: number;
-  total_price: number;
-  username: string;
-  ordered: boolean;
 }
 
 export interface IAnbarsFilter {
@@ -51,18 +46,11 @@ export type AnbarWhereOptions = WhereOptions & {
   toUsername?: string;
 };
 
-export interface ITransferStokAnbar {
-  fromAnbar: ITransferAnbar;
-  toAnbar: ITransferAnbar;
-  message: string;
-}
-
-export interface IAnbarsUsername {
+export interface IAnbarUsernameItem {
   username: string;
   userId: number;
 }
 
-export interface IAnbarsUsernameResponse {
-  usernamesArray: IAnbarsUsername[];
-  errorMessage?: string;
+export interface IAnbarsUsernamesResponse extends IAnbarErrorMessage {
+  usernames?: IAnbarUsernameItem[];
 }

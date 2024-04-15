@@ -1,5 +1,9 @@
 import { Order } from '../order.model';
 
+export interface IOrderErrorMessage {
+  error_message?: string;
+}
+
 export type StatusOrderType =
   | 'new'
   | 'sent_to_customer'
@@ -13,15 +17,17 @@ export interface IOrderQuery {
   offset?: string;
 }
 
-export interface IOrderResponse {
+export interface IOrderResponse extends IOrderErrorMessage {
   order?: Order;
-  error_message?: string;
   message?: string;
 }
 
-export interface IOrdersResponse {
+export interface ICountAndRowsOrdersResponse extends IOrderErrorMessage {
   count?: number;
   rows?: Order[];
-  error_message?: string;
   message?: string;
+}
+
+export interface IOrdersResponse extends IOrderErrorMessage {
+  orders?: Order[];
 }

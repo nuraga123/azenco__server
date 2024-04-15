@@ -13,11 +13,15 @@ export class HistoryService {
     return this.historyModel.findAll();
   }
 
-  async createHistory(
-    message: string,
-    username: string,
-    userId: number,
-  ): Promise<History> {
+  async createHistory({
+    message,
+    username,
+    userId,
+  }: {
+    message: string;
+    username: string;
+    userId: number;
+  }): Promise<History> {
     try {
       return await this.historyModel.create({ message, username, userId });
     } catch (error) {

@@ -1,28 +1,41 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
   Post,
   Query,
 } from '@nestjs/common';
-import { Order } from './order.model';
 import { OrderService } from './order.service';
 import { NewOrderDto } from './dto/new-order.dto';
-import { ConfirmSendOrderDto } from './dto/confirm-send-order.dto';
-import { CancelSendOrderDto } from './dto/cancel-send-order.dto';
-import { IOrderQuery, IOrderResponse, IOrdersResponse } from './types';
+import {
+  ICountAndRowsOrdersResponse,
+  IOrderQuery,
+  IOrderResponse,
+  IOrdersResponse,
+} from './types';
 
 @Controller('orders')
 export class OrderController {
-  constructor(private readonly orderService: OrderService) {}
+  constructor(private readonly orderService: OrderService) {
+    /**/
+  }
 
   //получения всех заказов
+  @Get('all')
+  @HttpCode(HttpStatus.OK)
+  getOrders(): Promise<IOrdersResponse> {
+    return this.orderService.findAllOrders();
+  }
+
   @Get()
   @HttpCode(HttpStatus.OK)
-  getAllOrders(@Query() query: IOrderQuery): Promise<IOrdersResponse> {
-    return this.orderService.getCountAndRowsOrders(query);
+  getCountAndRowsOrders(
+    @Query() query: IOrderQuery,
+  ): Promise<ICountAndRowsOrdersResponse> {
+    return this.orderService.findAndCountAllOrders(query);
   }
 
   // Обработчик POST запроса для создания нового заказа
@@ -32,20 +45,10 @@ export class OrderController {
     return await this.orderService.create(newOrderDto);
   }
 
-  @Post('confirm-anbar-order')
-  async confirmOrderAnbar(
-    @Body() confirmSendOrderDto: ConfirmSendOrderDto,
-  ): Promise<{ order?: Order; message?: string; error?: string }> {
-    try {
-      return await this.orderService.confirmOrderAnbar(confirmSendOrderDto);
-    } catch (error) {
-      return { error: `Ошибка при выполнении операции: ${error.message}` };
-    }
-  }
-
-  // problem
-  @Post('cancel-send-customer')
-  async cancelOrder(@Body() cancelOrderDto: CancelSendOrderDto) {
-    return this.orderService.cancelOrderAnbarUser(cancelOrderDto);
+  // Обработчик POST запроса для создания нового заказа
+  @Delete('remove')
+  @HttpCode(HttpStatus.CREATED)
+  async removeOrderById(@Body('id') id: number): Promise<IOrderResponse> {
+    return await this.orderService.remove(+id);
   }
 }

@@ -4,6 +4,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import * as bcrypt from 'bcrypt';
 import { User } from './users.model';
 import { CreateUserDto } from './dto/create-user.dto';
+import { IUserResponce } from './types';
 
 @Injectable()
 export class UsersService {
@@ -20,8 +21,10 @@ export class UsersService {
     return await this.userModel.findOne({ ...filter });
   }
 
-  async findOneById(id: number): Promise<User> {
-    return await this.userModel.findOne({ where: { id } });
+  async findOneById(id: number): Promise<IUserResponce> {
+    const user = await this.userModel.findOne({ where: { id } });
+    if (!user) return { error_message: `нет пользователя по ID: ${id}` };
+    return { user };
   }
 
   async create(

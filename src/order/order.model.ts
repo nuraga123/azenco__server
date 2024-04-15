@@ -39,7 +39,7 @@ export class Order extends Model<Order> {
   @Column({ type: DataType.DECIMAL(20, 2) })
   price: number;
 
-  @Column(DataType.DECIMAL(20, 2))
+  @Column({ type: DataType.DECIMAL(20, 2) })
   totalPrice: number;
 
   @Column(DataType.STRING)
@@ -47,10 +47,10 @@ export class Order extends Model<Order> {
 
   @Column(DataType.TEXT)
   description: string;
-  
+
   @Column(DataType.TEXT)
   anbarLocation: string;
-  
+
   @Column(DataType.TEXT)
   clientLocation: string;
 
