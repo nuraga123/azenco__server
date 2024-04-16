@@ -9,6 +9,7 @@ import { HistoryService } from 'src/history/history.service';
 import { NewOrderDto } from './dto/new-order.dto';
 import {
   ICountAndRowsOrdersResponse,
+  IOrderErrorMessage,
   IOrderQuery,
   IOrderResponse,
   IOrdersResponse,
@@ -16,7 +17,8 @@ import {
 
 @Injectable()
 export class OrderService {
-  private readonly logger = new Logger(OrderService.name);
+  // Инициализация логгера
+  private logger = new Logger(OrderService.name);
 
   constructor(
     @InjectModel(Order)
@@ -24,27 +26,26 @@ export class OrderService {
     private readonly usersService: UsersService,
     private readonly anbarService: AnbarService,
     private readonly historyService: HistoryService,
-  ) {
-    /**/
-  }
+  ) {}
 
-  // возврашает ошибку
-  async errorsMessage(e: any): Promise<{ error_message: string }> {
-    this.logger.log(e);
+  // Обработка ошибок
+  private async handleErrors(e: any): Promise<IOrderErrorMessage> {
+    this.logger.error(e);
     return { error_message: (e as AxiosError).message };
   }
 
+  // Поиск всех заказов
   async findAllOrders(): Promise<IOrdersResponse> {
     try {
       const orders = await this.orderModel.findAll();
-      if (!orders.length) return { error_message: 'нет амбаров!' };
+      if (!orders.length) return { error_message: 'Нет заказов!' };
       return { orders };
     } catch (error) {
-      return this.errorsMessage(error);
+      return this.handleErrors(error);
     }
   }
 
-  // Получение всех записей заказов
+  // Получение всех заказов с подсчетом
   async findAndCountAllOrders(
     query: IOrderQuery,
   ): Promise<ICountAndRowsOrdersResponse> {
@@ -56,60 +57,65 @@ export class OrderService {
 
       return { count, rows };
     } catch (e) {
-      return this.errorsMessage(e);
+      return this.handleErrors(e);
     }
   }
 
-  // поиск по ID заказа
-  async findOrderId(orderId: number): Promise<IOrderResponse> {
+  // Поиск заказа по ID
+  async findOrderById(orderId: number): Promise<IOrderResponse> {
     try {
       const order = await this.orderModel.findByPk(orderId);
       if (!order) return { error_message: 'Заказ не найден!' };
       return { order };
     } catch (e) {
-      return this.errorsMessage(e);
+      return this.handleErrors(e);
     }
   }
 
-  // все заказы одного клиента
-  async findOrderByClientId(clientId: number) {
+  // Поиск всех заказов одного клиента
+  async findOrdersByClientId(clientId: number) {
     try {
       return await this.orderModel.findAll({
         where: { clientId },
       });
     } catch (e) {
-      return this.errorsMessage(e);
+      return this.handleErrors(e);
     }
   }
 
-  // создаеться заказ
-  async create(newOrderDto: NewOrderDto): Promise<IOrderResponse> {
+  // Создание заказа
+  async createOrder(newOrderDto: NewOrderDto): Promise<IOrderResponse> {
     try {
       const { anbarId, clientId, quantity, clientLocation } = newOrderDto;
 
-      // находим анбар с продуктом по anbarId в базе данных
+      // Поиск склада по ID
       const { anbar, error_message: anbarError } =
         await this.anbarService.findOneAnbarId(anbarId);
-
       if (anbarError) return { error_message: anbarError };
 
-      // находим клиента  в базе данных
+      // Поиск клиента по ID
       const { user: client, error_message: clientError } =
         await this.usersService.findOneById(clientId);
-
       if (clientError) return { error_message: clientError };
 
-      // проверка сток не равен 0 и не больше чем просит заказчик
-      if (anbar && anbar?.stock && +anbar?.stock < quantity) {
+      // Проверка на правильность количества
+      if (typeof quantity !== 'number' || quantity <= 0) {
+        return { error_message: 'Неверное количество заказа!' };
+      }
+
+      // Проверка наличия товара на складе
+      if (anbar && anbar.stock && +anbar.stock < quantity) {
         return {
-          error_message: `заказ невозможен, так как число товара всего ${+anbar.stock}`,
+          error_message: `Товара "${anbar.name}" недостаточно на складе!`,
         };
       }
 
-      const message: string = `Новый Заказ! Заказчик: ${client.username} из ${clientLocation} просит у Складчика: ${anbar.username} | ${quantity} ${anbar.unit} ${anbar.name} находиться в ${anbar.location}`;
+      // Создание описания заказа
+      const description: string = ` Заказчик: ${client.username} из ${clientLocation} заказал ${quantity} ${anbar.unit} товара "${anbar.name}" у "${anbar.username}"`;
 
+      // Создание заказа
       const order = await this.orderModel.create({
-        status: 'new',
+        status: 'новый_заказ_клиента',
         clientId: +client.id,
         clientUserName: client.username,
         anbarId: +anbar.id,
@@ -120,31 +126,50 @@ export class OrderService {
         totalPrice: +quantity * +anbar.price,
         unit: anbar.unit,
         img: anbar.img,
-        description: message,
         quantity: +quantity,
         anbarLocation: anbar.location,
+        description,
         clientLocation,
       });
 
+      // Создание записи в истории
+      const message: string = `Создан новый заказ № ${order.id}! ${description}`;
       await this.historyService.createHistory({
-        message,
         userId: +client.id,
         username: client.username,
+        message,
       });
 
       return {
-        message,
         order,
+        message,
       };
     } catch (e) {
-      return this.errorsMessage(e);
+      return this.handleErrors(e);
     }
   }
 
-  async remove(id: number) {
-    const { order, error_message } = await this.findOrderId(+id);
+  // Отмена заказа клиентом
+  async cancelOrderClient(id: number) {
+    const { order, error_message } = await this.findOrderById(+id);
     if (error_message) return { error_message };
+
+    await this.historyService.createHistory({
+      message: `Заказ № ${+order.id} отменен клиентом: ${order.clientUserName}!`,
+      username: order.clientUserName,
+      userId: +order.clientId,
+    });
+
     await order.destroy();
-    return { message: `заказ № ${order.id} удален !` };
+    return { message: `Заказ № ${order.id} успешно отменен!` };
+  }
+
+  async agreesAndConfirmAnbarOrder({ anbarId }: { anbarId: number }) {
+    const { order, error_message } = await this.findOrderById(anbarId);
+    if (error_message) return { error_message };
+
+    order.status = 'заказ_принял_складчик';
+
+    return anbarId;
   }
 }

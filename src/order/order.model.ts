@@ -5,12 +5,15 @@ import { StatusOrderType } from './types';
 export class Order extends Model<Order> {
   @Column({
     type: DataType.ENUM(
-      'new',
-      'sent_to_customer',
-      'cancelled_by_customer',
-      'cancelled_by_anbar',
-      'received_by_customer',
-      'refunded',
+      'новый_заказ_клиента',
+      'заказ_принял_складчик',
+      'заказ_отменен_складчиком',
+      'заказ_отправлен_клиенту',
+      'заказ_успешно_доставлен',
+      'заказ_доставлен_с_потерей_и_повреждениями',
+      'заказ_доставлен_с_повреждениями',
+      'заказ_доставлен_с_потерей',
+      'заказ_недоставлен',
     ),
   })
   status: StatusOrderType;
@@ -54,6 +57,6 @@ export class Order extends Model<Order> {
   @Column(DataType.TEXT)
   clientLocation: string;
 
-  @Column({ defaultValue: '' })
+  @Column({ defaultValue: '', type: DataType.TEXT })
   img: string;
 }

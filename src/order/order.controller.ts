@@ -8,6 +8,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+
 import { OrderService } from './order.service';
 import { NewOrderDto } from './dto/new-order.dto';
 import {
@@ -30,6 +31,8 @@ export class OrderController {
     return this.orderService.findAllOrders();
   }
 
+  // запроса для получения заказов с параметрами
+  // пример: orders?limit=20&offset=0
   @Get()
   @HttpCode(HttpStatus.OK)
   getCountAndRowsOrders(
@@ -38,17 +41,17 @@ export class OrderController {
     return this.orderService.findAndCountAllOrders(query);
   }
 
-  // Обработчик POST запроса для создания нового заказа
+  // запрос для создания нового заказа
   @Post('create')
   @HttpCode(HttpStatus.CREATED)
-  async addNewOrder(@Body() newOrderDto: NewOrderDto): Promise<IOrderResponse> {
-    return await this.orderService.create(newOrderDto);
+  addNewOrder(@Body() newOrderDto: NewOrderDto): Promise<IOrderResponse> {
+    return this.orderService.createOrder(newOrderDto);
   }
 
-  // Обработчик POST запроса для создания нового заказа
-  @Delete('remove')
-  @HttpCode(HttpStatus.CREATED)
-  async removeOrderById(@Body('id') id: number): Promise<IOrderResponse> {
-    return await this.orderService.remove(+id);
+  // запрос для удаления заказа клиентом
+  @Delete('remove-client')
+  @HttpCode(HttpStatus.OK)
+  removeOrderById(@Body('id') id: number): Promise<IOrderResponse> {
+    return this.orderService.cancelOrderClient(+id);
   }
 }
