@@ -5,7 +5,7 @@ import { JwtModule } from '@nestjs/jwt';
 
 import { SequelizeConfigService } from './config/sequelizeConfig.service';
 import { databaseConfig } from './config/configuration';
-import { AnbarModule } from './anbar/anbar.module';
+import { AnbarModule } from './anbar/newAnbar/anbar.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { ProductsModule } from './products/products.module';

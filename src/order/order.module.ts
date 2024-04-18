@@ -5,7 +5,7 @@ import { OrderController } from './order.controller';
 import { OrderService } from './order.service';
 import { Order } from './order.model';
 import { UsersModule } from 'src/users/users.module';
-import { AnbarModule } from 'src/anbar/anbar.module';
+import { AnbarModule } from 'src/anbar/newAnbar/anbar.module';
 import { HistoryModule } from 'src/history/history.module';
 
 @Module({

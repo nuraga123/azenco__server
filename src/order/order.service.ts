@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { AxiosError } from 'axios';
 
 import { Order } from './order.model';
-import { AnbarService } from 'src/anbar/anbar.service';
+import { AnbarService } from 'src/anbar/newAnbar/anbar.service';
 import { UsersService } from 'src/users/users.service';
 import { HistoryService } from 'src/history/history.service';
 import { NewOrderDto } from './dto/new-order.dto';
@@ -104,7 +104,7 @@ export class OrderService {
       }
 
       // Проверка наличия товара на складе
-      if (anbar && anbar.stock && +anbar.stock < quantity) {
+      if (anbar && anbar.newStock && +anbar.newStock < quantity) {
         return {
           error_message: `Товара "${anbar.name}" недостаточно на складе!`,
         };
@@ -165,11 +165,24 @@ export class OrderService {
   }
 
   async agreesAndConfirmAnbarOrder({ anbarId }: { anbarId: number }) {
-    const { order, error_message } = await this.findOrderById(anbarId);
-    if (error_message) return { error_message };
+    const { order, error_message: orderError } =
+      await this.findOrderById(anbarId);
 
+    if (orderError) return { error_message: orderError };
     order.status = 'заказ_принял_складчик';
 
-    return anbarId;
+    const { anbar, error_message: anbarError } =
+      await this.anbarService.findOneAnbarId(order?.anbarId);
+
+    if (anbarError) return { error_message: anbarError };
+
+    // save prev state
+    anbar.previousStock = +anbar.newStock;
+    anbar.previousTotalPrice = +anbar.totalPrice;
+
+    // operation minus
+    const minusStock: number = +anbar.newStock - +order.quantity;
+    anbar.newStock = +minusStock;
+    anbar.totalPrice = +anbar.price * +minusStock;
   }
 }

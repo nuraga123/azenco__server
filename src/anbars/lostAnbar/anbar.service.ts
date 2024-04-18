@@ -8,12 +8,12 @@ import {
   IAnbarResponce,
   IAnbarUsernameItem,
   IAnbarErrorMessage,
-} from './types';
+} from '../brokenAnbar/types';
 import { Anbar } from './anbar.model';
 import { UsersService } from 'src/users/users.service';
 import { HistoryService } from 'src/history/history.service';
 import { ProductsService } from 'src/products/products.service';
-import { NewAnbarDto } from './dto/new-anbar.dto';
+import { NewAnbarDto } from '../brokenAnbar/dto/new-anbar.dto';
 
 @Injectable()
 export class AnbarService {
@@ -217,7 +217,7 @@ export class AnbarService {
       });
 
       return {
-        message: `Товар добавлен в анбар ${anbar.username} | ${anbar.name} | ${anbar.stock} ${product.unit}`,
+        message: `Товар добавлен в анбар ${anbar.username} | ${anbar.name} | ${anbar.newStock} ${product.unit}`,
         anbar,
       };
     } catch (error) {
@@ -225,5 +225,31 @@ export class AnbarService {
     }
   }
 
-  // переместить товар с одного склада на другой
+  // вычитание с анбара
+  async minusAnbar({
+    anbarId,
+    minusQuantity,
+  }: {
+    anbarId: number;
+    minusQuantity: number;
+  }) {
+    if (!anbarId && !minusQuantity) {
+      return { error_message: 'нет anbarId или количества!' };
+    }
+
+    const { anbar, error_message } = await this.findOneAnbarId(anbarId);
+
+    if (error_message) return { error_message };
+
+    // save prev state
+    anbar.previousStock = +anbar.newStock;
+    anbar.previousTotalPrice = +anbar.totalPrice;
+
+    // operation minus
+    const minusStock: number = +anbar.newStock - +minusQuantity;
+    anbar.newStock = +minusStock;
+    anbar.totalPrice = +anbar.price * +minusStock;
+
+    anbar.save();
+  }
 }

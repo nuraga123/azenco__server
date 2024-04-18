@@ -1,5 +1,5 @@
 import { Op, WhereOptions } from 'sequelize';
-import { Anbar } from '../anbar.model';
+import { Anbar } from '../../newAnbar/anbar.model';
 
 export interface IAnbarErrorMessage {
   error_message?: string;
