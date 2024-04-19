@@ -1,38 +1,31 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { AxiosError } from 'axios';
 
 import { Order } from './order.model';
-import { AnbarService } from 'src/anbar/newAnbar/anbar.service';
+import { AnbarService } from 'src/anbars/anbar.service';
 import { UsersService } from 'src/users/users.service';
 import { HistoryService } from 'src/history/history.service';
 import { NewOrderDto } from './dto/new-order.dto';
 import {
   ICountAndRowsOrdersResponse,
-  IOrderErrorMessage,
   IOrderQuery,
   IOrderResponse,
   IOrdersResponse,
 } from './types';
+import { ErrorService } from 'src/errors/errors.service';
 
 @Injectable()
 export class OrderService {
   // Инициализация логгера
-  private logger = new Logger(OrderService.name);
 
   constructor(
     @InjectModel(Order)
     private readonly orderModel: typeof Order,
     private readonly usersService: UsersService,
     private readonly anbarService: AnbarService,
+    private readonly errorService: ErrorService,
     private readonly historyService: HistoryService,
   ) {}
-
-  // Обработка ошибок
-  private async handleErrors(e: any): Promise<IOrderErrorMessage> {
-    this.logger.error(e);
-    return { error_message: (e as AxiosError).message };
-  }
 
   // Поиск всех заказов
   async findAllOrders(): Promise<IOrdersResponse> {
@@ -41,7 +34,7 @@ export class OrderService {
       if (!orders.length) return { error_message: 'Нет заказов!' };
       return { orders };
     } catch (error) {
-      return this.handleErrors(error);
+      return this.errorService.errorsMessage(error);
     }
   }
 
@@ -57,7 +50,7 @@ export class OrderService {
 
       return { count, rows };
     } catch (e) {
-      return this.handleErrors(e);
+      return this.errorService.errorsMessage(e);
     }
   }
 
@@ -68,7 +61,7 @@ export class OrderService {
       if (!order) return { error_message: 'Заказ не найден!' };
       return { order };
     } catch (e) {
-      return this.handleErrors(e);
+      return this.errorService.errorsMessage(e);
     }
   }
 
@@ -79,7 +72,7 @@ export class OrderService {
         where: { clientId },
       });
     } catch (e) {
-      return this.handleErrors(e);
+      return this.errorService.errorsMessage(e);
     }
   }
 
@@ -145,7 +138,7 @@ export class OrderService {
         message,
       };
     } catch (e) {
-      return this.handleErrors(e);
+      return this.errorService.errorsMessage(e);
     }
   }
 

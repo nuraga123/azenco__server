@@ -1,19 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { AxiosError } from 'axios';
 
 import {
   IAnbarsUsernamesResponse,
   IAnbarsResponce,
   IAnbarResponce,
   IAnbarUsernameItem,
-  IAnbarErrorMessage,
-} from '../brokenAnbar/types';
+} from './types';
 import { Anbar } from './anbar.model';
 import { UsersService } from 'src/users/users.service';
 import { HistoryService } from 'src/history/history.service';
 import { ProductsService } from 'src/products/products.service';
-import { NewAnbarDto } from '../brokenAnbar/dto/new-anbar.dto';
+import { NewAnbarDto } from './dto/new-anbar.dto';
+import { ErrorService } from 'src/errors/errors.service';
 
 @Injectable()
 export class AnbarService {
@@ -25,15 +24,9 @@ export class AnbarService {
     private readonly usersService: UsersService,
     private readonly productsService: ProductsService,
     private readonly historyService: HistoryService,
+    private readonly errorService: ErrorService,
   ) {
     /**/
-  }
-
-  async errorsMessage(error: any): Promise<IAnbarErrorMessage> {
-    this.logger.log({ ...error });
-    return {
-      error_message: `Anbar Error: ${(error as AxiosError).message}!`,
-    };
   }
 
   // получение всех анбаров
@@ -43,7 +36,7 @@ export class AnbarService {
       if (!anbars?.length) return { error_message: 'Нет Анбаров!' };
       return { anbars };
     } catch (error) {
-      return this.errorsMessage(error);
+      return this.errorService.errorsMessage(error);
     }
   }
 
@@ -54,7 +47,7 @@ export class AnbarService {
       if (!anbar) return { error_message: `не найден анбар по ID: ${id}` };
       return { anbar };
     } catch (error) {
-      return this.errorsMessage(error);
+      return this.errorService.errorsMessage(error);
     }
   }
 
@@ -78,7 +71,7 @@ export class AnbarService {
       );
       return { usernames };
     } catch (error) {
-      return this.errorsMessage(error);
+      return this.errorService.errorsMessage(error);
     }
   }
 
@@ -88,7 +81,7 @@ export class AnbarService {
       const anbars = await this.anbarModel.findAll({ where: { userId } });
       return { anbars };
     } catch (error) {
-      return this.errorsMessage(error);
+      return this.errorService.errorsMessage(error);
     }
   }
 
@@ -221,7 +214,7 @@ export class AnbarService {
         anbar,
       };
     } catch (error) {
-      return this.errorsMessage(error);
+      return this.errorService.errorsMessage(error);
     }
   }
 

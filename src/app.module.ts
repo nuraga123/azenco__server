@@ -5,7 +5,6 @@ import { JwtModule } from '@nestjs/jwt';
 
 import { SequelizeConfigService } from './config/sequelizeConfig.service';
 import { databaseConfig } from './config/configuration';
-import { AnbarModule } from './anbar/newAnbar/anbar.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { ProductsModule } from './products/products.module';
@@ -13,6 +12,7 @@ import { TokenModule } from './token/token.module';
 import { OrderModule } from './order/order.module';
 import { HistoryModule } from './history/history.module';
 import { CarsModule } from './cars/cars.module';
+import { AnbarModule } from './anbars/anbar.module';
 
 @Module({
   imports: [

@@ -1,11 +1,11 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { AnbarService } from './anbar.service';
-import { NewAnbarDto } from '../brokenAnbar/dto/new-anbar.dto';
+import { NewAnbarDto } from './dto/new-anbar.dto';
 import {
-  IAnbarResponce,
-  IAnbarsResponce,
   IAnbarsUsernamesResponse,
-} from '../brokenAnbar/types';
+  IAnbarsResponce,
+  IAnbarResponce,
+} from './types';
 
 @Controller('anbar')
 export class AnbarController {
