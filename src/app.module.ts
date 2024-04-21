@@ -13,6 +13,7 @@ import { OrderModule } from './order/order.module';
 import { HistoryModule } from './history/history.module';
 import { CarsModule } from './cars/cars.module';
 import { AnbarModule } from './anbars/anbar.module';
+import { ErrorsModule } from './errors/errors.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { AnbarModule } from './anbars/anbar.module';
     OrderModule,
     HistoryModule,
     CarsModule,
+    ErrorsModule,
   ],
 })
 export class AppModule {}

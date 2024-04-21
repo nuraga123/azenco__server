@@ -33,8 +33,8 @@ export class OrderService {
       const orders = await this.orderModel.findAll();
       if (!orders.length) return { error_message: 'Нет заказов!' };
       return { orders };
-    } catch (error) {
-      return this.errorService.errorsMessage(error);
+    } catch (e) {
+      return this.errorService.errorsMessage(e);
     }
   }
 
@@ -157,25 +157,54 @@ export class OrderService {
     return { message: `Заказ № ${order.id} успешно отменен!` };
   }
 
-  async agreesAndConfirmAnbarOrder({ anbarId }: { anbarId: number }) {
-    const { order, error_message: orderError } =
-      await this.findOrderById(anbarId);
+  async confirmByAnbarUser({ anbarId }: { anbarId: number }) {
+    try {
+      const { order, error_message: orderError } =
+        await this.findOrderById(anbarId);
+      if (orderError) return { error_message: orderError };
 
-    if (orderError) return { error_message: orderError };
-    order.status = 'заказ_принял_складчик';
+      const { anbar, error_message: anbarError } =
+        await this.anbarService.findOneAnbarId(order.anbarId);
 
-    const { anbar, error_message: anbarError } =
-      await this.anbarService.findOneAnbarId(order?.anbarId);
+      if (anbarError) return { error_message: anbarError };
 
-    if (anbarError) return { error_message: anbarError };
+      if (!anbar) {
+        return { error_message: 'Склад не найден.' };
 
-    // save prev state
-    anbar.previousStock = +anbar.newStock;
-    anbar.previousTotalPrice = +anbar.totalPrice;
+      } else if (!anbar.newStock) {
+        return { error_message: 'Отсутствует информация о запасах на складе.' };
+      } else if (!anbar.price) {
+        return { error_message: 'Цена товара на складе не указана.' };
+      } else if (!order.quantity) {
+        return { error_message: 'Количество товара в заказе не указано.' };
+      }
 
-    // operation minus
-    const minusStock: number = +anbar.newStock - +order.quantity;
-    anbar.newStock = +minusStock;
-    anbar.totalPrice = +anbar.price * +minusStock;
+      if (order.quantity <= 0) {
+        return { error_message: 'Неверное количество товара для заказа.' };
+      }
+
+      if (+anbar.newStock < +order.quantity) {
+        return {
+          error_message: `Недостаточное количество товара "${anbar.name}" на складе.`,
+        };
+      }
+
+      anbar.previousStock = +anbar.newStock;
+      anbar.previousTotalPrice = +anbar.totalPrice;
+      
+      const minusStock: number = +anbar.newStock - +order.quantity;
+      anbar.newStock = +minusStock;
+      anbar.totalPrice = +anbar.price * +minusStock;
+      
+      order.status = 'заказ_принял_складчик';
+      await order.save();
+      await anbar.save();
+
+      return {
+        success_message: 'Заказ успешно подтвержден пользователем со склада.',
+      };
+    } catch (e) {
+      return this.errorService.errorsMessage(e)
+    }
   }
 }

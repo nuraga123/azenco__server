@@ -11,7 +11,7 @@ import { Anbar } from './anbar.model';
 import { UsersService } from 'src/users/users.service';
 import { HistoryService } from 'src/history/history.service';
 import { ProductsService } from 'src/products/products.service';
-import { NewAnbarDto } from './dto/new-anbar.dto';
+import { CreateAnbarDto } from './dto/create-anbar.dto';
 import { ErrorService } from 'src/errors/errors.service';
 
 @Injectable()
@@ -85,128 +85,118 @@ export class AnbarService {
     }
   }
 
-  // Добавить товар в амбар
-  async createNewAnbar(newAnbarDto: NewAnbarDto): Promise<IAnbarResponce> {
+  async findAnbarByUserIdAndProductId({
+    userId,
+    productId,
+  }: {
+    userId: number;
+    productId: number;
+  }): Promise<IAnbarResponce> {
     try {
-      const { stock, userId, productId, location } = newAnbarDto;
-
-      if (typeof stock !== 'number' || isNaN(stock)) {
-        return {
-          error_message: `Некорректное значение для поля stock`,
-        };
+      if (!userId || !productId) {
+        return { error_message: 'нет user ID  или продукта ID' };
       }
 
-      if (typeof userId !== 'number' || isNaN(userId)) {
-        return {
-          error_message: `Некорректное значение для поля userId`,
-        };
+      const find = { where: { userId, productId } };
+      const anbar = await this.anbarModel.findOne(find);
+      if (!anbar?.id) return { error_message: 'не найден амбар' };
+      return { anbar };
+    } catch (e) {
+      return this.errorService.errorsMessage(e);
+    }
+  }
+
+  // Добавить товар в амбар
+  async createNewAnbar(
+    createAnbarDto: CreateAnbarDto,
+  ): Promise<IAnbarResponce> {
+    try {
+      const {
+        userId,
+        productId,
+        location,
+        newStock,
+        usedStock,
+        brokenStock,
+        lostStock,
+      } = createAnbarDto;
+
+      // Проверка на корректность значений
+      if (!userId || !productId) {
+        return { error_message: 'Некорректные данные для добавления в амбар' };
       }
 
-      if (typeof productId !== 'number' || isNaN(productId)) {
-        return {
-          error_message: `Некорректное значение для поля productId`,
-        };
-      }
-
-      if (location?.length < 3 || typeof location !== 'string') {
-        return {
-          error_message: `Некорректное значение для поля location или меньше 3 символов`,
-        };
-      }
-
+      // Поиск пользователя укоратить метод
       const user = await this.usersService.findOne({ where: { id: userId } });
 
       if (!user) {
-        return {
-          error_message: `Пользователь с ID ${userId} не найден`,
-        };
+        return { error_message: `Пользователь с ID ${userId} не найден` };
       }
 
-      const { product } = await this.productsService.findOneProduct(productId);
-
+      // Поиск продукта
+      const { product } = await this.productsService.findOneProduct(+productId);
       if (!product) {
-        return {
-          error_message: `Товар с ID ${productId} не найден`,
-        };
+        return { error_message: `Товар с ID ${productId} не найден` };
       }
 
+      // Проверка единиц измерения и другие проверки...
       const isPieceUnit = product.unit === 'ədəd';
       const isWeightUnit = product.unit === 'kg';
       const isLengthUnit = product.unit === 'metr';
 
-      // Получаем дробную часть числа
-      const decimalPart = stock.toString().split('.')[1];
-      this.logger.log(decimalPart);
-
-      if (decimalPart && decimalPart.length >= 4) {
-        this.logger.log(
-          `decimalPart.length >= 4: ${decimalPart.length >= 4} ${stock}`,
-        );
-      }
-
-      if (decimalPart && decimalPart.length >= 3) {
-        this.logger.log(
-          `decimalPart.length >= 3: ${decimalPart.length >= 3} ${stock}`,
-        );
-      }
-
-      if (isWeightUnit && stock <= 0.001 && decimalPart.length < 4) {
+      if (isWeightUnit && newStock <= 0.001) {
         return {
           error_message: `Минимальное количество для единицы измерения 0.001 kg (1 грамм)`,
         };
       }
 
-      if (isLengthUnit && stock <= 0.01 && decimalPart.length < 3) {
+      if (isLengthUnit && newStock <= 0.01) {
         return {
           error_message: `Минимальное количество для единицы измерения 0.01 metr (1 см)`,
         };
       }
 
-      if (isPieceUnit && !Number.isInteger(stock)) {
+      if (isPieceUnit && !Number.isInteger(newStock)) {
         return {
           error_message:
-            'Количество товара должно быть целым числом из за того что товар тип штучный',
+            'Количество товара должно быть целым числом из-за того, что товар тип штучный',
         };
       }
 
-      if (stock <= 0) {
-        return {
-          error_message: 'Количество товара должно быть больше 0',
-        };
-      }
-
-      // Проверяем, существует ли уже запись в анбаре для данного пользователя и продукта
-      const existingAnbar = await this.anbarModel.findOne({
-        where: {
-          userId: userId,
-          productId: productId,
-        },
+      // Поиск записи в анбаре для данного пользователя и продукта
+      const existingAnbar = await this.findAnbarByUserIdAndProductId({
+        userId,
+        productId,
       });
 
-      // Если запись уже существует, возвращаем ошибку
-      if (existingAnbar) {
-        return {
-          error_message: `У пользователя уже существует запись в анбаре для данного продукта`,
-        };
+      this.logger.log(existingAnbar.anbar);
+
+      if (existingAnbar.anbar) {
+        return { error_message: 'такой анбар уже существует' };
       }
 
+      const totalStock: number = +newStock + +usedStock + +brokenStock;
+
+      // Создание записи в анбаре
       const anbar: Anbar = await this.anbarModel.create({
-        userId: user.id,
+        userId,
+        productId,
         username: user.username,
-        productId: product.id,
+        location,
         azencoCode: product.azencoCode,
         name: product.name,
         type: product.type,
         img: product.img,
         unit: product.unit,
-        price: +product.price,
-        totalPrice: +product.price * +stock,
+        newStock: +newStock || 0,
+        usedStock: +usedStock || 0,
+        brokenStock: +brokenStock || 0,
+        lostStock: +lostStock || 0,
+        totalStock,
         previousStock: 0,
         previousTotalPrice: 0,
-        ordered: false,
-        isComeProduct: true,
-        location,
-        stock,
+        price: +product.price,
+        totalPrice: +product.price * +totalStock,
       });
 
       return {

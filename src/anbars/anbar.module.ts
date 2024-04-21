@@ -6,6 +6,7 @@ import { Anbar } from './anbar.model';
 import { UsersModule } from 'src/users/users.module';
 import { ProductsModule } from 'src/products/products.module';
 import { HistoryModule } from 'src/history/history.module';
+import { ErrorsModule } from 'src/errors/errors.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { HistoryModule } from 'src/history/history.module';
     UsersModule,
     ProductsModule,
     HistoryModule,
+    ErrorsModule,
   ],
   controllers: [AnbarController],
   providers: [AnbarService],

@@ -5,6 +5,9 @@ export class Anbar extends Model {
   @Column(DataType.INTEGER)
   userId: number;
 
+  @Column(DataType.INTEGER)
+  productId: number;
+
   @Column(DataType.TEXT)
   username: string;
 
@@ -20,10 +23,7 @@ export class Anbar extends Model {
   @Column(DataType.TEXT)
   unit: string;
 
-  @Column(DataType.INTEGER)
-  productId: number;
-
-  @Column(DataType.DECIMAL(20, 3))
+  @Column(DataType.DECIMAL(20, 2))
   price: number;
 
   // количество новых товаров
@@ -53,9 +53,6 @@ export class Anbar extends Model {
   // до заказа количество продуктов
   @Column(DataType.DECIMAL(20, 3))
   previousStock: number;
-
-  @Column(DataType.BOOLEAN)
-  ordered: boolean;
 
   @Column({
     type: DataType.TEXT,
