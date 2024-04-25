@@ -25,13 +25,15 @@ export class OrderService {
     private readonly anbarService: AnbarService,
     private readonly errorService: ErrorService,
     private readonly historyService: HistoryService,
-  ) {}
+  ) {
+    /**/
+  }
 
   // Поиск всех заказов
   async findAllOrders(): Promise<IOrdersResponse> {
     try {
       const orders = await this.orderModel.findAll();
-      if (!orders.length) return { error_message: 'Нет заказов!' };
+      if (!orders.length) return { error_message: 'Нет заказов!', orders: [] };
       return { orders };
     } catch (e) {
       return this.errorService.errorsMessage(e);
@@ -79,7 +81,14 @@ export class OrderService {
   // Создание заказа
   async createOrder(newOrderDto: NewOrderDto): Promise<IOrderResponse> {
     try {
-      const { anbarId, clientId, quantity, clientLocation } = newOrderDto;
+      const {
+        anbarId,
+        clientId,
+        clientLocation,
+        newStock,
+        usedStock,
+        brokenStock,
+      } = newOrderDto;
 
       // Поиск склада по ID
       const { anbar, error_message: anbarError } =
@@ -92,23 +101,28 @@ export class OrderService {
       if (clientError) return { error_message: clientError };
 
       // Проверка на правильность количества
-      if (typeof quantity !== 'number' || quantity <= 0) {
+      if (typeof newStock !== 'number' || newStock <= 0) {
         return { error_message: 'Неверное количество заказа!' };
       }
 
       // Проверка наличия товара на складе
-      if (anbar && anbar.newStock && +anbar.newStock < quantity) {
+      if (anbar && anbar.newStock && +anbar.newStock < newStock) {
         return {
           error_message: `Товара "${anbar.name}" недостаточно на складе!`,
         };
       }
 
       // Создание описания заказа
-      const description: string = ` Заказчик: ${client.username} из ${clientLocation} заказал ${quantity} ${anbar.unit} товара "${anbar.name}" у "${anbar.username}"`;
+      const description: string = ` Заказчик: ${client.username} из ${clientLocation} заказал ${newStock} ${anbar.unit} товара ${anbar.name} у ${anbar.username}`;
+
+      const totalStock: number = +newStock + +usedStock + +brokenStock;
+      const totalPrice: number = +anbar.price * +totalStock;
 
       // Создание заказа
       const order = await this.orderModel.create({
-        status: 'новый_заказ_клиента',
+        status: 'новый_заказ',
+        description,
+        clientLocation,
         clientId: +client.id,
         clientUserName: client.username,
         anbarId: +anbar.id,
@@ -116,27 +130,27 @@ export class OrderService {
         name: anbar.name,
         azencoCode: anbar.azencoCode,
         price: +anbar.price,
-        totalPrice: +quantity * +anbar.price,
         unit: anbar.unit,
         img: anbar.img,
-        quantity: +quantity,
         anbarLocation: anbar.location,
-        description,
-        clientLocation,
+        newStock: newStock ? +newStock : 0,
+        usedStock: usedStock ? +usedStock : 0,
+        brokenStock: brokenStock ? +brokenStock : 0,
+        lostStock: 0,
+        totalStock,
+        totalPrice,
       });
 
       // Создание записи в истории
       const message: string = `Создан новый заказ № ${order.id}! ${description}`;
+
       await this.historyService.createHistory({
         userId: +client.id,
         username: client.username,
         message,
       });
 
-      return {
-        order,
-        message,
-      };
+      return { order, message };
     } catch (e) {
       return this.errorService.errorsMessage(e);
     }
@@ -157,54 +171,50 @@ export class OrderService {
     return { message: `Заказ № ${order.id} успешно отменен!` };
   }
 
-  async confirmByAnbarUser({ anbarId }: { anbarId: number }) {
+  // заказ принял складчик
+  async confirmAnbarUserOrder(id: number): Promise<IOrderResponse> {
     try {
-      const { order, error_message: orderError } =
-        await this.findOrderById(anbarId);
+      const { order, error_message } = await this.findOrderById(id);
+      const message = `Cкладчик: ${order.anbarUsername} принял заказ №${order.id} ${order.clientUserName}`;
+      order.status = 'заказ_принял_складчик';
+      order.description = message;
+      return error_message ? { error_message } : { order, message };
+    } catch (e) {
+      return this.errorService.errorsMessage(e);
+    }
+  }
+
+  // отправка заказа
+  async sendOrderToClient(id: number) {
+    try {
+      const { order, error_message: orderError } = await this.findOrderById(id);
+
       if (orderError) return { error_message: orderError };
 
       const { anbar, error_message: anbarError } =
-        await this.anbarService.findOneAnbarId(order.anbarId);
+        await this.anbarService.minusAnbar({
+          anbarId: order.anbarId,
+          quantity: order.newStock,
+        });
 
       if (anbarError) return { error_message: anbarError };
 
-      if (!anbar) {
-        return { error_message: 'Склад не найден.' };
+      const message: string = `Заказ ${order.id} успешно отправлен! Складчик: ${order.anbarUsername} из ${order.anbarLocation} отправил Клиенту: ${order.clientUserName} по адресу: ${order.clientLocation}`;
+      order.status = 'заказ_отправлен_клиенту';
+      order.description = message;
 
-      } else if (!anbar.newStock) {
-        return { error_message: 'Отсутствует информация о запасах на складе.' };
-      } else if (!anbar.price) {
-        return { error_message: 'Цена товара на складе не указана.' };
-      } else if (!order.quantity) {
-        return { error_message: 'Количество товара в заказе не указано.' };
-      }
-
-      if (order.quantity <= 0) {
-        return { error_message: 'Неверное количество товара для заказа.' };
-      }
-
-      if (+anbar.newStock < +order.quantity) {
-        return {
-          error_message: `Недостаточное количество товара "${anbar.name}" на складе.`,
-        };
-      }
-
-      anbar.previousStock = +anbar.newStock;
-      anbar.previousTotalPrice = +anbar.totalPrice;
-      
-      const minusStock: number = +anbar.newStock - +order.quantity;
-      anbar.newStock = +minusStock;
-      anbar.totalPrice = +anbar.price * +minusStock;
-      
-      order.status = 'заказ_принял_складчик';
       await order.save();
       await anbar.save();
 
-      return {
-        success_message: 'Заказ успешно подтвержден пользователем со склада.',
-      };
+      await this.historyService.createHistory({
+        userId: anbar.userId,
+        username: anbar.username,
+        message,
+      });
+
+      return { order, message };
     } catch (e) {
-      return this.errorService.errorsMessage(e)
+      return this.errorService.errorsMessage(e);
     }
   }
 }

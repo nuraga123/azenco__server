@@ -5,7 +5,7 @@ export interface IOrderErrorMessage {
 }
 
 export type StatusOrderType =
-  | 'новый_заказ_клиента'
+  | 'новый_заказ'
   | 'заказ_принял_складчик'
   | 'заказ_отменен_складчиком'
   | 'заказ_отправлен_клиенту'

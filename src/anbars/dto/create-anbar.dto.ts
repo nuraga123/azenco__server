@@ -29,8 +29,4 @@ export class CreateAnbarDto {
   @ApiProperty({ example: 'Москва' })
   @IsNotEmpty()
   readonly location: string;
-
-  @ApiProperty({ example: 17 })
-  @IsNotEmpty()
-  readonly totalStock: number;
 }

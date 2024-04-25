@@ -181,22 +181,22 @@ export class AnbarService {
       const anbar: Anbar = await this.anbarModel.create({
         userId,
         productId,
-        username: user.username,
         location,
+        username: user.username,
         azencoCode: product.azencoCode,
         name: product.name,
         type: product.type,
         img: product.img,
         unit: product.unit,
+        price: +product.price,
         newStock: +newStock || 0,
         usedStock: +usedStock || 0,
         brokenStock: +brokenStock || 0,
         lostStock: +lostStock || 0,
-        totalStock,
         previousStock: 0,
         previousTotalPrice: 0,
-        price: +product.price,
         totalPrice: +product.price * +totalStock,
+        totalStock,
       });
 
       return {
@@ -211,28 +211,41 @@ export class AnbarService {
   // вычитание с анбара
   async minusAnbar({
     anbarId,
-    minusQuantity,
+    quantity,
   }: {
     anbarId: number;
-    minusQuantity: number;
+    quantity: number;
   }) {
-    if (!anbarId && !minusQuantity) {
-      return { error_message: 'нет anbarId или количества!' };
-    }
+    if (!anbarId) return { error_message: 'нет anbarId!' };
+    if (!quantity) return { error_message: 'Количество в заказе не указано!' };
 
     const { anbar, error_message } = await this.findOneAnbarId(anbarId);
 
     if (error_message) return { error_message };
+    if (!anbar) return { error_message: 'Склад не найден.' };
+    if (!anbar.newStock) return { error_message: 'нет запаса на складе' };
+    if (!anbar.price) return { error_message: 'Цена не указана.' };
+
+    if (quantity <= 0) {
+      return { error_message: 'Неверное количество товара для заказа.' };
+    }
+
+    if (+anbar.newStock < +quantity) {
+      return {
+        error_message: `Недостаточное количество товара "${anbar.name}" на складе.`,
+      };
+    }
 
     // save prev state
     anbar.previousStock = +anbar.newStock;
     anbar.previousTotalPrice = +anbar.totalPrice;
 
     // operation minus
-    const minusStock: number = +anbar.newStock - +minusQuantity;
+    const minusStock: number = +anbar.newStock - +quantity;
     anbar.newStock = +minusStock;
     anbar.totalPrice = +anbar.price * +minusStock;
 
     anbar.save();
+    return { anbar };
   }
 }

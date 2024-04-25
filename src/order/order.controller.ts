@@ -48,6 +48,18 @@ export class OrderController {
     return this.orderService.createOrder(newOrderDto);
   }
 
+  @Post('confirm-anbar-user')
+  @HttpCode(HttpStatus.OK)
+  confirmAnbarUser(@Body('id') id: number): Promise<IOrderResponse> {
+    return this.orderService.confirmAnbarUserOrder(id);
+  }
+
+  @Post('send-order-client')
+  @HttpCode(HttpStatus.OK)
+  confirmAnbar(@Body('id') id: number): Promise<IOrderResponse> {
+    return this.orderService.sendOrderToClient(id);
+  }
+
   // запрос для удаления заказа клиентом
   @Delete('remove-client')
   @HttpCode(HttpStatus.OK)

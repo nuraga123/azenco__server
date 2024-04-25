@@ -5,7 +5,7 @@ import { StatusOrderType } from './types';
 export class Order extends Model<Order> {
   @Column({
     type: DataType.ENUM(
-      'новый_заказ_клиента',
+      'новый_заказ',
       'заказ_принял_складчик',
       'заказ_отменен_складчиком',
       'заказ_отправлен_клиенту',
@@ -36,8 +36,24 @@ export class Order extends Model<Order> {
   @Column(DataType.STRING)
   azencoCode: string;
 
-  @Column({ type: DataType.DECIMAL(20, 3) })
-  quantity: number;
+  // количество новых товаров
+  @Column(DataType.DECIMAL(20, 3))
+  newStock: number;
+
+  // количество использованных товаров
+  @Column(DataType.DECIMAL(20, 3))
+  usedStock: number;
+
+  // количество сломанных товаров
+  @Column(DataType.DECIMAL(20, 3))
+  brokenStock: number;
+
+  // количество потерянных товаров
+  @Column(DataType.DECIMAL(20, 3))
+  lostStock: number;
+
+  @Column(DataType.DECIMAL(20, 3))
+  totalStock: number;
 
   @Column({ type: DataType.DECIMAL(20, 2) })
   price: number;
