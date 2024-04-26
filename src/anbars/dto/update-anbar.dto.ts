@@ -2,14 +2,10 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
 
 // DTO для обновления количества товаров в амбаре
-export class UpdateAnbarStockDto {
+export class UpdatedAnbarDto {
   @ApiProperty({ example: 1 })
   @IsNotEmpty()
-  readonly userId: number;
-
-  @ApiProperty({ example: 1 })
-  @IsNotEmpty()
-  readonly productId: number;
+  readonly id: number;
 
   @ApiProperty({ example: 10 })
   readonly newStock?: number;
@@ -22,4 +18,8 @@ export class UpdateAnbarStockDto {
 
   @ApiProperty({ example: 3 })
   readonly lostStock?: number;
+
+  @ApiProperty({ example: 'Москва' })
+  @IsNotEmpty()
+  readonly location: string;
 }

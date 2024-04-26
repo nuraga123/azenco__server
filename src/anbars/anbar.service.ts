@@ -11,7 +11,8 @@ import { Anbar } from './anbar.model';
 import { UsersService } from 'src/users/users.service';
 import { HistoryService } from 'src/history/history.service';
 import { ProductsService } from 'src/products/products.service';
-import { CreateAnbarDto } from './dto/create-anbar.dto';
+import { CreatedAnbarDto } from './dto/create-anbar.dto';
+import { UpdatedAnbarDto } from './dto/update-anbar.dto';
 import { ErrorService } from 'src/errors/errors.service';
 
 @Injectable()
@@ -108,7 +109,7 @@ export class AnbarService {
 
   // Добавить товар в амбар
   async createNewAnbar(
-    createAnbarDto: CreateAnbarDto,
+    createdAnbarDto: CreatedAnbarDto,
   ): Promise<IAnbarResponce> {
     try {
       const {
@@ -119,7 +120,7 @@ export class AnbarService {
         usedStock,
         brokenStock,
         lostStock,
-      } = createAnbarDto;
+      } = createdAnbarDto;
 
       // Проверка на корректность значений
       if (!userId || !productId) {
@@ -198,11 +199,15 @@ export class AnbarService {
         totalPrice: +product.price * +totalStock,
         totalStock,
       });
+      const message: string = `Новый Амбар! Складчик: ${anbar.username} Товар: ${anbar.name} | новые - ${anbar.newStock} | использованные - ${anbar.usedStock} | сломанные - ${anbar.brokenStock} | потерянные - ${anbar.lostStock} | ${product.unit}`;
 
-      return {
-        message: `Товар добавлен в анбар ${anbar.username} | ${anbar.name} | ${anbar.newStock} ${product.unit}`,
-        anbar,
-      };
+      await this.historyService.createHistory({
+        message,
+        userId,
+        username: anbar.username,
+      });
+
+      return { anbar, message };
     } catch (error) {
       return this.errorService.errorsMessage(error);
     }
@@ -247,5 +252,15 @@ export class AnbarService {
 
     anbar.save();
     return { anbar };
+  }
+
+  async update(updatedAnbarDto: UpdatedAnbarDto): Promise<IAnbarResponce> {
+    const { id, ...updateData } = updatedAnbarDto;
+    const { anbar, error_message } = await this.findOneAnbarId(+id);
+    if (error_message) return { error_message };
+
+    anbar.update(updateData);
+    const message: string = `Складчик: ${anbar.username} обновил амбар №${anbar.id}!`;
+    return { anbar, message };
   }
 }

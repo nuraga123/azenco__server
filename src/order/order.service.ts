@@ -93,7 +93,14 @@ export class OrderService {
       // Поиск склада по ID
       const { anbar, error_message: anbarError } =
         await this.anbarService.findOneAnbarId(anbarId);
+
       if (anbarError) return { error_message: anbarError };
+
+      function validateStock({ stock, type }: { stock: number; type: string }) {
+        if (typeof stock !== 'number' || stock <= 0) {
+          return { error_message: `Неверное количество ${type}! товаров` };
+        }
+      }
 
       // Поиск клиента по ID
       const { user: client, error_message: clientError } =
@@ -101,9 +108,9 @@ export class OrderService {
       if (clientError) return { error_message: clientError };
 
       // Проверка на правильность количества
-      if (typeof newStock !== 'number' || newStock <= 0) {
-        return { error_message: 'Неверное количество заказа!' };
-      }
+      validateStock({ stock: newStock, type: 'новых' });
+      validateStock({ stock: usedStock, type: 'использованныx' });
+      validateStock({ stock: brokenStock, type: 'сломанных' });
 
       // Проверка наличия товара на складе
       if (anbar && anbar.newStock && +anbar.newStock < newStock) {
@@ -113,8 +120,9 @@ export class OrderService {
       }
 
       // Создание описания заказа
-      const description: string = ` Заказчик: ${client.username} из ${clientLocation} заказал ${newStock} ${anbar.unit} товара ${anbar.name} у ${anbar.username}`;
+      const description: string = ` Заказчик: ${client.username} из ${clientLocation} заказал ${newStock} ${anbar.unit} ${anbar.name} у ${anbar.username}`;
 
+      // подсчет общего количества и общей цены
       const totalStock: number = +newStock + +usedStock + +brokenStock;
       const totalPrice: number = +anbar.price * +totalStock;
 
