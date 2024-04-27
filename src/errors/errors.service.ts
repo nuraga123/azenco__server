@@ -10,4 +10,9 @@ export class ErrorService {
     this.logger.error({ ...error });
     return { error_message: `Error ${(error as AxiosError)?.message}` };
   }
+
+  log(data: any) {
+    this.logger.log(`DATA --- ${data}`);
+    this.logger.log({ ...data });
+  }
 }

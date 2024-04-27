@@ -4,7 +4,7 @@ import { CreateProductDto } from '../dto/create-product.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
 
 export interface IError {
-  error?: string;
+  error_message?: string;
 }
 
 export interface IProductResponse extends IError {

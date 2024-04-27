@@ -13,6 +13,7 @@ import {
   IOrdersResponse,
 } from './types';
 import { ErrorService } from 'src/errors/errors.service';
+import { CreatedAnbarDto } from 'src/anbars/dto/create-anbar.dto';
 
 @Injectable()
 export class OrderService {
@@ -120,7 +121,7 @@ export class OrderService {
       }
 
       // Создание описания заказа
-      const description: string = ` Заказчик: ${client.username} из ${clientLocation} заказал ${newStock} ${anbar.unit} ${anbar.name} у ${anbar.username}`;
+      const description: string = `Заказчик: ${client.username} из ${clientLocation} заказал: новые - ${newStock} | использованные - ${usedStock} | сломанные - ${brokenStock} | ${anbar.unit} ${anbar.name} у ${anbar.username} из ${anbar.location}`;
 
       // подсчет общего количества и общей цены
       const totalStock: number = +newStock + +usedStock + +brokenStock;
@@ -150,7 +151,7 @@ export class OrderService {
       });
 
       // Создание записи в истории
-      const message: string = `Создан новый заказ № ${order.id}! ${description}`;
+      const message: string = `Новый заказ № ${order.id}! ${description}`;
 
       await this.historyService.createHistory({
         userId: +client.id,
@@ -183,31 +184,36 @@ export class OrderService {
   async confirmAnbarUserOrder(id: number): Promise<IOrderResponse> {
     try {
       const { order, error_message } = await this.findOrderById(id);
+      if (error_message) return { error_message };
       const message = `Cкладчик: ${order.anbarUsername} принял заказ №${order.id} ${order.clientUserName}`;
       order.status = 'заказ_принял_складчик';
       order.description = message;
-      return error_message ? { error_message } : { order, message };
+      order.save();
+      return { order, message };
     } catch (e) {
       return this.errorService.errorsMessage(e);
     }
   }
 
   // отправка заказа
-  async sendOrderToClient(id: number) {
+  async sendAnbarUserOrder(id: number) {
     try {
       const { order, error_message: orderError } = await this.findOrderById(id);
-
       if (orderError) return { error_message: orderError };
 
+      const { anbarId, newStock, usedStock, brokenStock } = order;
+
       const { anbar, error_message: anbarError } =
-        await this.anbarService.minusAnbar({
-          anbarId: order.anbarId,
-          quantity: order.newStock,
+        await this.anbarService.minusAnbarOrder({
+          anbarId,
+          newStock,
+          usedStock,
+          brokenStock,
         });
 
       if (anbarError) return { error_message: anbarError };
 
-      const message: string = `Заказ ${order.id} успешно отправлен! Складчик: ${order.anbarUsername} из ${order.anbarLocation} отправил Клиенту: ${order.clientUserName} по адресу: ${order.clientLocation}`;
+      const message: string = `Заказ ${order.id} успешно отправлен! В вашем Амбаре №${anbar.id} на месте: новые - ${anbar.newStock} | использованные - ${anbar.usedStock} | сломанные - ${anbar.brokenStock} | ${anbar.unit} ${anbar.name}`;
       order.status = 'заказ_отправлен_клиенту';
       order.description = message;
 
@@ -221,6 +227,102 @@ export class OrderService {
       });
 
       return { order, message };
+    } catch (e) {
+      return this.errorService.errorsMessage(e);
+    }
+  }
+
+  async successDeliver({
+    id,
+    clientAnbarId,
+  }: {
+    id: number;
+    clientAnbarId: number;
+  }): Promise<IOrderResponse> {
+    try {
+      const { order, error_message } = await this.findOrderById(id);
+      if (error_message) return { error_message };
+
+      // Проверяем, существует ли у клиента анбар с данным продуктом
+      const { anbar: clientAnbar, error_message: anbarError } =
+        await this.anbarService.findOneAnbarId(+clientAnbarId);
+
+      if (anbarError) {
+        return { error_message: anbarError };
+      }
+      const { newStock, brokenStock, usedStock, lostStock } = clientAnbar;
+
+      this.errorService.log(clientAnbar);
+
+      if (!clientAnbar) {
+        const {
+          clientId,
+          newStock,
+          brokenStock,
+          usedStock,
+          lostStock,
+          clientLocation,
+        } = order;
+        // Если анбар с данным продуктом не существует, создаем новый
+        const createdAnbarDto: CreatedAnbarDto = {
+          userId: +clientId,
+          productId: 3,
+          newStock,
+          usedStock,
+          brokenStock,
+          lostStock,
+          location: clientLocation,
+        };
+
+        const { anbar: newAnbar, error_message } =
+          await this.anbarService.createNewAnbar(createdAnbarDto);
+
+        if (error_message) return { error_message };
+
+        newAnbar.save();
+
+        const message = `Новый анбар №${newAnbar.id} создан для клиента ${newAnbar.username} Заказ ${order.id} успешно доставлен! Клиент: ${order.clientUserName} по адресу: ${order.clientLocation}`;
+
+        // Обновляем статус заказа и описание
+        order.status = 'заказ_успешно_доставлен';
+        order.description = message;
+
+        await this.historyService.createHistory({
+          userId: newAnbar.userId,
+          username: newAnbar.username,
+          message,
+        });
+
+        return { order, message };
+      } else {
+        // Если анбар с данным продуктом существует, увеличиваем количество продукта на анбаре
+        clientAnbar.newStock = +clientAnbar.newStock + +newStock;
+        clientAnbar.usedStock = +clientAnbar.usedStock + +usedStock;
+        clientAnbar.brokenStock = +clientAnbar.brokenStock + +brokenStock;
+        clientAnbar.lostStock = +clientAnbar.lostStock + +lostStock;
+
+        const totalStock =
+          +clientAnbar.newStock +
+          clientAnbar.usedStock +
+          clientAnbar.brokenStock;
+        const totalPrice = +totalStock * +clientAnbar.price;
+        clientAnbar.totalPrice = +totalPrice;
+        await clientAnbar.save();
+
+        const message = `Продукт добавлен к анбару №${clientAnbar.id} Заказ ${order.id} успешно доставлен! Клиент: ${order.clientUserName} по адресу: ${order.clientLocation}`;
+
+        // Обновляем статус заказа и описание
+        order.status = 'заказ_успешно_доставлен';
+        order.description = message;
+        await order.save();
+
+        await this.historyService.createHistory({
+          userId: clientAnbar.userId,
+          username: clientAnbar.username,
+          message,
+        });
+        return { order, message };
+      }
     } catch (e) {
       return this.errorService.errorsMessage(e);
     }

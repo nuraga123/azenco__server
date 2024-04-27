@@ -14,6 +14,7 @@ import { ProductsService } from 'src/products/products.service';
 import { CreatedAnbarDto } from './dto/create-anbar.dto';
 import { UpdatedAnbarDto } from './dto/update-anbar.dto';
 import { ErrorService } from 'src/errors/errors.service';
+import { CreateOptions } from 'sequelize';
 
 @Injectable()
 export class AnbarService {
@@ -129,16 +130,13 @@ export class AnbarService {
 
       // Поиск пользователя укоратить метод
       const user = await this.usersService.findOne({ where: { id: userId } });
-
-      if (!user) {
-        return { error_message: `Пользователь с ID ${userId} не найден` };
-      }
+      if (!user?.id) return { error_message: `Пользователь не найден` };
 
       // Поиск продукта
       const { product } = await this.productsService.findOneProduct(+productId);
-      if (!product) {
+
+      if (!product)
         return { error_message: `Товар с ID ${productId} не найден` };
-      }
 
       // Проверка единиц измерения и другие проверки...
       const isPieceUnit = product.unit === 'ədəd';
@@ -177,12 +175,9 @@ export class AnbarService {
       }
 
       const totalStock: number = +newStock + +usedStock + +brokenStock;
+      const totalPrice: number = +totalStock * +product.price;
 
-      // Создание записи в анбаре
-      const anbar: Anbar = await this.anbarModel.create({
-        userId,
-        productId,
-        location,
+      const anbar: Anbar = await this.anbarModel.create<Anbar>({
         username: user.username,
         azencoCode: product.azencoCode,
         name: product.name,
@@ -196,8 +191,11 @@ export class AnbarService {
         lostStock: +lostStock || 0,
         previousStock: 0,
         previousTotalPrice: 0,
-        totalPrice: +product.price * +totalStock,
+        userId,
+        productId,
+        location,
         totalStock,
+        totalPrice,
       });
       const message: string = `Новый Амбар! Складчик: ${anbar.username} Товар: ${anbar.name} | новые - ${anbar.newStock} | использованные - ${anbar.usedStock} | сломанные - ${anbar.brokenStock} | потерянные - ${anbar.lostStock} | ${product.unit}`;
 
@@ -214,41 +212,55 @@ export class AnbarService {
   }
 
   // вычитание с анбара
-  async minusAnbar({
+  async minusAnbarOrder({
     anbarId,
-    quantity,
+    newStock,
+    usedStock,
+    brokenStock,
   }: {
     anbarId: number;
-    quantity: number;
+    newStock: number;
+    usedStock: number;
+    brokenStock: number;
   }) {
     if (!anbarId) return { error_message: 'нет anbarId!' };
-    if (!quantity) return { error_message: 'Количество в заказе не указано!' };
+    if (!newStock || !usedStock || !brokenStock) {
+      return { error_message: 'Количество в заказе не указано!' };
+    }
 
     const { anbar, error_message } = await this.findOneAnbarId(anbarId);
 
     if (error_message) return { error_message };
     if (!anbar) return { error_message: 'Склад не найден.' };
     if (!anbar.newStock) return { error_message: 'нет запаса на складе' };
+    if (!anbar.newStock) return { error_message: 'нет запаса на складе' };
+    if (!anbar.newStock) return { error_message: 'нет запаса на складе' };
+    if (!anbar.newStock) return { error_message: 'нет запаса на складе' };
     if (!anbar.price) return { error_message: 'Цена не указана.' };
 
-    if (quantity <= 0) {
+    if (newStock <= 0) {
       return { error_message: 'Неверное количество товара для заказа.' };
     }
 
-    if (+anbar.newStock < +quantity) {
+    if (+anbar.newStock < +newStock) {
       return {
         error_message: `Недостаточное количество товара "${anbar.name}" на складе.`,
       };
     }
 
     // save prev state
-    anbar.previousStock = +anbar.newStock;
+    anbar.previousStock = +anbar.totalStock;
     anbar.previousTotalPrice = +anbar.totalPrice;
 
     // operation minus
-    const minusStock: number = +anbar.newStock - +quantity;
-    anbar.newStock = +minusStock;
-    anbar.totalPrice = +anbar.price * +minusStock;
+    anbar.newStock = +anbar.newStock - +newStock;
+    anbar.usedStock = +anbar.usedStock - +usedStock;
+    anbar.brokenStock = +anbar.brokenStock - +brokenStock;
+
+    const totalStock = +anbar.newStock + +anbar.usedStock + +anbar.brokenStock;
+    anbar.totalStock = +totalStock;
+
+    anbar.totalPrice = +totalStock * anbar.price;
 
     anbar.save();
     return { anbar };

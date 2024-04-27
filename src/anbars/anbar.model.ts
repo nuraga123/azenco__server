@@ -43,6 +43,10 @@ export class Anbar extends Model {
   lostStock: number;
 
   // общая стоимость всех товаров
+  @Column(DataType.DECIMAL(20, 3))
+  totalStock: number;
+  
+  // общая стоимость всех товаров
   @Column(DataType.DECIMAL(20, 2))
   totalPrice: number;
 
