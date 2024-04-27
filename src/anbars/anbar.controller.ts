@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { AnbarService } from './anbar.service';
-import { CreateAnbarDto } from './dto/create-anbar.dto';
+import { CreatedAnbarDto } from './dto/create-anbar.dto';
 import {
   IAnbarsUsernamesResponse,
   IAnbarsResponce,
@@ -44,8 +44,8 @@ export class AnbarController {
   // новый анбар
   @Post('create')
   postCreateNewAnbar(
-    @Body() createAnbarDto: CreateAnbarDto,
+    @Body() createdAnbarDto: CreatedAnbarDto,
   ): Promise<IAnbarResponce> {
-    return this.anbarService.createNewAnbar(createAnbarDto);
+    return this.anbarService.createNewAnbar(createdAnbarDto);
   }
 }
