@@ -1,20 +1,15 @@
 import {
-  Body,
   Controller,
-  Delete,
   Get,
   HttpCode,
   HttpStatus,
-  Post,
   Query,
 } from '@nestjs/common';
 
 import { OrderService } from './order.service';
-import { NewOrderDto } from './dto/new-order.dto';
 import {
   ICountAndRowsOrdersResponse,
   IOrderQuery,
-  IOrderResponse,
   IOrdersResponse,
 } from './types';
 
@@ -40,7 +35,8 @@ export class OrderController {
   ): Promise<ICountAndRowsOrdersResponse> {
     return this.orderService.findAndCountAllOrders(query);
   }
-
+  
+  /*
   // запрос для создания нового заказа
   @Post('create')
   @HttpCode(HttpStatus.CREATED)
@@ -77,4 +73,5 @@ export class OrderController {
       clientAnbarId,
     });
   }
+  */
 }

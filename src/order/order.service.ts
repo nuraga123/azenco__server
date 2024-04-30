@@ -2,10 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 
 import { Order } from './order.model';
-import { AnbarService } from 'src/anbars/anbar.service';
 import { UsersService } from 'src/users/users.service';
 import { HistoryService } from 'src/history/history.service';
-import { NewOrderDto } from './dto/new-order.dto';
 import {
   ICountAndRowsOrdersResponse,
   IOrderQuery,
@@ -13,7 +11,7 @@ import {
   IOrdersResponse,
 } from './types';
 import { ErrorService } from 'src/errors/errors.service';
-import { CreatedAnbarDto } from 'src/anbars/dto/create-anbar.dto';
+import { BarnService } from 'src/barn/service/barn.service';
 
 @Injectable()
 export class OrderService {
@@ -22,7 +20,7 @@ export class OrderService {
     @InjectModel(Order)
     private readonly orderModel: typeof Order,
     private readonly usersService: UsersService,
-    private readonly anbarService: AnbarService,
+    private readonly barnService: BarnService,
     private readonly errorService: ErrorService,
     private readonly historyService: HistoryService,
   ) {
@@ -78,6 +76,7 @@ export class OrderService {
     }
   }
 
+  /*
   // Создание заказа
   async createOrder(newOrderDto: NewOrderDto): Promise<IOrderResponse> {
     try {
@@ -340,4 +339,5 @@ export class OrderService {
       return this.errorService.errorsMessage(e);
     }
   }
+  */
 }

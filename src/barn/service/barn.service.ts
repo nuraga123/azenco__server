@@ -1,19 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 
-import {
-  IBarnsUsernamesResponse,
-  IBarnsResponce,
-  IBarnResponce,
-  IBarnUsernameItem,
-} from './types';
-import { Barn } from './barn_base.model';
+import { Barn } from '../model/barn.model';
+import { IBarnText, IUserIdAndProductId } from '../types';
+
 import { UsersService } from 'src/users/users.service';
 import { HistoryService } from 'src/history/history.service';
 import { ProductsService } from 'src/products/products.service';
 import { ErrorService } from 'src/errors/errors.service';
-import { CreatedAnbarDto } from './dto/create-anbar.dto';
-import { UpdatedAnbarDto } from './dto/update-anbar.dto';
+
+// import { CreatedAnbarDto } from '../dto/create-anbar.dto';
+// import { UpdatedAnbarDto } from '../dto/update-anbar.dto';
 
 @Injectable()
 export class BarnService {
@@ -21,7 +18,7 @@ export class BarnService {
 
   constructor(
     @InjectModel(Barn)
-    private anbarModel: typeof Barn,
+    private barnModel: typeof Barn,
     private readonly usersService: UsersService,
     private readonly productsService: ProductsService,
     private readonly historyService: HistoryService,
@@ -30,87 +27,100 @@ export class BarnService {
     /**/
   }
 
-  // получение всех анбаров
-  async findAll(): Promise<IBarnsResponce> {
+  barnText: IBarnText = {
+    ID_ERROR: 'ID Меньше или равно 0 !',
+    NOT_BARN: 'Нет Амбара !',
+    NOT_BARNS: 'Нетy Амбаров !',
+    NOT_ID_BARN: 'В базе данных нет амбара с ID:',
+    NOT_USERNAME_BARNS: 'Нет имен амбаров !',
+    NOT_PRODUCT_ID: 'нет user ID  или продукта ID',
+  };
+
+  // получение всех амбаров
+  async findAll() {
     try {
-      const anbars = await this.anbarModel.findAll();
-      if (!anbars?.length) return { error_message: 'Нет Анбаров!' };
-      return { anbars };
-    } catch (error) {
-      return this.errorService.errorsMessage(error);
-    }
-  }
-
-  // поиск амбара по id
-  async findOneAnbarId(id: number): Promise<IBarnResponce> {
-    try {
-      const anbar = await this.anbarModel.findOne({ where: { id } });
-      if (!anbar) return { error_message: `не найден анбар по ID: ${id}` };
-      return { anbar };
-    } catch (error) {
-      return this.errorService.errorsMessage(error);
-    }
-  }
-
-  // данные об имен пользователей анбара
-  async getAnbarsUsernames(name: string): Promise<IBarnsUsernamesResponse> {
-    try {
-      const anbars: IBarnUsernameItem[] = await this.anbarModel.findAll({
-        attributes: ['username', 'userId'],
-      });
-
-      if (!anbars.length) return { error_message: 'Нет Имен амбаров' };
-
-      const uniqueEntries: IAnbarUsernameItem[] = [
-        ...new Map(anbars.map((item) => [item.userId, item])).values(),
-      ];
-
-      if (!uniqueEntries.length) return { error_message: 'Нет Имен амбаров' };
-
-      const usernames: IAnbarUsernameItem[] = uniqueEntries.filter(
-        (item) => item.username !== name,
-      );
-      return { usernames };
-    } catch (error) {
-      return this.errorService.errorsMessage(error);
-    }
-  }
-
-  // Поиск продуктов по userId в анбаре
-  async findAllByUserId(userId: number): Promise<IAnbarsResponce> {
-    try {
-      const anbars = await this.anbarModel.findAll({ where: { userId } });
-      return { anbars };
-    } catch (error) {
-      return this.errorService.errorsMessage(error);
-    }
-  }
-
-  async findAnbarByUserIdAndProductId({
-    userId,
-    productId,
-  }: {
-    userId: number;
-    productId: number;
-  }): Promise<IBarnResponce> {
-    try {
-      if (!userId || !productId) {
-        return { error_message: 'нет user ID  или продукта ID' };
-      }
-
-      const find = { where: { userId, productId } };
-      const anbar = await this.anbarModel.findOne(find);
-      if (!anbar?.id) return { error_message: 'не найден амбар' };
-      return { anbar };
+      const barns = await this.barnModel.findAll();
+      if (!barns?.length) return { message: this.barnText.NOT_BARNS };
+      return { barns };
     } catch (e) {
       return this.errorService.errorsMessage(e);
     }
   }
 
+  // поиск амбара по id
+  async findOneAnbarId(id: number) {
+    try {
+      if (+id <= 0) return { error_message: this.barnText.ID_ERROR };
+
+      const barn = await this.barnModel.findOne({ where: { id } });
+      if (!barn?.id) return { message: `${this.barnText.NOT_ID_BARN} ${id}!` };
+
+      return { barn };
+    } catch (e) {
+      return this.errorService.errorsMessage(e);
+    }
+  }
+
+  // данные об имен пользователей анбара
+  async getAnbarsUsernames(myUserNameBarn: string) {
+    try {
+      const barns = await this.barnModel.findAll({
+        attributes: ['username', 'userId'],
+      });
+
+      if (!barns.length) return { message: this.barnText.NOT_USERNAME_BARNS };
+
+      const barnsMapValues = [
+        ...new Map(barns.map((barn) => [barn.userId, barn])).values(),
+      ];
+
+      if (!barnsMapValues.length)
+        return { message: this.barnText.NOT_USERNAME_BARNS };
+
+      const usernames = barnsMapValues.filter(
+        (barn) => barn.username !== myUserNameBarn,
+      );
+
+      return { usernames };
+    } catch (e) {
+      return this.errorService.errorsMessage(e);
+    }
+  }
+
+  // Поиск продуктов по userId в анбаре
+  async findAllByUserId(userId: number) {
+    try {
+      const barns = await this.barnModel.findAll({ where: { userId } });
+      if (barns.length <= 0) return { message: this.barnText.NOT_BARNS };
+      return { barns };
+    } catch (e) {
+      return this.errorService.errorsMessage(e);
+    }
+  }
+
+  async findBarnByUserIdAndProductId({
+    userId,
+    productId,
+  }: IUserIdAndProductId) {
+    try {
+      if (!userId || !productId) {
+        return {
+          error_message: this.barnText.ID_ERROR,
+        };
+      }
+
+      const options = { where: { userId, productId } };
+      const barn = await this.barnModel.findOne(options);
+      if (!barn?.id) return { error_message: this.barnText.NOT_BARN };
+      return { barn };
+    } catch (e) {
+      return this.errorService.errorsMessage(e);
+    }
+  }
+
+/*
   // Добавить товар в амбар
-  async createNewAnbar(
-    createdAnbarDto: CreatedAnbarDto,
-  ): Promise<IBarnResponce> {
+  async createNewAnbar(createdAnbarDto: CreatedAnbarDto) {
     try {
       const {
         userId,
@@ -291,4 +301,6 @@ export class BarnService {
       return { message };
     }
   }
+
+  */
 }

@@ -12,8 +12,8 @@ import { TokenModule } from './token/token.module';
 import { OrderModule } from './order/order.module';
 import { HistoryModule } from './history/history.module';
 import { CarsModule } from './cars/cars.module';
-import { AnbarModule } from './anbars/anbar.module';
 import { ErrorsModule } from './errors/errors.module';
+import { BarnModule } from './barn/module/barn.module';
 
 @Module({
   imports: [
@@ -34,7 +34,7 @@ import { ErrorsModule } from './errors/errors.module';
     ConfigModule.forRoot({
       load: [databaseConfig],
     }),
-    AnbarModule,
+    BarnModule,
     UsersModule,
     AuthModule,
     ProductsModule,

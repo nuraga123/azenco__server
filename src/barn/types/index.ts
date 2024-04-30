@@ -1,5 +1,5 @@
 import { Op, WhereOptions } from 'sequelize';
-import { Barn } from '../barn_base.model';
+import { Barn } from '../model/barn.model';
 export interface IBarnErrorMessage {
   error_message?: string;
 }
@@ -58,4 +58,19 @@ export interface IStock {
   specificStock: number;
   previousStock: number;
   lostStock: number;
+}
+
+
+export interface IBarnText {
+  ID_ERROR: string;
+  NOT_BARN: string;
+  NOT_ID_BARN: string;
+  NOT_BARNS: string;
+  NOT_USERNAME_BARNS: string;
+  NOT_PRODUCT_ID: string;
+}
+
+export interface IUserIdAndProductId {
+  userId: number;
+  productId: number;
 }
