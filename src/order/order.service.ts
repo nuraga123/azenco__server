@@ -18,7 +18,6 @@ import { CreatedAnbarDto } from 'src/anbars/dto/create-anbar.dto';
 @Injectable()
 export class OrderService {
   // Инициализация логгера
-
   constructor(
     @InjectModel(Order)
     private readonly orderModel: typeof Order,
@@ -214,6 +213,7 @@ export class OrderService {
       if (anbarError) return { error_message: anbarError };
 
       const message: string = `Заказ ${order.id} успешно отправлен! В вашем Амбаре №${anbar.id} на месте: новые - ${anbar.newStock} | использованные - ${anbar.usedStock} | сломанные - ${anbar.brokenStock} | ${anbar.unit} ${anbar.name}`;
+
       order.status = 'заказ_отправлен_клиенту';
       order.description = message;
 
@@ -225,6 +225,12 @@ export class OrderService {
         username: anbar.username,
         message,
       });
+
+      const { message: removeMessage, error_message: errorMessageRemove } =
+        await this.anbarService.removeAnbar(+id);
+
+      if (errorMessageRemove) return { error_message: errorMessageRemove };
+      if (removeMessage) return { message: removeMessage };
 
       return { order, message };
     } catch (e) {
@@ -247,10 +253,9 @@ export class OrderService {
       const { anbar: clientAnbar, error_message: anbarError } =
         await this.anbarService.findOneAnbarId(+clientAnbarId);
 
-      if (anbarError) {
-        return { error_message: anbarError };
-      }
-      const { newStock, brokenStock, usedStock, lostStock } = clientAnbar;
+      if (anbarError) return { error_message: anbarError };
+
+      const { newStock, usedStock, brokenStock, lostStock } = clientAnbar;
 
       this.errorService.log(clientAnbar);
 
@@ -263,10 +268,11 @@ export class OrderService {
           lostStock,
           clientLocation,
         } = order;
+
         // Если анбар с данным продуктом не существует, создаем новый
         const createdAnbarDto: CreatedAnbarDto = {
           userId: +clientId,
-          productId: 3,
+          productId,
           newStock,
           usedStock,
           brokenStock,
@@ -296,17 +302,23 @@ export class OrderService {
         return { order, message };
       } else {
         // Если анбар с данным продуктом существует, увеличиваем количество продукта на анбаре
-        clientAnbar.newStock = +clientAnbar.newStock + +newStock;
-        clientAnbar.usedStock = +clientAnbar.usedStock + +usedStock;
-        clientAnbar.brokenStock = +clientAnbar.brokenStock + +brokenStock;
-        clientAnbar.lostStock = +clientAnbar.lostStock + +lostStock;
+        clientAnbar.newStock = +clientAnbar.newStock + (+newStock || 0);
+
+        clientAnbar.usedStock = +clientAnbar.usedStock + (+usedStock || 0);
+
+        clientAnbar.brokenStock =
+          +clientAnbar.brokenStock + (+brokenStock || 0);
+
+        clientAnbar.lostStock = +clientAnbar.lostStock + (+lostStock || 0);
 
         const totalStock =
           +clientAnbar.newStock +
-          clientAnbar.usedStock +
-          clientAnbar.brokenStock;
+          +clientAnbar.usedStock +
+          +clientAnbar.brokenStock;
+
         const totalPrice = +totalStock * +clientAnbar.price;
         clientAnbar.totalPrice = +totalPrice;
+
         await clientAnbar.save();
 
         const message = `Продукт добавлен к анбару №${clientAnbar.id} Заказ ${order.id} успешно доставлен! Клиент: ${order.clientUserName} по адресу: ${order.clientLocation}`;
@@ -321,6 +333,7 @@ export class OrderService {
           username: clientAnbar.username,
           message,
         });
+
         return { order, message };
       }
     } catch (e) {

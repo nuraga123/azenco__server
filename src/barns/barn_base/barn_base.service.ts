@@ -2,27 +2,26 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 
 import {
-  IAnbarsUsernamesResponse,
-  IAnbarsResponce,
-  IAnbarResponce,
-  IAnbarUsernameItem,
+  IBarnsUsernamesResponse,
+  IBarnsResponce,
+  IBarnResponce,
+  IBarnUsernameItem,
 } from './types';
-import { Anbar } from './anbar.model';
+import { Barn } from './barn_base.model';
 import { UsersService } from 'src/users/users.service';
 import { HistoryService } from 'src/history/history.service';
 import { ProductsService } from 'src/products/products.service';
+import { ErrorService } from 'src/errors/errors.service';
 import { CreatedAnbarDto } from './dto/create-anbar.dto';
 import { UpdatedAnbarDto } from './dto/update-anbar.dto';
-import { ErrorService } from 'src/errors/errors.service';
-import { CreateOptions } from 'sequelize';
 
 @Injectable()
-export class AnbarService {
-  private readonly logger = new Logger(AnbarService.name);
+export class BarnService {
+  private readonly logger = new Logger(BarnService.name);
 
   constructor(
-    @InjectModel(Anbar)
-    private anbarModel: typeof Anbar,
+    @InjectModel(Barn)
+    private anbarModel: typeof Barn,
     private readonly usersService: UsersService,
     private readonly productsService: ProductsService,
     private readonly historyService: HistoryService,
@@ -32,7 +31,7 @@ export class AnbarService {
   }
 
   // получение всех анбаров
-  async findAll(): Promise<IAnbarsResponce> {
+  async findAll(): Promise<IBarnsResponce> {
     try {
       const anbars = await this.anbarModel.findAll();
       if (!anbars?.length) return { error_message: 'Нет Анбаров!' };
@@ -43,7 +42,7 @@ export class AnbarService {
   }
 
   // поиск амбара по id
-  async findOneAnbarId(id: number): Promise<IAnbarResponce> {
+  async findOneAnbarId(id: number): Promise<IBarnResponce> {
     try {
       const anbar = await this.anbarModel.findOne({ where: { id } });
       if (!anbar) return { error_message: `не найден анбар по ID: ${id}` };
@@ -54,9 +53,9 @@ export class AnbarService {
   }
 
   // данные об имен пользователей анбара
-  async getAnbarsUsernames(name: string): Promise<IAnbarsUsernamesResponse> {
+  async getAnbarsUsernames(name: string): Promise<IBarnsUsernamesResponse> {
     try {
-      const anbars: IAnbarUsernameItem[] = await this.anbarModel.findAll({
+      const anbars: IBarnUsernameItem[] = await this.anbarModel.findAll({
         attributes: ['username', 'userId'],
       });
 
@@ -93,7 +92,7 @@ export class AnbarService {
   }: {
     userId: number;
     productId: number;
-  }): Promise<IAnbarResponce> {
+  }): Promise<IBarnResponce> {
     try {
       if (!userId || !productId) {
         return { error_message: 'нет user ID  или продукта ID' };
@@ -111,7 +110,7 @@ export class AnbarService {
   // Добавить товар в амбар
   async createNewAnbar(
     createdAnbarDto: CreatedAnbarDto,
-  ): Promise<IAnbarResponce> {
+  ): Promise<IBarnResponce> {
     try {
       const {
         userId,
@@ -177,7 +176,7 @@ export class AnbarService {
       const totalStock: number = +newStock + +usedStock + +brokenStock;
       const totalPrice: number = +totalStock * +product.price;
 
-      const anbar: Anbar = await this.anbarModel.create<Anbar>({
+      const anbar: Barn = await this.anbarModel.create<Barn>({
         username: user.username,
         azencoCode: product.azencoCode,
         name: product.name,
@@ -197,7 +196,7 @@ export class AnbarService {
         totalStock,
         totalPrice,
       });
-      const message: string = `Новый Амбар! Складчик: ${anbar.username} Товар: ${anbar.name} | новые - ${anbar.newStock} | использованные - ${anbar.usedStock} | сломанные - ${anbar.brokenStock} | потерянные - ${anbar.lostStock} | ${product.unit}`;
+      const message: string = `Новый Амбар! Складчик: ${anbar.username} Товар: ${anbar.name} | новые - ${anbar.newStock} | использованные - ${anbar.usedStock} | сломанные - ${anbar.brokenStock} | потерянные - ${anbar.lostStock} | ${anbar.unit}`;
 
       await this.historyService.createHistory({
         message,
@@ -266,7 +265,7 @@ export class AnbarService {
     return { anbar };
   }
 
-  async update(updatedAnbarDto: UpdatedAnbarDto): Promise<IAnbarResponce> {
+  async updateAnbar(updatedAnbarDto: UpdatedAnbarDto): Promise<IBarnResponce> {
     const { id, ...updateData } = updatedAnbarDto;
     const { anbar, error_message } = await this.findOneAnbarId(+id);
     if (error_message) return { error_message };
@@ -274,5 +273,22 @@ export class AnbarService {
     anbar.update(updateData);
     const message: string = `Складчик: ${anbar.username} обновил амбар №${anbar.id}!`;
     return { anbar, message };
+  }
+
+  async removeAnbar(id: number): Promise<IBarnResponce> {
+    const { anbar, error_message } = await this.findOneAnbarId(id);
+
+    if (error_message) return { error_message };
+
+    const { userId, username, name, unit, azencoCode, totalStock } = anbar;
+
+    if (+totalStock !== 0) {
+      const message: string = `Амбар №${id} успешно удален! Складчик: ${username} | Товар: ${name} | KOD: ${azencoCode} | Общий запас: ${totalStock} ${unit}`;
+      await this.historyService.createHistory({ message, userId, username });
+
+      await anbar.destroy();
+
+      return { message };
+    }
   }
 }

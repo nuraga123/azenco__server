@@ -1,25 +1,24 @@
 import { Op, WhereOptions } from 'sequelize';
-import { Anbar } from '../anbar.model';
-
-export interface IAnbarErrorMessage {
+import { Barn } from '../barn_base.model';
+export interface IBarnErrorMessage {
   error_message?: string;
 }
 
-export interface IAnbarResponce extends IAnbarErrorMessage {
-  anbar?: Anbar;
+export interface IBarnResponce extends IBarnErrorMessage {
+  anbar?: Barn;
   message?: string;
 }
 
-export interface IAnbarsResponce extends IAnbarErrorMessage {
-  anbars?: Anbar[];
+export interface IBarnsResponce extends IBarnErrorMessage {
+  anbars?: Barn[];
 }
 
 export interface ICountAndRowsAnbarsResponce {
-  rows: Anbar[];
+  rows: Barn[];
   count: number;
 }
 
-export interface IAnbarsFilter {
+export interface IBarnsFilter {
   bolt?: string;
   PRR?: string;
   earring?: string;
@@ -37,7 +36,7 @@ export interface IAnbarsQuery {
   earring?: string;
 }
 
-export type AnbarWhereOptions = WhereOptions & {
+export type BarnWhereOptions = WhereOptions & {
   userId?: number;
   productId?: number;
   quantity?: number;
@@ -46,11 +45,17 @@ export type AnbarWhereOptions = WhereOptions & {
   toUsername?: string;
 };
 
-export interface IAnbarUsernameItem {
+export interface IBarnUsernameItem {
   username: string;
   userId: number;
 }
 
-export interface IAnbarsUsernamesResponse extends IAnbarErrorMessage {
-  usernames?: IAnbarUsernameItem[];
+export interface IBarnsUsernamesResponse extends IBarnErrorMessage {
+  usernames?: IBarnUsernameItem[];
+}
+
+export interface IStock {
+  specificStock: number;
+  previousStock: number;
+  lostStock: number;
 }

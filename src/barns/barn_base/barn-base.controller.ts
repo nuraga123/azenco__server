@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { AnbarService } from './anbar.service';
+import { BarnService } from './barn_base.service';
 import { CreatedAnbarDto } from './dto/create-anbar.dto';
 import {
   IAnbarsUsernamesResponse,
@@ -7,8 +7,8 @@ import {
   IAnbarResponce,
 } from './types';
 
-@Controller('anbar')
-export class AnbarController {
+@Controller('barn')
+export class BarnController {
   constructor(private readonly anbarService: AnbarService) {}
 
   // получение имен анбаров
