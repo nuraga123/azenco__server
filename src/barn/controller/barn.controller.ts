@@ -1,16 +1,13 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { BarnService } from '../service/barn.service';
-import { CreatedAnbarDto } from '../dto/create-anbar.dto';
-
+import { CreatedBarnDto } from '../dto/create-barn.dto';
 
 @Controller('barn')
 export class BarnController {
   constructor(private readonly barnService: BarnService) {}
 
   // получение имен анбаров  @Post('usernames')
-  getAnbarsUsernames(
-    @Body('name') name: string,
-  ) {
+  getAnbarsUsernames(@Body('name') name: string) {
     return this.barnService.getAnbarsUsernames(name);
   }
 
@@ -22,27 +19,20 @@ export class BarnController {
 
   // поиск по id анбара
   @Get(':id')
-  async getFindOneAnbarProduct(
-    @Param('id') anbarId: number,
-  ){
+  async getFindOneAnbarProduct(@Param('id') anbarId: number) {
     return await this.barnService.findOneAnbarId(anbarId);
   }
 
   // поиск по userId
   @Get('user/:id')
-  async getAnbarByUserId(
-    @Param('id') userId: number,
-  ) {
+  async getAnbarByUserId(@Param('id') userId: number) {
     return await this.barnService.findAllByUserId(userId);
   }
 
   // новый анбар
   @Post('create')
-  postCreateNewAnbar(
-    @Body() createdAnbarDto: CreatedAnbarDto,
-  ) {
-    // return this.barnService.createNewAnbar(createdAnbarDto);
+  postCreateNewAnbar(@Body() createdBarnDto: CreatedBarnDto) {
+    return this.barnService.createNewAnbar(createdBarnDto);
   }
 }
 export { BarnService };
-

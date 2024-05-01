@@ -1,16 +1,13 @@
 import { Op, WhereOptions } from 'sequelize';
 import { Barn } from '../model/barn.model';
-export interface IBarnErrorMessage {
-  error_message?: string;
+import { IErrorMessage } from '../../errors/types/index';
+
+export interface IBarnResponce extends IErrorMessage {
+  barn?: Barn;
 }
 
-export interface IBarnResponce extends IBarnErrorMessage {
-  anbar?: Barn;
-  message?: string;
-}
-
-export interface IBarnsResponce extends IBarnErrorMessage {
-  anbars?: Barn[];
+export interface IBarnsResponce extends IErrorMessage {
+  barns?: Barn[];
 }
 
 export interface ICountAndRowsAnbarsResponce {
@@ -50,16 +47,9 @@ export interface IBarnUsernameItem {
   userId: number;
 }
 
-export interface IBarnsUsernamesResponse extends IBarnErrorMessage {
+export interface IBarnsUsernamesResponse extends IErrorMessage {
   usernames?: IBarnUsernameItem[];
 }
-
-export interface IStock {
-  specificStock: number;
-  previousStock: number;
-  lostStock: number;
-}
-
 
 export interface IBarnText {
   ID_ERROR: string;
@@ -73,4 +63,11 @@ export interface IBarnText {
 export interface IUserIdAndProductId {
   userId: number;
   productId: number;
+}
+
+export interface IMinusAnbarOrder {
+  anbarId: number;
+  newStock: number;
+  usedStock: number;
+  brokenStock: number;
 }

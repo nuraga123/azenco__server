@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
 
-export class CreatedAnbarDto {
+export class CreatedBarnDto {
   @ApiProperty({ example: 1 })
   @IsNotEmpty()
   readonly userId: number;

@@ -2,15 +2,21 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 
 import { Barn } from '../model/barn.model';
-import { IBarnText, IUserIdAndProductId } from '../types';
+import {
+  IBarnResponce,
+  IBarnsResponce,
+  IBarnsUsernamesResponse,
+  IBarnText,
+  IMinusAnbarOrder,
+  IUserIdAndProductId,
+} from '../types';
 
 import { UsersService } from 'src/users/users.service';
 import { HistoryService } from 'src/history/history.service';
 import { ProductsService } from 'src/products/products.service';
 import { ErrorService } from 'src/errors/errors.service';
-
-// import { CreatedAnbarDto } from '../dto/create-anbar.dto';
-// import { UpdatedAnbarDto } from '../dto/update-anbar.dto';
+import { CreatedBarnDto } from '../dto/create-barn.dto';
+import { UpdatedBarnDto } from '../dto/update-barn.dto';
 
 @Injectable()
 export class BarnService {
@@ -37,7 +43,7 @@ export class BarnService {
   };
 
   // получение всех амбаров
-  async findAll() {
+  async findAll(): Promise<IBarnsResponce> {
     try {
       const barns = await this.barnModel.findAll();
       if (!barns?.length) return { message: this.barnText.NOT_BARNS };
@@ -48,7 +54,7 @@ export class BarnService {
   }
 
   // поиск амбара по id
-  async findOneAnbarId(id: number) {
+  async findOneAnbarId(id: number): Promise<IBarnResponce> {
     try {
       if (+id <= 0) return { error_message: this.barnText.ID_ERROR };
 
@@ -62,7 +68,9 @@ export class BarnService {
   }
 
   // данные об имен пользователей анбара
-  async getAnbarsUsernames(myUserNameBarn: string) {
+  async getAnbarsUsernames(
+    myUserNameBarn: string,
+  ): Promise<IBarnsUsernamesResponse> {
     try {
       const barns = await this.barnModel.findAll({
         attributes: ['username', 'userId'],
@@ -88,7 +96,7 @@ export class BarnService {
   }
 
   // Поиск продуктов по userId в анбаре
-  async findAllByUserId(userId: number) {
+  async findAllByUserId(userId: number): Promise<IBarnsResponce> {
     try {
       const barns = await this.barnModel.findAll({ where: { userId } });
       if (barns.length <= 0) return { message: this.barnText.NOT_BARNS };
@@ -118,9 +126,8 @@ export class BarnService {
     }
   }
 
-/*
   // Добавить товар в амбар
-  async createNewAnbar(createdAnbarDto: CreatedAnbarDto) {
+  async createNewAnbar(createdBarnDto: CreatedBarnDto) {
     try {
       const {
         userId,
@@ -130,7 +137,7 @@ export class BarnService {
         usedStock,
         brokenStock,
         lostStock,
-      } = createdAnbarDto;
+      } = createdBarnDto;
 
       // Проверка на корректность значений
       if (!userId || !productId) {
@@ -172,21 +179,21 @@ export class BarnService {
       }
 
       // Поиск записи в анбаре для данного пользователя и продукта
-      const existingAnbar = await this.findAnbarByUserIdAndProductId({
+      const existingAnbar = await this.findBarnByUserIdAndProductId({
         userId,
         productId,
       });
 
-      this.logger.log(existingAnbar.anbar);
+      this.logger.log(existingAnbar);
 
-      if (existingAnbar.anbar) {
+      if (existingAnbar) {
         return { error_message: 'такой анбар уже существует' };
       }
 
       const totalStock: number = +newStock + +usedStock + +brokenStock;
       const totalPrice: number = +totalStock * +product.price;
 
-      const anbar: Barn = await this.anbarModel.create<Barn>({
+      const barn: Barn = await this.barnModel.create<Barn>({
         username: user.username,
         azencoCode: product.azencoCode,
         name: product.name,
@@ -206,15 +213,16 @@ export class BarnService {
         totalStock,
         totalPrice,
       });
-      const message: string = `Новый Амбар! Складчик: ${anbar.username} Товар: ${anbar.name} | новые - ${anbar.newStock} | использованные - ${anbar.usedStock} | сломанные - ${anbar.brokenStock} | потерянные - ${anbar.lostStock} | ${anbar.unit}`;
+
+      const message: string = `Новый Амбар! Складчик: ${barn.username} Товар: ${barn.productName} | новые - ${barn.newStock} | использованные - ${barn.usedStock} | сломанные - ${barn.brokenStock} | потерянные - ${barn.lostStock} | ${barn.unit}`;
 
       await this.historyService.createHistory({
         message,
         userId,
-        username: anbar.username,
+        username: barn.username,
       });
 
-      return { anbar, message };
+      return { barn, message };
     } catch (error) {
       return this.errorService.errorsMessage(error);
     }
@@ -226,81 +234,71 @@ export class BarnService {
     newStock,
     usedStock,
     brokenStock,
-  }: {
-    anbarId: number;
-    newStock: number;
-    usedStock: number;
-    brokenStock: number;
-  }) {
+  }: IMinusAnbarOrder) {
     if (!anbarId) return { error_message: 'нет anbarId!' };
     if (!newStock || !usedStock || !brokenStock) {
       return { error_message: 'Количество в заказе не указано!' };
     }
 
-    const { anbar, error_message } = await this.findOneAnbarId(anbarId);
+    const { barn, error_message } = await this.findOneAnbarId(anbarId);
 
     if (error_message) return { error_message };
-    if (!anbar) return { error_message: 'Склад не найден.' };
-    if (!anbar.newStock) return { error_message: 'нет запаса на складе' };
-    if (!anbar.newStock) return { error_message: 'нет запаса на складе' };
-    if (!anbar.newStock) return { error_message: 'нет запаса на складе' };
-    if (!anbar.newStock) return { error_message: 'нет запаса на складе' };
-    if (!anbar.price) return { error_message: 'Цена не указана.' };
+    if (!barn) return { error_message: 'Склад не найден.' };
+    if (!barn.newStock) return { error_message: 'нет запаса на складе' };
+    if (!barn.newStock) return { error_message: 'нет запаса на складе' };
+    if (!barn.newStock) return { error_message: 'нет запаса на складе' };
+    if (!barn.newStock) return { error_message: 'нет запаса на складе' };
+    if (!barn.price) return { error_message: 'Цена не указана.' };
 
     if (newStock <= 0) {
       return { error_message: 'Неверное количество товара для заказа.' };
     }
 
-    if (+anbar.newStock < +newStock) {
+    if (+barn.newStock < +newStock) {
       return {
-        error_message: `Недостаточное количество товара "${anbar.name}" на складе.`,
+        error_message: `Недостаточное количество товара "${barn.productName}" на складе.`,
       };
     }
 
-    // save prev state
-    anbar.previousStock = +anbar.totalStock;
-    anbar.previousTotalPrice = +anbar.totalPrice;
-
     // operation minus
-    anbar.newStock = +anbar.newStock - +newStock;
-    anbar.usedStock = +anbar.usedStock - +usedStock;
-    anbar.brokenStock = +anbar.brokenStock - +brokenStock;
+    barn.newStock = +barn.newStock - +newStock;
+    barn.usedStock = +barn.usedStock - +usedStock;
+    barn.brokenStock = +barn.brokenStock - +brokenStock;
 
-    const totalStock = +anbar.newStock + +anbar.usedStock + +anbar.brokenStock;
-    anbar.totalStock = +totalStock;
+    const totalStock = +barn.newStock + +barn.usedStock + +barn.brokenStock;
+    barn.totalStock = +totalStock;
 
-    anbar.totalPrice = +totalStock * anbar.price;
+    barn.totalPrice = +totalStock * barn.price;
 
-    anbar.save();
-    return { anbar };
+    barn.save();
+    return { barn };
   }
 
-  async updateAnbar(updatedAnbarDto: UpdatedAnbarDto): Promise<IBarnResponce> {
+  async updateAnbar(updatedAnbarDto: UpdatedBarnDto): Promise<IBarnResponce> {
     const { id, ...updateData } = updatedAnbarDto;
-    const { anbar, error_message } = await this.findOneAnbarId(+id);
+    const { barn, error_message } = await this.findOneAnbarId(+id);
     if (error_message) return { error_message };
 
-    anbar.update(updateData);
-    const message: string = `Складчик: ${anbar.username} обновил амбар №${anbar.id}!`;
-    return { anbar, message };
+    barn.update(updateData);
+    const message: string = `Складчик: ${barn.username} обновил амбар №${barn.id}!`;
+    return { barn, message };
   }
 
   async removeAnbar(id: number): Promise<IBarnResponce> {
-    const { anbar, error_message } = await this.findOneAnbarId(id);
+    const { barn, error_message } = await this.findOneAnbarId(id);
 
     if (error_message) return { error_message };
 
-    const { userId, username, name, unit, azencoCode, totalStock } = anbar;
+    const { userId, username, productName, unit, azencoCode, totalStock } =
+      barn;
 
     if (+totalStock !== 0) {
-      const message: string = `Амбар №${id} успешно удален! Складчик: ${username} | Товар: ${name} | KOD: ${azencoCode} | Общий запас: ${totalStock} ${unit}`;
+      const message: string = `Амбар №${id} успешно удален! Складчик: ${username} | Товар: ${productName} | KOD: ${azencoCode} | Общий запас: ${totalStock} ${unit}`;
       await this.historyService.createHistory({ message, userId, username });
 
-      await anbar.destroy();
+      await barn.destroy();
 
       return { message };
     }
   }
-
-  */
 }
