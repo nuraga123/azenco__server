@@ -43,7 +43,7 @@ export class BarnService {
   };
 
   // получение всех амбаров
-  async findAll(): Promise<IBarnsResponce> {
+  async findAllBarns(): Promise<IBarnsResponce> {
     try {
       const barns = await this.barnModel.findAll();
       if (!barns?.length) return { message: this.barnText.NOT_BARNS };
@@ -54,7 +54,7 @@ export class BarnService {
   }
 
   // поиск амбара по id
-  async findOneAnbarId(id: number): Promise<IBarnResponce> {
+  async findOneBarnId(id: number): Promise<IBarnResponce> {
     try {
       if (+id <= 0) return { error_message: this.barnText.ID_ERROR };
 
@@ -67,10 +67,8 @@ export class BarnService {
     }
   }
 
-  // данные об имен пользователей анбара
-  async getAnbarsUsernames(
-    myUserNameBarn: string,
-  ): Promise<IBarnsUsernamesResponse> {
+  // данные об имен пользователей всех амбаров
+  async findAllBarnsUsername(noname: string): Promise<IBarnsUsernamesResponse> {
     try {
       const barns = await this.barnModel.findAll({
         attributes: ['username', 'userId'],
@@ -86,7 +84,7 @@ export class BarnService {
         return { message: this.barnText.NOT_USERNAME_BARNS };
 
       const usernames = barnsMapValues.filter(
-        (barn) => barn.username !== myUserNameBarn,
+        (barn) => barn.username !== noname,
       );
 
       return { usernames };
@@ -96,7 +94,7 @@ export class BarnService {
   }
 
   // Поиск продуктов по userId в анбаре
-  async findAllByUserId(userId: number): Promise<IBarnsResponce> {
+  async findAllBarnsUserId(userId: number): Promise<IBarnsResponce> {
     try {
       const barns = await this.barnModel.findAll({ where: { userId } });
       if (barns.length <= 0) return { message: this.barnText.NOT_BARNS };
@@ -106,7 +104,8 @@ export class BarnService {
     }
   }
 
-  async findBarnByUserIdAndProductId({
+  // поиск амбара по userId и productId
+  async findOneBarnUserIdAndProductId({
     userId,
     productId,
   }: IUserIdAndProductId) {
@@ -127,7 +126,7 @@ export class BarnService {
   }
 
   // Добавить товар в амбар
-  async createNewAnbar(createdBarnDto: CreatedBarnDto) {
+  async createBarn(createdBarnDto: CreatedBarnDto) {
     try {
       const {
         userId,
@@ -179,7 +178,7 @@ export class BarnService {
       }
 
       // Поиск записи в анбаре для данного пользователя и продукта
-      const existingAnbar = await this.findBarnByUserIdAndProductId({
+      const existingAnbar = await this.findOneBarnUserIdAndProductId({
         userId,
         productId,
       });
@@ -240,7 +239,7 @@ export class BarnService {
       return { error_message: 'Количество в заказе не указано!' };
     }
 
-    const { barn, error_message } = await this.findOneAnbarId(anbarId);
+    const { barn, error_message } = await this.findOneBarnId(anbarId);
 
     if (error_message) return { error_message };
     if (!barn) return { error_message: 'Склад не найден.' };
@@ -274,9 +273,10 @@ export class BarnService {
     return { barn };
   }
 
-  async updateAnbar(updatedAnbarDto: UpdatedBarnDto): Promise<IBarnResponce> {
+  // обновление амбара
+  async updateBarn(updatedAnbarDto: UpdatedBarnDto): Promise<IBarnResponce> {
     const { id, ...updateData } = updatedAnbarDto;
-    const { barn, error_message } = await this.findOneAnbarId(+id);
+    const { barn, error_message } = await this.findOneBarnId(+id);
     if (error_message) return { error_message };
 
     barn.update(updateData);
@@ -284,21 +284,21 @@ export class BarnService {
     return { barn, message };
   }
 
-  async removeAnbar(id: number): Promise<IBarnResponce> {
-    const { barn, error_message } = await this.findOneAnbarId(id);
+  // удаление амбара
+  async removeBarn(id: number): Promise<IBarnResponce> {
+    const { barn, error_message } = await this.findOneBarnId(id);
 
     if (error_message) return { error_message };
 
     const { userId, username, productName, unit, azencoCode, totalStock } =
       barn;
 
-    if (+totalStock !== 0) {
-      const message: string = `Амбар №${id} успешно удален! Складчик: ${username} | Товар: ${productName} | KOD: ${azencoCode} | Общий запас: ${totalStock} ${unit}`;
-      await this.historyService.createHistory({ message, userId, username });
+    const message: string = `Амбар №${id} успешно удален! Складчик: ${username} | Товар: ${productName} | KOD: ${azencoCode} | Общий запас: ${totalStock} ${unit}`;
 
-      await barn.destroy();
+    await this.historyService.createHistory({ message, userId, username });
 
-      return { message };
-    }
+    await barn.destroy();
+
+    return { message };
   }
 }

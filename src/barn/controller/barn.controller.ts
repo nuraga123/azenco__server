@@ -7,32 +7,32 @@ export class BarnController {
   constructor(private readonly barnService: BarnService) {}
 
   // получение имен анбаров  @Post('usernames')
-  getAnbarsUsernames(@Body('name') name: string) {
-    return this.barnService.getAnbarsUsernames(name);
+  getBarnsUsername(@Body('noname') noname: string) {
+    return this.barnService.findAllBarnsUsername(noname);
   }
 
   // все анбары
   @Get('all')
-  getAnbars() {
-    return this.barnService.findAll();
+  getBarns() {
+    return this.barnService.findAllBarns();
   }
 
   // поиск по id анбара
   @Get(':id')
-  async getFindOneAnbarProduct(@Param('id') anbarId: number) {
-    return await this.barnService.findOneAnbarId(anbarId);
+  async getBarnId(@Param('id') anbarId: number) {
+    return await this.barnService.findOneBarnId(anbarId);
   }
 
   // поиск по userId
   @Get('user/:id')
-  async getAnbarByUserId(@Param('id') userId: number) {
-    return await this.barnService.findAllByUserId(userId);
+  async getBarnsUserId(@Param('id') userId: number) {
+    return await this.barnService.findAllBarnsUserId(userId);
   }
 
   // новый анбар
   @Post('create')
-  postCreateNewAnbar(@Body() createdBarnDto: CreatedBarnDto) {
-    return this.barnService.createNewAnbar(createdBarnDto);
+  postCreateBarn(@Body() createdBarnDto: CreatedBarnDto) {
+    return this.barnService.createBarn(createdBarnDto);
   }
 }
 export { BarnService };
