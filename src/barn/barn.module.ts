@@ -5,8 +5,9 @@ import { UsersModule } from 'src/users/users.module';
 import { ProductsModule } from 'src/products/products.module';
 import { HistoryModule } from 'src/history/history.module';
 import { ErrorsModule } from 'src/errors/errors.module';
-import { Barn } from '../model/barn.model';
-import { BarnService } from '../service/barn.service';
+import { Barn } from './barn.model';
+import { BarnService } from './barn.service';
+import { BarnController } from './barn.controller';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { BarnService } from '../service/barn.service';
     HistoryModule,
     ErrorsModule,
   ],
+  controllers: [BarnController],
   providers: [BarnService],
   exports: [BarnService],
 })

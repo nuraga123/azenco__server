@@ -8,7 +8,7 @@ import { UsersModule } from 'src/users/users.module';
 
 import { HistoryModule } from 'src/history/history.module';
 import { ErrorsModule } from 'src/errors/errors.module';
-import { BarnModule } from 'src/barn/module/barn.module';
+import { BarnModule } from 'src/barn/barn.module';
 
 @Module({
   imports: [

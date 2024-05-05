@@ -11,7 +11,7 @@ import {
   IOrdersResponse,
 } from './types';
 import { ErrorService } from 'src/errors/errors.service';
-import { BarnService } from 'src/barn/service/barn.service';
+import { BarnService } from 'src/barn/barn.service';
 
 @Injectable()
 export class OrderService {

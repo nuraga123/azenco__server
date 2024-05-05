@@ -1,20 +1,21 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { BarnService } from '../service/barn.service';
-import { CreatedBarnDto } from '../dto/create-barn.dto';
+import { BarnService } from './barn.service';
+import { CreatedBarnDto } from './dto/create-barn.dto';
 
 @Controller('barn')
 export class BarnController {
   constructor(private readonly barnService: BarnService) {}
 
-  // получение имен анбаров  @Post('usernames')
-  getBarnsUsername(@Body('noname') noname: string) {
-    return this.barnService.findAllBarnsUsername(noname);
-  }
-
   // все анбары
   @Get('all')
   getBarns() {
     return this.barnService.findAllBarns();
+  }
+
+  // получение имен анбаров
+  @Post('usersnames')
+  getBarnsUsernames(@Body('noname') noname: string) {
+    return this.barnService.findAllBarnsUsername(noname);
   }
 
   // поиск по id анбара
@@ -35,4 +36,3 @@ export class BarnController {
     return this.barnService.createBarn(createdBarnDto);
   }
 }
-export { BarnService };

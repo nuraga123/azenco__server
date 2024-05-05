@@ -1,5 +1,5 @@
 import { Op, WhereOptions } from 'sequelize';
-import { Barn } from '../model/barn.model';
+import { Barn } from '../barn.model';
 import { IErrorMessage } from '../../errors/types/index';
 
 export interface IBarnResponce extends IErrorMessage {
@@ -10,9 +10,9 @@ export interface IBarnsResponce extends IErrorMessage {
   barns?: Barn[];
 }
 
-export interface ICountAndRowsAnbarsResponce {
-  rows: Barn[];
-  count: number;
+export interface ICountAndRowsBarnsResponce extends IErrorMessage {
+  rows?: Barn[];
+  count?: number;
 }
 
 export interface IBarnsFilter {
@@ -22,12 +22,12 @@ export interface IBarnsFilter {
   price: { [Op.between]: number[] };
 }
 
-export interface IAnbarsQuery {
+export interface IBarnsQuery {
   limit: string;
   offset: string;
   priceFrom?: string;
   priceTo?: string;
-  sortBy?: string;
+  sortBy?: 'ASC' | 'DESK';
   bolt?: string;
   PRR?: string;
   earring?: string;

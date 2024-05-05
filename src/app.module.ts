@@ -13,7 +13,7 @@ import { OrderModule } from './order/order.module';
 import { HistoryModule } from './history/history.module';
 import { CarsModule } from './cars/cars.module';
 import { ErrorsModule } from './errors/errors.module';
-import { BarnModule } from './barn/module/barn.module';
+import { BarnModule } from './barn/barn.module';
 
 @Module({
   imports: [
