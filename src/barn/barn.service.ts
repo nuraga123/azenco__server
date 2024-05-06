@@ -371,8 +371,7 @@ export class BarnService {
 
     if (error_message) return { error_message };
 
-    const { userId, username, name, unit, azencoCode, totalStock } =
-      barn;
+    const { userId, username, name, unit, azencoCode, totalStock } = barn;
 
     const message: string = `Амбар №${id} успешно удален! Складчик: ${username} | Товар: ${name} | KOD: ${azencoCode} | Общий запас: ${totalStock} ${unit}`;
 
