@@ -7,4 +7,5 @@ export const barnText: IBarnText = {
   NOT_ID_BARN: 'В базе данных нет амбара с ID:',
   NOT_USERNAME_BARNS: 'Нет имен амбаров !',
   NOT_PRODUCT_ID: 'нет user ID  или продукта ID',
+  WRONG_DATA: 'Неверные данные!',
 };

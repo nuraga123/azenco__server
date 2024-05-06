@@ -142,7 +142,7 @@ export class ProductsService {
     }
 
     // Проверка наличия и корректности единицы измерения
-    if (typeof unit !== 'string' || unit.length <= 1) {
+    if (typeof unit !== 'string') {
       errors.push(
         'Единица измерения должна быть строкой длиной больше 1 символа',
       );
@@ -272,10 +272,7 @@ export class ProductsService {
           ? updatedProduct.type
           : product.type;
 
-      product.unit =
-        updatedProduct.unit && updatedProduct.unit.length >= 1
-          ? updatedProduct.unit
-          : product.unit;
+      product.unit = !!updatedProduct.unit ? updatedProduct.unit : product.unit;
 
       product.img =
         updatedProduct.img && updatedProduct.img.length >= 1

@@ -55,3 +55,13 @@ export interface IProductsQuery {
 export interface IDeleteProduct extends IError {
   message?: string;
 }
+
+export type IUnit =
+  | 'штук'
+  | 'тон'
+  | 'км'
+  | 'метр'
+  | 'кг'
+  | 'набор'
+  | 'литр'
+  | 'см';

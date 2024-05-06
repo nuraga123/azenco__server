@@ -37,6 +37,71 @@ export class BarnService {
     /**/
   }
 
+  validateStockForUnit(barn: Barn): { message: string } {
+    const {
+      unit,
+      newStock,
+      usedStock,
+      brokenStock,
+      lostNewStock,
+      lostBrokenStock,
+      lostUsedStock,
+    } = barn;
+
+    const stocksToCheck = [
+      newStock,
+      usedStock,
+      brokenStock,
+      lostNewStock,
+      lostBrokenStock,
+      lostUsedStock,
+    ];
+
+    let message = '';
+
+    // штук
+    if (unit === 'штук') {
+      const invalidStock = stocksToCheck.find(
+        (stock) => !Number.isInteger(stock) || stock < 0,
+      );
+
+      if (invalidStock !== undefined) {
+        message =
+          'Количество товара типа "штук" должно быть целым положительным числом!';
+      }
+    }
+
+    // кг
+    if (unit === 'кг') {
+      const invalidStock = stocksToCheck.find((stock) => stock < 0);
+
+      if (invalidStock !== undefined) {
+        message =
+          'Минимальное количество для единицы измерения килограмм должно быть больше или равно нулю';
+      }
+    }
+
+    // литр
+    if (unit === 'литр' || unit === 'см') {
+      const invalidStock = stocksToCheck.find((stock) => stock < 0);
+
+      if (invalidStock !== undefined) {
+        message = `Минимальное количество для единицы измерения ${unit} должно быть больше или равно нулю! `;
+      } else {
+        const invalidStockBelowMin = stocksToCheck.find(
+          (stock) => stock < 0.001,
+        );
+
+        if (invalidStockBelowMin !== undefined) {
+          message = `Минимальное количество для единицы измерения ${unit} должно быть не менее 0.001! `;
+        }
+      }
+    } else {
+      message = 'Неизвестная единица измерения';
+    }
+    return { message };
+  }
+
   // получение всех амбаров
   async findAllBarns(): Promise<IBarnsResponce> {
     try {
@@ -174,7 +239,7 @@ export class BarnService {
 
       // Проверка на корректность значений
       if (!userId || !productId || !location) {
-        return { error_message: 'Неправельные данные для создания амбара!' };
+        return { message: barnText.WRONG_DATA };
       }
 
       // Поиск пользователя укоратить метод
