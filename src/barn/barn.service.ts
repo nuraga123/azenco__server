@@ -38,62 +38,71 @@ export class BarnService {
   }
 
   validateStockForUnit(barn: Barn): { message: string } {
+    let message: string = '';
+
     const {
       unit,
       newStock,
       usedStock,
       brokenStock,
+      totalStock,
+      // lost
       lostNewStock,
       lostBrokenStock,
       lostUsedStock,
+      lostTotalStock,
     } = barn;
 
-    const stocksToCheck = [
+    const stocks = {
       newStock,
       usedStock,
       brokenStock,
+      totalStock,
+      // lost
       lostNewStock,
       lostBrokenStock,
       lostUsedStock,
-    ];
-
-    let message = '';
+      lostTotalStock,
+    };
 
     // штук
-    if (unit === 'штук') {
-      const invalidStock = stocksToCheck.find(
-        (stock) => !Number.isInteger(stock) || stock < 0,
-      );
+    if (unit === 'штук' || unit === 'набор') {
+      const invalidStocks = Object.entries(stocks).filter(([key, stock]) => {
+        console.log(key);
+        return !Number.isInteger(stock) || stock <= 0;
+      });
 
-      if (invalidStock !== undefined) {
-        message =
-          'Количество товара типа "штук" должно быть целым положительным числом!';
+      if (invalidStocks?.length) {
+        invalidStocks.forEach(([key, stock]) => {
+          message += `Неправильное значение ${key}: ${stock}`;
+        });
+        message += `Единица Измерения: << ${unit} >> должно быть целым положительным числом!`;
       }
     }
 
     // кг
     if (unit === 'кг') {
-      const invalidStock = stocksToCheck.find((stock) => stock < 0);
+      const invalidStock = Object.entries(stocks).filter((stock) => stock);
 
-      if (invalidStock !== undefined) {
+      if (invalidStock) {
         message =
-          'Минимальное количество для единицы измерения килограмм должно быть больше или равно нулю';
+          'Минимальное количество для единицы измерения килограмм должно быть больше или равно нулю! ';
       }
     }
 
     // литр
     if (unit === 'литр' || unit === 'см') {
-      const invalidStock = stocksToCheck.find((stock) => stock < 0);
+      const invalidStock = Object.entries(stocks).find((stock) => stock);
 
       if (invalidStock !== undefined) {
-        message = `Минимальное количество для единицы измерения ${unit} должно быть больше или равно нулю! `;
+        message = `Минимальное количество для единицы измерения ${unit} должно быть больше или равно нулю!`;
       } else {
-        const invalidStockBelowMin = stocksToCheck.find(
-          (stock) => stock < 0.001,
+        const invalidStockBelowMin = Object.entries(stocks).find(
+          (stock) => stock,
         );
 
         if (invalidStockBelowMin !== undefined) {
-          message = `Минимальное количество для единицы измерения ${unit} должно быть не менее 0.001! `;
+          message = `Минимальное количество для единицы измерения ${unit} должно быть не менее 0.001!`;
         }
       }
     } else {

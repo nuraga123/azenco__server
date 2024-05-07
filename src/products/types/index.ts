@@ -6,7 +6,6 @@ import { UpdateProductDto } from '../dto/update-product.dto';
 export interface IError {
   error_message?: string;
 }
-
 export interface IProductResponse extends IError {
   product?: Product;
 }
@@ -58,10 +57,10 @@ export interface IDeleteProduct extends IError {
 
 export type IUnit =
   | 'штук'
-  | 'тон'
-  | 'км'
-  | 'метр'
-  | 'кг'
   | 'набор'
-  | 'литр'
-  | 'см';
+  | 'тон'
+  | 'кг'
+  | 'км'
+  | 'см'
+  | 'метр'
+  | 'литр';
