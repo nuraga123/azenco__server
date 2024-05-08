@@ -45,47 +45,45 @@ export class BarnService {
       newStock,
       usedStock,
       brokenStock,
-      totalStock,
       // lost
       lostNewStock,
       lostBrokenStock,
       lostUsedStock,
-      lostTotalStock,
     } = barn;
 
-    const stocks = {
-      newStock,
-      usedStock,
-      brokenStock,
-      totalStock,
+    const stocks = [
+      { stock: newStock, type: 'новый' },
+      { stock: usedStock, type: 'использованный' },
+      { stock: brokenStock, type: 'не пригодный' },
       // lost
-      lostNewStock,
-      lostBrokenStock,
-      lostUsedStock,
-      lostTotalStock,
+      { stock: lostNewStock, type: 'потерянно-новый' },
+      { stock: lostBrokenStock, type: 'потерянно-новый' },
+      { stock: lostUsedStock, type: 'потерянно-новый' },
+    ];
+
+    const checkIntegerStocks = (
+      stocks: { stock: number; type: string }[],
+    ): { message: string } => {
+      const nonIntegerStocks = stocks.filter(
+        (item) => !Number.isInteger(item.stock),
+      );
+
+      if (nonIntegerStocks.length) {
+        const message = nonIntegerStocks
+          .map((item) => `${item.type}: ${item.stock}`)
+          .join(', ');
+        return { message: `Нецелые числа: ${message}` };
+      }
     };
 
-    // штук
-    if (unit === 'штук' || unit === 'набор') {
-      const invalidStocks = Object.entries(stocks).filter(([key, stock]) => {
-        console.log(key);
-        return !Number.isInteger(stock) || stock <= 0;
-      });
-
-      if (invalidStocks?.length) {
-        invalidStocks.forEach(([key, stock]) => {
-          message += `Неправильное значение ${key}: ${stock}`;
-        });
-        message += `Единица Измерения: << ${unit} >> должно быть целым положительным числом!`;
-      }
-    }
+    if (unit === 'штук') return checkIntegerStocks(stocks);
 
     // кг
-    if (unit === 'кг') {
+    if (unit === 'набор') {
       const invalidStock = Object.entries(stocks).filter((stock) => stock);
 
       if (invalidStock) {
-        message =
+        message +=
           'Минимальное количество для единицы измерения килограмм должно быть больше или равно нулю! ';
       }
     }

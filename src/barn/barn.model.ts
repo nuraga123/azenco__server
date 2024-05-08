@@ -1,6 +1,5 @@
 import { IsString } from 'class-validator';
 import { Table, Model, Column, DataType } from 'sequelize-typescript';
-import { Unit } from 'src/products/product.model';
 import { IUnit } from 'src/products/types';
 
 @Table({ tableName: 'Barn' })
@@ -31,18 +30,7 @@ export class Barn extends Model {
 
   // Единица измерения
   @Column(
-    DataType.ENUM(
-      Unit.PIECE,
-      Unit.TON,
-      Unit.M,
-      Unit.KG,
-      Unit.SET,
-      Unit.L,
-      Unit.GR,
-      Unit.MM,
-      Unit.CM,
-      Unit.KM,
-    ),
+    DataType.ENUM('штук', 'набор', 'тон', 'кг', 'км', 'см', 'метр', 'литр'),
   )
   @IsString()
   unit: IUnit;
