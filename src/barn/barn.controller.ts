@@ -35,4 +35,10 @@ export class BarnController {
   postCreateBarn(@Body() createdBarnDto: CreatedBarnDto) {
     return this.barnService.createBarn(createdBarnDto);
   }
+
+  // новый анбар
+  @Post('add-stocks')
+  postAddStocksBarn(@Body() createdBarnDto: CreatedBarnDto) {
+    return this.barnService.createBarn(createdBarnDto);
+  }
 }

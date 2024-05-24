@@ -7,22 +7,22 @@ export class CreatedBarnDto {
   @IsNumber()
   readonly userId: number;
 
-  @ApiProperty({ example: 1 })
+  @ApiProperty({ example: 2 })
   @IsNotEmpty()
   @IsNumber()
   readonly productId: number;
 
-  @ApiProperty({ example: 10 })
+  @ApiProperty({ example: 10.777 })
   @IsNotEmpty()
   @IsNumber()
   readonly newStock: number;
 
-  @ApiProperty({ example: 5 })
+  @ApiProperty({ example: 5.555 })
   @IsNotEmpty()
   @IsNumber()
   readonly usedStock: number;
 
-  @ApiProperty({ example: 2 })
+  @ApiProperty({ example: 2.777 })
   @IsNotEmpty()
   @IsNumber()
   readonly brokenStock: number;
@@ -32,7 +32,8 @@ export class CreatedBarnDto {
   @IsString()
   readonly location: string;
 
-  @ApiProperty({ example: 1 })
+  // lost
+  @ApiProperty({ example: 0 })
   @IsNumber()
   readonly lostNewStock?: number;
 

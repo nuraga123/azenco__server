@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
 
@@ -20,12 +20,11 @@ import { ProductsService } from 'src/products/products.service';
 import { ErrorService } from 'src/errors/errors.service';
 import { CreatedBarnDto } from './dto/create-barn.dto';
 import { UpdatedBarnDto } from './dto/update-barn.dto';
+import { StocksBarnDto } from './dto/stocks-barn.dto';
 import { barnText } from './text/barnText';
 
 @Injectable()
 export class BarnService {
-  private readonly logger = new Logger(BarnService.name);
-
   constructor(
     @InjectModel(Barn)
     private barnModel: typeof Barn,
@@ -45,6 +44,7 @@ export class BarnService {
       newStock,
       usedStock,
       brokenStock,
+
       // lost
       lostNewStock,
       lostBrokenStock,
@@ -72,11 +72,14 @@ export class BarnService {
         const message = nonIntegerStocks
           .map((item) => `${item.type}: ${item.stock}`)
           .join(', ');
+
         return { message: `Нецелые числа: ${message}` };
       }
     };
 
-    if (unit === 'штук') return checkIntegerStocks(stocks);
+    if (unit === 'штук') {
+      return checkIntegerStocks(stocks);
+    }
 
     // кг
     if (unit === 'набор') {
@@ -163,7 +166,7 @@ export class BarnService {
       if (+id <= 0) return { error_message: barnText.ID_ERROR };
 
       const barn = await this.barnModel.findOne({ where: { id } });
-      if (!barn?.id) return { message: `${barnText.NOT_ID_BARN} ${id}!` };
+      if (!barn?.id) return { error_message: barnText.NOT_ID_BARN };
 
       return { barn };
     } catch (e) {
@@ -230,7 +233,7 @@ export class BarnService {
   }
 
   // Добавить товар в амбар
-  async createBarn(createdBarnDto: CreatedBarnDto) {
+  async createBarn(createdBarnDto: CreatedBarnDto): Promise<IBarnResponce> {
     try {
       const {
         userId,
@@ -372,12 +375,67 @@ export class BarnService {
         message,
         userId,
         username: barn.username,
+        userSelectedDate: '',
+        movementType: '',
+        productName: '',
+        unit: 'штук',
+        price: 0,
+        source: '',
+        destination: '',
       });
 
       return { barn, message };
     } catch (error) {
       return this.errorService.errorsMessage(error);
     }
+  }
+
+  async addStocksBarn(stocksBarnDto: StocksBarnDto): Promise<IBarnsResponce> {
+    const {
+      id,
+      newStock,
+      usedStock,
+      brokenStock,
+      // lost
+      lostNewStock,
+      lostBrokenStock,
+      lostUsedStock,
+    } = stocksBarnDto;
+
+    const isNumberStocksBarnArray = Object.values(stocksBarnDto).filter(
+      (el) => typeof el !== 'number',
+    );
+
+    // Валидация входных данных
+    if (isNumberStocksBarnArray?.length) return { message: 'Yanlış miqdar' };
+
+    const { barn, message, error_message } = await this.findOneBarnId(+id);
+
+    if (message) return { message };
+    if (error_message) return { error_message };
+
+    // Обновление количества материала
+    barn.newStock = +barn.newStock + +newStock;
+    barn.usedStock = +barn.usedStock + +usedStock;
+    barn.brokenStock = +barn.brokenStock + +brokenStock;
+
+    // Обновление итоговых сумм
+    barn.totalStock = +barn.newStock + +barn.usedStock + +barn.brokenStock;
+    barn.totalPrice = +barn.totalStock * +barn.price;
+
+    // Обновление количества материала
+    barn.lostNewStock = +barn.lostNewStock + +lostNewStock;
+    barn.lostUsedStock = +barn.lostUsedStock + +lostUsedStock;
+    barn.lostBrokenStock = +barn.lostBrokenStock + +lostBrokenStock;
+
+    // Обновление потерянных количества материала
+    barn.lostTotalStock =
+      +barn.lostNewStock + +barn.lostUsedStock + +barn.lostBrokenStock;
+
+    // Обновление потерянных итоговых сумм
+    barn.lostTotalPrice = +barn.lostTotalStock * +barn.price;
+
+    await barn.save();
   }
 
   // вычитание с анбара
@@ -447,7 +505,18 @@ export class BarnService {
 
     const message: string = `Амбар №${id} успешно удален! Складчик: ${username} | Товар: ${name} | KOD: ${azencoCode} | Общий запас: ${totalStock} ${unit}`;
 
-    await this.historyService.createHistory({ message, userId, username });
+    await this.historyService.createHistory({
+      message,
+      userId,
+      username,
+      userSelectedDate: '',
+      movementType: '',
+      productName: '',
+      unit: 'штук',
+      price: 0,
+      source: '',
+      destination: '',
+    });
 
     await barn.destroy();
 

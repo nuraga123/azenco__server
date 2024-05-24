@@ -1,112 +1,119 @@
-import { Table, Model, Column, DataType } from 'sequelize-typescript';
+import { IsString, IsNumber, IsNotEmpty } from 'class-validator';
+import { IUnit } from 'src/products/types';
 
-@Table({ tableName: 'History' })
-export class History extends Model<History> {
+export class CreateHistoryDto {
   // Идентификатор пользователя
-  @Column(DataType.INTEGER)
+  @IsNotEmpty()
+  @IsNumber()
   userId: number;
 
   // Имя пользователя
-  @Column(DataType.TEXT)
+  @IsNotEmpty()
+  @IsString()
   username: string;
 
   // Выбранная пользователем дата
-  @Column(DataType.TEXT)
+  @IsNotEmpty()
+  @IsString()
   userSelectedDate: string;
 
   // Тип движения (приход, перемещение, расход и т.д.)
-  @Column(DataType.TEXT)
+  @IsNotEmpty()
+  @IsString()
   movementType: string;
 
   // Название продукта
-  @Column(DataType.TEXT)
+  @IsNotEmpty()
+  @IsString()
   productName: string;
 
   // Единица измерения
-  @Column(DataType.TEXT)
-  unit: string;
+  @IsNotEmpty()
+  @IsString()
+  unit: IUnit;
 
   // Цена за единицу
-  @Column(DataType.DECIMAL(20, 2))
+  @IsNotEmpty()
+  @IsNumber()
   price: number;
 
   /* сток */
   // Новый запас продукта
-  @Column(DataType.DECIMAL(20, 3))
-  newStock: number;
+  @IsNumber()
+  newStock?: number;
 
   // Использованный запас продукта
-  @Column(DataType.DECIMAL(20, 3))
-  usedStock: number;
+  @IsNumber()
+  usedStock?: number;
 
   // Поломанный запас продукта
-  @Column(DataType.DECIMAL(20, 3))
-  brokenStock: number;
+  @IsNumber()
+  brokenStock?: number;
 
   // Общий запас продукта
-  @Column(DataType.DECIMAL(20, 3))
-  totalStock: number;
+  @IsNumber()
+  totalStock?: number;
 
   /* цены */
   // Новая цена продукта
-  @Column(DataType.DECIMAL(20, 2))
-  newTotalPrice: number;
+  @IsNumber()
+  newTotalPrice?: number;
 
   // Цена продукта после использования
-  @Column(DataType.DECIMAL(20, 2))
-  usedTotalPrice: number;
+  @IsNumber()
+  usedTotalPrice?: number;
 
   // Цена продукта после поломки
-  @Column(DataType.DECIMAL(20, 2))
-  brokenTotalPrice: number;
+  @IsNumber()
+  brokenTotalPrice?: number;
 
   // Общая цена всех продуктов
-  @Column(DataType.DECIMAL(20, 2))
-  totalPrice: number;
+  @IsNumber()
+  totalPrice?: number;
 
   /* Потерянный сток продуктов */
   // Потерянный новый продукт
-  @Column(DataType.DECIMAL(20, 3))
-  lostNewStock: number;
+  @IsNumber()
+  lostNewStock?: number;
 
   // Потерянный использованный продукт
-  @Column(DataType.DECIMAL(20, 3))
-  lostUsedStock: number;
+  @IsNumber()
+  lostUsedStock?: number;
 
   // Потерянный поломанный продукт
-  @Column(DataType.DECIMAL(20, 3))
-  lostBrokenStock: number;
+  @IsNumber()
+  lostBrokenStock?: number;
 
   // Общий потерянный продукт
-  @Column(DataType.DECIMAL(20, 3))
-  lostTotalStock: number;
+  @IsNumber()
+  lostTotalStock?: number;
 
-  /* Потерянный Цена продуктов */
+  /* Потерянные цены продуктов */
   // Цена потерянного нового продукта
-  @Column(DataType.DECIMAL(20, 2))
-  lostNewTotalPrice: number;
+  @IsNumber()
+  lostNewTotalPrice?: number;
 
   // Цена потерянного использованного продукта
-  @Column(DataType.DECIMAL(20, 2))
-  lostUsedTotalPrice: number;
+  @IsNumber()
+  lostUsedTotalPrice?: number;
 
   // Цена потерянного поломанного продукта
-  @Column(DataType.DECIMAL(20, 2))
-  lostBrokenTotalPrice: number;
+  @IsNumber()
+  lostBrokenTotalPrice?: number;
 
   // Цена потерянного продукта
-  @Column(DataType.DECIMAL(20, 2))
-  lostTotalPrice: number;
+  @IsNumber()
+  lostTotalPrice?: number;
 
   // Источник (откуда перемещен товар)
-  @Column(DataType.TEXT)
+  @IsString()
   source: string;
 
   // Назначение (куда перемещен товар)
-  @Column(DataType.TEXT)
+  @IsString()
   destination: string;
 
   // Сообщение
-  @Column(DataType.TEXT)
+  @IsString()
   message: string;
 }

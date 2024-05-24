@@ -47,6 +47,10 @@ export class Barn extends Model {
   @Column(DataType.TEXT)
   location: string;
 
+  // цена
+  @Column(DataType.DECIMAL(20, 2))
+  price: number;
+
   /*  типизированные имена количества товара в складе  */
 
   // Новый запас продукта
@@ -66,10 +70,6 @@ export class Barn extends Model {
   totalStock: number;
 
   /*  типизированные сумма колличество на цену товара в складе  */
-
-  // цена
-  @Column(DataType.DECIMAL(20, 2))
-  price: number;
 
   // Новая цена продукта
   @Column(DataType.DECIMAL(20, 2))
