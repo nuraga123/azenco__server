@@ -10,7 +10,6 @@ import {
   IBarnsResponce,
   IBarnsUsernamesResponse,
   ICountAndRowsBarnsResponce,
-  IMinusAnbarOrder,
   IUserIdAndProductId,
 } from './types';
 
@@ -235,27 +234,23 @@ export class BarnService {
   // Добавить товар в амбар
   async createBarn(createdBarnDto: CreatedBarnDto): Promise<IBarnResponce> {
     try {
-      const {
-        userId,
-        productId,
-        location,
-        newStock,
-        usedStock,
-        brokenStock,
-        lostNewStock,
-        lostBrokenStock,
-        lostUsedStock,
-      } = createdBarnDto;
+      const { userId, productId, location, newStock, usedStock, brokenStock } =
+        createdBarnDto;
 
       // Проверка на корректность значений
       if (!userId || !productId || !location) {
-        return { message: barnText.WRONG_DATA };
+        return { error_message: barnText.WRONG_DATA };
+      }
+
+      if (+newStock + +usedStock + +brokenStock <= 0) {
+        return { error_message: barnText.STOCKS_ERROR };
       }
 
       // Поиск пользователя укоратить метод
       const { username } = await this.usersService.findOne({
         where: { id: +userId },
       });
+
       if (!username) return { message: `Пользователь не найден` };
 
       // Поиск продукта
@@ -302,6 +297,7 @@ export class BarnService {
         return { error_message: existingBarn.error_message };
       }
 
+      // !!! переименовать name на productName
       const { name, azencoCode, price, type, img, unit } = product;
 
       // для реального количества
@@ -312,21 +308,11 @@ export class BarnService {
       const totalStock: number = +newStock + +usedStock + +brokenStock;
       const totalPrice: number = +totalStock * +price;
 
-      // для потерянного количества
-      const lostNewTotalPrice = +lostNewStock * +price;
-      const lostUsedTotalPrice = +lostUsedStock * +price;
-      const lostBrokenTotalPrice = +lostBrokenStock * +price;
-
-      const lostTotalStock: number =
-        +lostNewStock + +lostUsedStock + +lostBrokenStock;
-
-      const lostTotalPrice: number = +lostTotalStock * +price;
-
       const barn: Barn = await this.barnModel.create<Barn>({
+        productName: name,
         userId,
         username,
         productId,
-        name,
         azencoCode,
         price,
         type,
@@ -347,41 +333,47 @@ export class BarnService {
         totalPrice,
 
         // lost
-        lostNewStock: +lostNewStock || 0,
-        lostUsedStock: +lostUsedStock || 0,
-        lostBrokenStock: +lostBrokenStock || 0,
-        lostTotalStock,
-
+        lostNewStock: 0,
+        lostUsedStock: 0,
+        lostBrokenStock: 0,
+        lostTotalStock: 0,
         // lost total price
-        lostNewTotalPrice,
-        lostUsedTotalPrice,
-        lostBrokenTotalPrice,
-        lostTotalPrice,
+        lostNewTotalPrice: 0,
+        lostUsedTotalPrice: 0,
+        lostBrokenTotalPrice: 0,
+        lostTotalPrice: 0,
       });
 
       // Создание сообщения о создании амбара для истории
-      const message: string = `Новый aмбар №${barn.id} !  
-      Складчик: ${barn.username}; 
-      Товар: ${barn.name}; 
-      Новые: ${barn.newStock}; 
-      Использованные: ${barn.usedStock}; 
-      Сломанные: ${barn.brokenStock}; 
-      Потерянно-новые: ${barn.lostNewStock}; 
-      Потерянные-использованные: ${barn.lostUsedStock}; 
-      Потерянно-сломанные: ${barn.lostBrokenStock};
-      - ${barn.unit};`;
+      const message = `Новый aмбар №${barn.id} ! Складчик: ${barn.username}; Товар: ${
+        //
+        barn.productName
+      } - ${barn.unit}; Новые: ${barn.newStock}; Использованные: ${
+        //
+        barn.usedStock
+      }; Сломанные: ${barn.brokenStock};`;
 
       await this.historyService.createHistory({
-        message,
         userId,
-        username: barn.username,
-        userSelectedDate: '',
-        movementType: '',
-        productName: '',
-        unit: 'штук',
-        price: 0,
-        source: '',
-        destination: '',
+        username,
+        message,
+        azencoCode,
+        unit,
+        price,
+        userSelectedDate: new Date().toLocaleDateString(),
+        barnId: barn.id,
+        movementType: 'создан',
+        fromLocation: '',
+        toLocation: barn.location,
+        productName: barn.productName,
+        newStock: +barn.newStock,
+        usedStock: +barn.usedStock,
+        brokenStock: +barn.brokenStock,
+        totalStock: +barn.totalStock,
+        lostNewStock: +barn.lostNewStock,
+        lostUsedStock: +barn.lostUsedStock,
+        lostBrokenStock: +barn.lostBrokenStock,
+        lostTotalStock: +barn.lostTotalStock,
       });
 
       return { barn, message };
@@ -390,98 +382,220 @@ export class BarnService {
     }
   }
 
-  async addStocksBarn(stocksBarnDto: StocksBarnDto): Promise<IBarnsResponce> {
-    const {
-      id,
-      newStock,
-      usedStock,
-      brokenStock,
-      // lost
-      lostNewStock,
-      lostBrokenStock,
-      lostUsedStock,
-    } = stocksBarnDto;
+  async addStocksBarn(stocksBarnDto: StocksBarnDto): Promise<IBarnResponce> {
+    try {
+      const {
+        barnId,
+        movementType,
+        userSelectedDate,
+        fromLocation,
+        toLocation,
+        newStock,
+        usedStock,
+        brokenStock,
+      } = stocksBarnDto;
 
-    const isNumberStocksBarnArray = Object.values(stocksBarnDto).filter(
-      (el) => typeof el !== 'number',
-    );
+      if (
+        !barnId ||
+        !movementType ||
+        !userSelectedDate ||
+        !fromLocation ||
+        !toLocation
+      ) {
+        return { error_message: barnText.NOT_INPUT_DATA };
+      }
 
-    // Валидация входных данных
-    if (isNumberStocksBarnArray?.length) return { message: 'Yanlış miqdar' };
+      if (
+        newStock < 0 ||
+        typeof newStock !== 'number' ||
+        usedStock < 0 ||
+        typeof usedStock !== 'number' ||
+        brokenStock < 0 ||
+        typeof brokenStock !== 'number'
+      ) {
+        return { error_message: barnText.STOCKS_ERROR };
+      }
 
-    const { barn, message, error_message } = await this.findOneBarnId(+id);
+      const {
+        message: FindMessage,
+        error_message: FindErrorMessage,
+        barn,
+      } = await this.findOneBarnId(barnId);
 
-    if (message) return { message };
-    if (error_message) return { error_message };
+      if (FindMessage) return { message: FindMessage };
+      if (FindErrorMessage) return { error_message: FindErrorMessage };
 
-    // Обновление количества материала
-    barn.newStock = +barn.newStock + +newStock;
-    barn.usedStock = +barn.usedStock + +usedStock;
-    barn.brokenStock = +barn.brokenStock + +brokenStock;
+      const { userId, username, azencoCode, productName, unit, price } = barn;
 
-    // Обновление итоговых сумм
-    barn.totalStock = +barn.newStock + +barn.usedStock + +barn.brokenStock;
-    barn.totalPrice = +barn.totalStock * +barn.price;
+      // Обновление количества материала
+      barn.newStock = +barn.newStock + +newStock;
+      barn.usedStock = +barn.usedStock + +usedStock;
+      barn.brokenStock = +barn.brokenStock + +brokenStock;
+      barn.totalStock = +barn.newStock + +barn.usedStock + +barn.brokenStock;
 
-    // Обновление количества материала
-    barn.lostNewStock = +barn.lostNewStock + +lostNewStock;
-    barn.lostUsedStock = +barn.lostUsedStock + +lostUsedStock;
-    barn.lostBrokenStock = +barn.lostBrokenStock + +lostBrokenStock;
+      // Обновление итоговых цен материала
+      barn.newTotalPrice = +barn.newStock * +price;
+      barn.usedTotalPrice = +barn.usedStock * +price;
+      barn.brokenTotalPrice = +barn.brokenStock * +price;
+      barn.totalPrice = +barn.totalStock * +barn.price;
 
-    // Обновление потерянных количества материала
-    barn.lostTotalStock =
-      +barn.lostNewStock + +barn.lostUsedStock + +barn.lostBrokenStock;
+      await barn.save();
 
-    // Обновление потерянных итоговых сумм
-    barn.lostTotalPrice = +barn.lostTotalStock * +barn.price;
+      const message = `Приход в Амбар №${barnId} | Складчик: ${username} | Товар: ${productName} - ${unit} | ${
+        newStock ? `Новые: ${newStock} | ` : ''
+      } ${usedStock ? `Использованные: ${usedStock} | ` : ''} ${
+        brokenStock ? ` Сломанные:  ${brokenStock} |` : ''
+      }`;
 
-    await barn.save();
+      await this.historyService.createHistory({
+        barnId,
+        userId,
+        username,
+        userSelectedDate,
+        movementType,
+        fromLocation,
+        toLocation,
+        message,
+        productName,
+        azencoCode,
+        unit,
+        price,
+        newStock: +barn.newStock,
+        usedStock: +barn.usedStock,
+        brokenStock: +barn.brokenStock,
+        totalStock: +barn.totalStock,
+        lostNewStock: +barn.lostNewStock,
+        lostUsedStock: +barn.lostUsedStock,
+        lostBrokenStock: +barn.lostBrokenStock,
+        lostTotalStock: +barn.lostTotalStock,
+      });
+
+      return { message, barn };
+    } catch (error) {
+      return this.errorService.errorsMessage(error);
+    }
   }
 
-  // вычитание с анбара
-  async minusAnbarOrder({
-    anbarId,
-    newStock,
-    usedStock,
-    brokenStock,
-  }: IMinusAnbarOrder) {
-    if (!anbarId) return { error_message: 'нет anbarId!' };
-    if (!newStock || !usedStock || !brokenStock) {
-      return { error_message: 'Количество в заказе не указано!' };
+  async reduceStocksBarn(stocksBarnDto: StocksBarnDto): Promise<IBarnResponce> {
+    try {
+      const {
+        barnId,
+        movementType,
+        userSelectedDate,
+        fromLocation,
+        toLocation,
+        newStock,
+        usedStock,
+        brokenStock,
+      } = stocksBarnDto;
+
+      if (
+        !barnId ||
+        !movementType ||
+        !userSelectedDate ||
+        !fromLocation ||
+        !toLocation
+      ) {
+        return { error_message: barnText.NOT_INPUT_DATA };
+      }
+
+      if (
+        newStock < 0 ||
+        typeof newStock !== 'number' ||
+        usedStock < 0 ||
+        typeof usedStock !== 'number' ||
+        brokenStock < 0 ||
+        typeof brokenStock !== 'number'
+      ) {
+        return { error_message: barnText.STOCKS_ERROR };
+      }
+
+      const {
+        message: FindMessage,
+        error_message: FindErrorMessage,
+        barn,
+      } = await this.findOneBarnId(barnId);
+
+      if (FindMessage) return { message: FindMessage };
+      if (FindErrorMessage) return { error_message: FindErrorMessage };
+
+      const { userId, username, azencoCode, productName, unit, price } = barn;
+
+      if (
+        newStock > barn.newStock ||
+        usedStock > barn.usedStock ||
+        brokenStock > barn.brokenStock
+      ) {
+        return { error_message: barnText.STOCKS_EXCEED_ERROR };
+      }
+
+      barn.newStock -= Number(newStock);
+      barn.usedStock -= Number(usedStock);
+      barn.brokenStock -= Number(brokenStock);
+      barn.totalStock = +barn.newStock + +barn.usedStock + +barn.brokenStock;
+
+      barn.newTotalPrice = +barn.newStock * +price;
+      barn.usedTotalPrice = +barn.usedStock * +price;
+      barn.brokenTotalPrice = +barn.brokenStock * +price;
+      barn.totalPrice = +barn.totalStock * +barn.price;
+
+      const sumTotalStocks = +barn.totalStock + +barn.lostTotalStock;
+      const message = `Уменьшение в Амбаре №${barnId} | Складчик: ${username} | Товар: ${productName} - ${unit} | ${newStock ? `Новые: ${newStock}; ` : ''} ${usedStock ? `Использованные: ${usedStock}; ` : ''} ${brokenStock ? `Сломанные: ${brokenStock};` : ''}`;
+
+      this.errorService.log(`sumTotalStocks --- ${+sumTotalStocks}`);
+
+      if (+sumTotalStocks) {
+        await barn.save();
+
+        await this.historyService.createHistory({
+          barnId,
+          userId,
+          username,
+          userSelectedDate,
+          movementType,
+          fromLocation,
+          toLocation,
+          message,
+          productName,
+          azencoCode,
+          unit,
+          price,
+          newStock: barn.newStock,
+          usedStock: barn.usedStock,
+          brokenStock: barn.brokenStock,
+          totalStock: barn.totalStock,
+        });
+
+        return { message, barn };
+      } else {
+        await this.historyService.createHistory({
+          barnId,
+          userId,
+          username,
+          userSelectedDate,
+          movementType,
+          fromLocation,
+          toLocation,
+          message,
+          productName,
+          azencoCode,
+          unit,
+          price,
+          newStock: barn.newStock,
+          usedStock: barn.usedStock,
+          brokenStock: barn.brokenStock,
+          totalStock: barn.totalStock,
+        });
+
+        const { message: removeMessage, error_message: removeErrorMessage } =
+          await this.removeBarn(barn.id);
+
+        if (removeErrorMessage) return { error_message: removeErrorMessage };
+        return { message: `${message} И ${removeMessage}` };
+      }
+    } catch (error) {
+      return this.errorService.errorsMessage(error);
     }
-
-    const { barn, error_message } = await this.findOneBarnId(anbarId);
-
-    if (error_message) return { error_message };
-    if (!barn) return { error_message: 'Склад не найден.' };
-    if (!barn.newStock) return { error_message: 'нет запаса на складе' };
-    if (!barn.newStock) return { error_message: 'нет запаса на складе' };
-    if (!barn.newStock) return { error_message: 'нет запаса на складе' };
-    if (!barn.newStock) return { error_message: 'нет запаса на складе' };
-    if (!barn.price) return { error_message: 'Цена не указана.' };
-
-    if (newStock <= 0) {
-      return { error_message: 'Неверное количество товара для заказа.' };
-    }
-
-    if (+barn.newStock < +newStock) {
-      return {
-        error_message: `Недостаточное количество товара "${barn.name}" на складе.`,
-      };
-    }
-
-    // operation minus
-    barn.newStock = +barn.newStock - +newStock;
-    barn.usedStock = +barn.usedStock - +usedStock;
-    barn.brokenStock = +barn.brokenStock - +brokenStock;
-
-    const totalStock = +barn.newStock + +barn.usedStock + +barn.brokenStock;
-    barn.totalStock = +totalStock;
-
-    barn.totalPrice = +totalStock * barn.price;
-
-    barn.save();
-    return { barn };
   }
 
   // обновление амбара
@@ -501,21 +615,20 @@ export class BarnService {
 
     if (error_message) return { error_message };
 
-    const { userId, username, name, unit, azencoCode, totalStock } = barn;
+    const { userId, username, productName, unit, azencoCode, totalStock } =
+      barn;
 
-    const message: string = `Амбар №${id} успешно удален! Складчик: ${username} | Товар: ${name} | KOD: ${azencoCode} | Общий запас: ${totalStock} ${unit}`;
+    //  описать поподробнее
+    const message: string = `Амбар №${id} успешно удален! Складчик: ${username} | Товар: ${productName} | KOD: ${azencoCode} | Общий запас: ${totalStock} ${unit}`;
 
     await this.historyService.createHistory({
       message,
+      movementType: 'удаление',
       userId,
       username,
-      userSelectedDate: '',
-      movementType: '',
-      productName: '',
+      productName,
       unit: 'штук',
-      price: 0,
-      source: '',
-      destination: '',
+      barnId: 0,
     });
 
     await barn.destroy();

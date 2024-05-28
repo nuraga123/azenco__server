@@ -12,6 +12,11 @@ export class CreatedBarnDto {
   @IsNumber()
   readonly productId: number;
 
+  @ApiProperty({ example: 'Москва' })
+  @IsNotEmpty()
+  @IsString()
+  readonly location: string;
+
   @ApiProperty({ example: 10.777 })
   @IsNotEmpty()
   @IsNumber()
@@ -26,11 +31,6 @@ export class CreatedBarnDto {
   @IsNotEmpty()
   @IsNumber()
   readonly brokenStock: number;
-
-  @ApiProperty({ example: 'Москва' })
-  @IsNotEmpty()
-  @IsString()
-  readonly location: string;
 
   // lost
   @ApiProperty({ example: 0 })

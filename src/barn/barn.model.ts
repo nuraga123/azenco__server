@@ -8,17 +8,17 @@ export class Barn extends Model {
   @Column(DataType.INTEGER)
   userId: number;
 
-  // Идентификатор продукта
-  @Column(DataType.INTEGER)
-  productId: number;
-
   // Имя пользователя
   @Column(DataType.TEXT)
   username: string;
 
+  // Идентификатор продукта
+  @Column(DataType.INTEGER)
+  productId: number;
+
   // Название продукта
   @Column(DataType.TEXT)
-  name: string;
+  productName: string;
 
   // Код Azenco
   @Column(DataType.TEXT)

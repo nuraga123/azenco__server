@@ -54,13 +54,13 @@ async function bootstrap() {
 
   // Пример вывода каждые 30 секунд
   setInterval(() => {
-    logger.log('Server Working 30s!');
-  }, 30000);
+    logger.log('Server Working 15s !');
+  }, 15000);
 
   // Пример вывода каждую минуту
   setInterval(() => {
-    logger.log('Server Working Two method 40s!');
-  }, 40000);
+    logger.log('Server Working Two method 30s !');
+  }, 30000);
 
   // Обслуживание статических файлов из папки public
   app.use(express.static('public'));

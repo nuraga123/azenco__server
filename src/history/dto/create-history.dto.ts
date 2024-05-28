@@ -2,40 +2,53 @@ import { IsString, IsNumber, IsNotEmpty } from 'class-validator';
 import { IUnit } from 'src/products/types';
 
 export class CreateHistoryDto {
-  // Идентификатор пользователя
-  @IsNotEmpty()
+  @IsNumber()
+  barnId: number;
+
+  // Сообщение
+  @IsString()
+  message: string;
+
   @IsNumber()
   userId: number;
 
-  // Имя пользователя
-  @IsNotEmpty()
   @IsString()
   username: string;
+
+  // Тип движения (приход, перемещение, расход)
+  @IsNotEmpty()
+  @IsString()
+  movementType?: string;
 
   // Выбранная пользователем дата
   @IsNotEmpty()
   @IsString()
-  userSelectedDate: string;
+  userSelectedDate?: string;
 
-  // Тип движения (приход, перемещение, расход и т.д.)
-  @IsNotEmpty()
+  // Источник (откуда перемещен товар)
   @IsString()
-  movementType: string;
+  fromLocation?: string;
+
+  // Назначение (куда перемещен товар)
+  @IsString()
+  toLocation?: string;
+
+  /* передача данных материала */
+  @IsString()
+  azencoCode?: string;
 
   // Название продукта
   @IsNotEmpty()
   @IsString()
-  productName: string;
+  productName?: string;
 
   // Единица измерения
   @IsNotEmpty()
   @IsString()
-  unit: IUnit;
+  unit?: IUnit;
 
-  // Цена за единицу
-  @IsNotEmpty()
   @IsNumber()
-  price: number;
+  price?: number;
 
   /* сток */
   // Новый запас продукта
@@ -54,23 +67,6 @@ export class CreateHistoryDto {
   @IsNumber()
   totalStock?: number;
 
-  /* цены */
-  // Новая цена продукта
-  @IsNumber()
-  newTotalPrice?: number;
-
-  // Цена продукта после использования
-  @IsNumber()
-  usedTotalPrice?: number;
-
-  // Цена продукта после поломки
-  @IsNumber()
-  brokenTotalPrice?: number;
-
-  // Общая цена всех продуктов
-  @IsNumber()
-  totalPrice?: number;
-
   /* Потерянный сток продуктов */
   // Потерянный новый продукт
   @IsNumber()
@@ -87,33 +83,4 @@ export class CreateHistoryDto {
   // Общий потерянный продукт
   @IsNumber()
   lostTotalStock?: number;
-
-  /* Потерянные цены продуктов */
-  // Цена потерянного нового продукта
-  @IsNumber()
-  lostNewTotalPrice?: number;
-
-  // Цена потерянного использованного продукта
-  @IsNumber()
-  lostUsedTotalPrice?: number;
-
-  // Цена потерянного поломанного продукта
-  @IsNumber()
-  lostBrokenTotalPrice?: number;
-
-  // Цена потерянного продукта
-  @IsNumber()
-  lostTotalPrice?: number;
-
-  // Источник (откуда перемещен товар)
-  @IsString()
-  source: string;
-
-  // Назначение (куда перемещен товар)
-  @IsString()
-  destination: string;
-
-  // Сообщение
-  @IsString()
-  message: string;
 }

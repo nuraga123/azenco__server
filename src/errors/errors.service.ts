@@ -12,7 +12,8 @@ export class ErrorService {
   }
 
   log(data: any) {
-    this.logger.log(`DATA --- ${data}`);
-    this.logger.log({ ...data });
+    this.logger.log(`////////////////////////////////////////////////////////`);
+    this.logger.log(`DATA >>> ${data}`);
+    this.logger.log(`////////////////////////////////////////////////////////`);
   }
 }

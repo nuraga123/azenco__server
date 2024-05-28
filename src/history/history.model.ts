@@ -2,6 +2,9 @@ import { Table, Model, Column, DataType } from 'sequelize-typescript';
 
 @Table({ tableName: 'History' })
 export class History extends Model<History> {
+  @Column(DataType.INTEGER)
+  barnId: number;
+
   // Идентификатор пользователя
   @Column(DataType.INTEGER)
   userId: number;
@@ -18,9 +21,25 @@ export class History extends Model<History> {
   @Column(DataType.TEXT)
   movementType: string;
 
+  // Источник (откуда перемещен товар)
+  @Column(DataType.TEXT)
+  fromLocation: string;
+
+  // Назначение (куда перемещен товар)
+  @Column(DataType.TEXT)
+  toLocation: string;
+
+  // Сообщение
+  @Column(DataType.TEXT)
+  message: string;
+
   // Название продукта
   @Column(DataType.TEXT)
   productName: string;
+
+  // Код Azenco
+  @Column(DataType.TEXT)
+  azencoCode: string;
 
   // Единица измерения
   @Column(DataType.TEXT)
@@ -47,23 +66,6 @@ export class History extends Model<History> {
   @Column(DataType.DECIMAL(20, 3))
   totalStock: number;
 
-  /* цены */
-  // Новая цена продукта
-  @Column(DataType.DECIMAL(20, 2))
-  newTotalPrice: number;
-
-  // Цена продукта после использования
-  @Column(DataType.DECIMAL(20, 2))
-  usedTotalPrice: number;
-
-  // Цена продукта после поломки
-  @Column(DataType.DECIMAL(20, 2))
-  brokenTotalPrice: number;
-
-  // Общая цена всех продуктов
-  @Column(DataType.DECIMAL(20, 2))
-  totalPrice: number;
-
   /* Потерянный сток продуктов */
   // Потерянный новый продукт
   @Column(DataType.DECIMAL(20, 3))
@@ -80,33 +82,4 @@ export class History extends Model<History> {
   // Общий потерянный продукт
   @Column(DataType.DECIMAL(20, 3))
   lostTotalStock: number;
-
-  /* Потерянный Цена продуктов */
-  // Цена потерянного нового продукта
-  @Column(DataType.DECIMAL(20, 2))
-  lostNewTotalPrice: number;
-
-  // Цена потерянного использованного продукта
-  @Column(DataType.DECIMAL(20, 2))
-  lostUsedTotalPrice: number;
-
-  // Цена потерянного поломанного продукта
-  @Column(DataType.DECIMAL(20, 2))
-  lostBrokenTotalPrice: number;
-
-  // Цена потерянного продукта
-  @Column(DataType.DECIMAL(20, 2))
-  lostTotalPrice: number;
-
-  // Источник (откуда перемещен товар)
-  @Column(DataType.TEXT)
-  source: string;
-
-  // Назначение (куда перемещен товар)
-  @Column(DataType.TEXT)
-  destination: string;
-
-  // Сообщение
-  @Column(DataType.TEXT)
-  message: string;
 }

@@ -1,0 +1,80 @@
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f4f9;
+  color: #333;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  text-align: center;
+}
+
+.container {
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  max-width: 600px;
+  width: 100%;
+}
+
+.server-status {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-top: 20px;
+  border: 3px solid #333;
+  background-color: yellow;
+  transition:
+    background-color 0.5s ease,
+    color 0.5s ease,
+    transform 0.3s ease;
+}
+
+.green {
+  background-color: #28a745;
+}
+
+.yellow {
+  background-color: #ffc107;
+}
+
+.red {
+  background-color: #dc3545;
+}
+
+p {
+  font-weight: bolder;
+  font-size: 18px;
+  letter-spacing: 1px;
+}
+
+.title {
+  padding: 20px 10px;
+  margin: 10px auto;
+  border-radius: 10px;
+  font-size: 18px;
+  letter-spacing: 1px;
+  background-color: #333;
+  color: #ffffff;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+.title.yellow {
+  color: #ffc107;
+  background-color: #333;
+}
+
+.title.green {
+  color: #28a745;
+  background-color: #333;
+}
+
+.title.red {
+  color: #dc3545;
+  background-color: #333;
+}

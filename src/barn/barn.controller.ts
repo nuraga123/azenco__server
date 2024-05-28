@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { BarnService } from './barn.service';
 import { CreatedBarnDto } from './dto/create-barn.dto';
+import { StocksBarnDto } from './dto/stocks-barn.dto';
 
 @Controller('barn')
 export class BarnController {
@@ -38,7 +39,12 @@ export class BarnController {
 
   // новый анбар
   @Post('add-stocks')
-  postAddStocksBarn(@Body() createdBarnDto: CreatedBarnDto) {
-    return this.barnService.createBarn(createdBarnDto);
+  postAddStocksBarn(@Body() stocksBarnDto: StocksBarnDto) {
+    return this.barnService.addStocksBarn(stocksBarnDto);
+  }
+
+  @Post('reduce-stocks')
+  postReduceStocksBarn(@Body() stocksBarnDto: StocksBarnDto) {
+    return this.barnService.reduceStocksBarn(stocksBarnDto);
   }
 }

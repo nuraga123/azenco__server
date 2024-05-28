@@ -4,129 +4,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Azenco сервис</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        text-align: center;
-      }
-
-      .container {
-        margin-top: 100px;
-      }
-
-      .server-status {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        display: inline-block;
-        margin-top: 20px;
-        border: 2px solid black;
-        background-color: yellow;
-        /* Добавляем transition для всех свойств */
-        transition:
-          background-color 0.5s ease,
-          color 0.5s ease;
-      }
-
-      .server-status--green {
-        background-color: green;
-      }
-
-      .server-status--yellow {
-        background-color: yellow;
-      }
-
-      .server-status--red {
-        background-color: red;
-      }
-    </style>
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div class="container">
-      <h1 id="service"></h1>
-      <p>Начало запуска сервера: <span id="start-time"></span></p>
-      <p>Прошло секунд: <span id="elapsed-time"></span></p>
+    <div class="container" id="container">
+      <h1 id="service">Server gözləmə rejimindədir 😴</h1>
+      <p>Serverin başlama tarixi və vaxtı: <span id="start-time">...</span></p>
+      <p><span id="elapsed-time"></span></p>
       <div class="server-status" id="server-status"></div>
+      <p class="title yellow">
+        Dairədə sarı rəng - serverin cavabını gözləmək deməkdir 😴
+      </p>
+      <p class="title green">
+        Dairədə yaşıl rəng - serverin işlədiyini bildirir 😊
+      </p>
+      <p class="title red">
+        Dairədə qırmızı rəng - serverin işləmədiyini bildirir 😞
+      </p>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script>
-      async function updateServerStatus(status) {
-        const serverStatus = document.getElementById('server-status');
-        if (status) {
-          serverStatus.classList.remove('server-status--yellow');
-          serverStatus.classList.remove('server-status--red');
-          serverStatus.classList.add('server-status--green');
-        } else {
-          serverStatus.classList.remove('server-status--yellow');
-          serverStatus.classList.remove('server-status--green');
-          serverStatus.classList.add('server-status--red');
-        }
-      }
-
-      async function formatTime(utcTimeString) {
-        const utcTime = new Date(utcTimeString);
-        const localTime = new Date(utcTime);
-        const formattedTime = localTime.toLocaleTimeString([], {
-          hour: '2-digit',
-          minute: '2-digit',
-        });
-
-        return `| ${formattedTime} | ${utcTime.toLocaleDateString()} |`;
-      }
-
-      async function getTime() {
-        const serverStatus = document.getElementById('server-status');
-        serverStatus.classList.remove('server-status--green');
-        serverStatus.classList.remove('server-status--red');
-
-        setInterval(
-          () => serverStatus.classList.add('server-status--yellow'),
-          1500,
-        );
-
-        const result = await axios
-          .get('/users/time')
-          .then((response) => {
-            console.log(response.data);
-            const { startTime, elapsedTime } = response.data;
-
-            document.getElementById('start-time').innerText =
-              typeof startTime !== 'undefined'
-                ? startTime
-                : 'сервер не работает';
-            document.getElementById('elapsed-time').innerText =
-              typeof elapsedTime !== 'undefined'
-                ? elapsedTime
-                : 'сервер не работает';
-
-            const service = document.getElementById('service');
-            if (response.data) {
-              updateServerStatus(response.data);
-              service.textContent = 'сервер работает 😊';
-
-              if (startTime && elapsedTime) {
-                formatTime(startTime).then((formattedTime) => {
-                  document.getElementById('start-time').innerText =
-                    formattedTime;
-                });
-              }
-            } else {
-              service.textContent = 'сервис не работает 😞';
-              serverStatus.style.backgroundColor = 'red';
-              console.log(
-                'Свойство serverStatus не найдено в полученных данных',
-              );
-              return;
-            }
-          })
-          .catch((error) => {
-            console.log('Ошибка при получении времени старта сервера:', error);
-          });
-
-        return result;
-      }
-
-      setInterval(() => getTime(), 2000);
-    </script>
+    <script src="script.js"></script>
   </body>
 </html>

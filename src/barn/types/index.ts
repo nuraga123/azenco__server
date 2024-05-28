@@ -57,8 +57,11 @@ export interface IBarnText {
   NOT_ID_BARN: string;
   NOT_BARNS: string;
   NOT_USERNAME_BARNS: string;
-  NOT_PRODUCT_ID: string;
+  NOT_PRODUCT_ID_AND_USER_ID: string;
   WRONG_DATA: string;
+  NOT_INPUT_DATA: string;
+  STOCKS_ERROR: string;
+  STOCKS_EXCEED_ERROR: string;
 }
 
 export interface IUserIdAndProductId {
