@@ -6,6 +6,7 @@ import { UpdateProductDto } from '../dto/update-product.dto';
 export interface IError {
   error_message?: string;
 }
+
 export interface IProductResponse extends IError {
   product?: Product;
 }
@@ -64,3 +65,12 @@ export type IUnit =
   | 'см'
   | 'метр'
   | 'литр';
+
+export type IMovementType =
+  | 'создан__yaradılmışdır'
+  | 'приход__gələn'
+  | 'расход__istehlak'
+  | 'отправление__gediş'
+  | 'возврат__qayıdış'
+  | 'списание__silinmə'
+  | 'изменение__dəyişikliklər';

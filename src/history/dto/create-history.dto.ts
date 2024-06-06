@@ -1,5 +1,5 @@
 import { IsString, IsNumber, IsNotEmpty } from 'class-validator';
-import { IUnit } from 'src/products/types';
+import { IMovementType, IUnit } from 'src/products/types';
 
 export class CreateHistoryDto {
   @IsNumber()
@@ -18,7 +18,7 @@ export class CreateHistoryDto {
   // Тип движения (приход, перемещение, расход)
   @IsNotEmpty()
   @IsString()
-  movementType?: string;
+  movementType?: IMovementType;
 
   // Выбранная пользователем дата
   @IsNotEmpty()

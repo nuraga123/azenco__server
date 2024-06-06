@@ -162,10 +162,13 @@ export class BarnService {
   // поиск амбара по id
   async findOneBarnId(id: number): Promise<IBarnResponce> {
     try {
-      if (+id <= 0) return { error_message: barnText.ID_ERROR };
+      if (+id <= 0) return { message: barnText.ID_ERROR };
 
       const barn = await this.barnModel.findOne({ where: { id } });
-      if (!barn?.id) return { error_message: barnText.NOT_ID_BARN };
+
+      if (!barn?.id) {
+        return { message: `${barnText.NOT_ID_BARN} - ${id}` };
+      }
 
       return { barn };
     } catch (e) {
@@ -362,7 +365,7 @@ export class BarnService {
         price,
         userSelectedDate: new Date().toLocaleDateString(),
         barnId: barn.id,
-        movementType: 'создан',
+        movementType: 'создан__yaradılmışdır',
         fromLocation: '',
         toLocation: barn.location,
         productName: barn.productName,
@@ -386,7 +389,6 @@ export class BarnService {
     try {
       const {
         barnId,
-        movementType,
         userSelectedDate,
         fromLocation,
         toLocation,
@@ -395,13 +397,7 @@ export class BarnService {
         brokenStock,
       } = stocksBarnDto;
 
-      if (
-        !barnId ||
-        !movementType ||
-        !userSelectedDate ||
-        !fromLocation ||
-        !toLocation
-      ) {
+      if (!barnId || !userSelectedDate || !fromLocation || !toLocation) {
         return { error_message: barnText.NOT_INPUT_DATA };
       }
 
@@ -448,11 +444,11 @@ export class BarnService {
       }`;
 
       await this.historyService.createHistory({
+        movementType: 'приход__gələn',
         barnId,
         userId,
         username,
         userSelectedDate,
-        movementType,
         fromLocation,
         toLocation,
         message,
@@ -480,7 +476,6 @@ export class BarnService {
     try {
       const {
         barnId,
-        movementType,
         userSelectedDate,
         fromLocation,
         toLocation,
@@ -489,13 +484,7 @@ export class BarnService {
         brokenStock,
       } = stocksBarnDto;
 
-      if (
-        !barnId ||
-        !movementType ||
-        !userSelectedDate ||
-        !fromLocation ||
-        !toLocation
-      ) {
+      if (!barnId || !userSelectedDate || !fromLocation || !toLocation) {
         return { error_message: barnText.NOT_INPUT_DATA };
       }
 
@@ -542,8 +531,6 @@ export class BarnService {
       const sumTotalStocks = +barn.totalStock + +barn.lostTotalStock;
       const message = `Уменьшение в Амбаре №${barnId} | Складчик: ${username} | Товар: ${productName} - ${unit} | ${newStock ? `Новые: ${newStock}; ` : ''} ${usedStock ? `Использованные: ${usedStock}; ` : ''} ${brokenStock ? `Сломанные: ${brokenStock};` : ''}`;
 
-      this.errorService.log(`sumTotalStocks --- ${+sumTotalStocks}`);
-
       if (+sumTotalStocks) {
         await barn.save();
 
@@ -552,7 +539,7 @@ export class BarnService {
           userId,
           username,
           userSelectedDate,
-          movementType,
+          movementType: 'расход__istehlak',
           fromLocation,
           toLocation,
           message,
@@ -573,7 +560,7 @@ export class BarnService {
           userId,
           username,
           userSelectedDate,
-          movementType,
+          movementType: 'расход__istehlak',
           fromLocation,
           toLocation,
           message,
@@ -623,7 +610,7 @@ export class BarnService {
 
     await this.historyService.createHistory({
       message,
-      movementType: 'удаление',
+      movementType: 'списание__silinmə',
       userId,
       username,
       productName,

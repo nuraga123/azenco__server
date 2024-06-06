@@ -7,10 +7,6 @@ export class StocksBarnDto {
   @IsNotEmpty()
   readonly barnId: number;
 
-  // Тип движения (приход, перемещение, расход)
-  @IsString()
-  readonly movementType: string;
-
   // Выбранная пользователем дата
   @IsString()
   readonly userSelectedDate: string;
