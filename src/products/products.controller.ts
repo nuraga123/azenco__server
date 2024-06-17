@@ -32,7 +32,7 @@ export class ProductsController {
   /* GET запросы*/
 
   // Получение списка продуктов с пагинацией, фильтрацией или сортировкой
-  @UseGuards(TokenGuard)
+  //@UseGuards(TokenGuard)
   @Get()
   paginateAndFilterOrSort(
     @Query() query: IProductsQuery,
