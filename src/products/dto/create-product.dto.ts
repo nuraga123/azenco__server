@@ -1,28 +1,27 @@
 import { IsNotEmpty, IsString, IsNumber, IsOptional } from 'class-validator';
-import { IUnit } from '../types';
 
 export class CreateProductDto {
   @IsNotEmpty()
   @IsString()
-  readonly azencoCode: string;
+  azencoCode: string;
 
   @IsNotEmpty()
   @IsString()
-  readonly name: string;
+  name: string;
 
   @IsNotEmpty()
   @IsString()
-  readonly type: string;
+  type: string;
 
   @IsNotEmpty()
   @IsString()
-  readonly unit: IUnit;
+  unit: string;
 
   @IsNotEmpty()
   @IsNumber()
-  readonly price: number;
+  price: number;
 
   @IsOptional()
   @IsString()
-  readonly img: string;
+  img: string;
 }

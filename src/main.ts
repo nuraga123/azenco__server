@@ -37,10 +37,11 @@ async function bootstrap() {
   app.enableCors({
     credentials: true, // Позволяет передавать куки через CORS
     origin: [
-      'http://localhost:3001', // Разрешенные источники запросов
+      'http://localhost:3001',
       'https://azenco-client.onrender.com',
       'https://azenco-client.vercel.app',
-      'http://192.168.1.2:3001', // Обратите внимание, что адреса должны быть полными
+      'http://192.168.1.2:3001',
+      'http://192.168.1.3:3001',
     ],
   });
 

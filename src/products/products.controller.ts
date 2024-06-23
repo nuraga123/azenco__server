@@ -29,6 +29,11 @@ export class ProductsController {
     /**/
   }
 
+  @Post('import')
+  importProducts(@Body('products') products: string) {
+    return this.productService.importJSON(products);
+  }
+
   /* GET запросы*/
 
   // Получение списка продуктов с пагинацией, фильтрацией или сортировкой
@@ -50,7 +55,6 @@ export class ProductsController {
   /* POST запросы */
 
   // Добавление нового продукта
-  @UseGuards(TokenGuard)
   @Post('add')
   addProduct(
     @Body() createProductDto: CreateProductDto,

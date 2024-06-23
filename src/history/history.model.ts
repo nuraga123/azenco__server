@@ -1,6 +1,6 @@
 import { IsString } from 'class-validator';
 import { Table, Model, Column, DataType } from 'sequelize-typescript';
-import { IMovementType, IUnit } from 'src/products/types';
+import { IMovementType } from 'src/products/types';
 
 @Table({ tableName: 'History' })
 export class History extends Model<History> {
@@ -53,11 +53,9 @@ export class History extends Model<History> {
   azencoCode: string;
 
   // Единица измерения
-  @Column(
-    DataType.ENUM('штук', 'набор', 'тон', 'кг', 'км', 'см', 'метр', 'литр'),
-  )
+  @Column(DataType.TEXT)
   @IsString()
-  unit: IUnit;
+  unit: string;
 
   // Цена за единицу
   @Column(DataType.DECIMAL(20, 2))

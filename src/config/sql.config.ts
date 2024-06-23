@@ -1,8 +1,9 @@
 import { registerAs } from '@nestjs/config';
 import { Dialect } from 'sequelize';
+import { MariaDbDialect } from '@sequelize/mariadb';
 
 export const sqlConfig = registerAs('database', () => ({
-  dialect: <Dialect>process.env.SQL_DIALECT || 'mysql',
+  dialect: <Dialect>process.env.SQL_DIALECT || MariaDbDialect || 'mysql',
   host: process.env.DATABASE_HOST,
   port: process.env.DATABASE_PORT,
   username: process.env.DATABASE_USER,

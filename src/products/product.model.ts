@@ -1,19 +1,5 @@
 import { Table, Model, Column, Unique, DataType } from 'sequelize-typescript';
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { IUnit } from './types';
-
-export enum Unit {
-  PIECE = 'шт',
-  TON = 'тон',
-  M = 'метр',
-  KG = 'кг',
-  SET = 'набор',
-  L = 'литр',
-  GR = 'гр',
-  MM = 'мм',
-  CM = 'см',
-  KM = 'км',
-}
 
 @Table
 export class Product extends Model {
@@ -38,22 +24,9 @@ export class Product extends Model {
   @IsString()
   type: string;
 
-  @Column(
-    DataType.ENUM(
-      Unit.PIECE,
-      Unit.TON,
-      Unit.M,
-      Unit.KG,
-      Unit.SET,
-      Unit.L,
-      Unit.GR,
-      Unit.MM,
-      Unit.CM,
-      Unit.KM,
-    ),
-  )
+  @Column(DataType.TEXT)
   @IsString()
-  unit: IUnit;
+  unit: string;
 
   @Column(DataType.TEXT)
   @IsString()

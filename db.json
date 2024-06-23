@@ -1,0 +1,1306 @@
+[
+  {
+    "name": "3200х12000х2800 iki otağı konteyner",
+    "azencoCode": "M00011278",
+    "price": 10771.57,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Akkumlyator 45AH volten",
+    "azencoCode": "M00045768",
+    "price": 95.0,
+    "type": "akkumlyator",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Antena kabeli 100 metr",
+    "azencoCode": "M00037508",
+    "price": 27.0,
+    "type": "kabel",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Aralıq bənd PTM 12-2",
+    "azencoCode": "000027116",
+    "price": 14.32,
+    "type": "bənd",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Aralıq bənd PTM 12-3",
+    "azencoCode": "S58003968",
+    "price": 13.2,
+    "type": "bənd",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Aralıq hissə PR 12-6",
+    "azencoCode": "000055758",
+    "price": 7.1,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Aralıq hissə PRR-16-1a",
+    "azencoCode": "M00038363",
+    "price": 20.55,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Asma dəsti OPEB",
+    "azencoCode": "M00022642",
+    "price": 106.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Asma sıxac 2PQN 5-7",
+    "azencoCode": "M00034187",
+    "price": 194.05,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Asma sıxac PQ-3-12",
+    "azencoCode": "S58611995",
+    "price": 15.39,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Açar 32",
+    "azencoCode": "000000468",
+    "price": 10.8,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Balış",
+    "azencoCode": "000000470",
+    "price": 3.01,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Balış üzü",
+    "azencoCode": "000000925",
+    "price": 6.71,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Birləşdirici sıxac SOAS-120-3",
+    "azencoCode": "S58631958",
+    "price": 4.48,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Birləşdirici sıxac SOAS-95-3",
+    "azencoCode": "000027677",
+    "price": 4.29,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Boya alminium",
+    "azencoCode": "000027682",
+    "price": 2.42,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Bolt M 16x50",
+    "azencoCode": "000011971",
+    "price": 5.2,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Bolt M20x50",
+    "azencoCode": "000012909",
+    "price": 0.44,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Bolt M 27x100",
+    "azencoCode": "000051848",
+    "price": 0.57,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Bolt M 30x70",
+    "azencoCode": "000013034",
+    "price": 2.42,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Bolt M 27x90",
+    "azencoCode": "S58002469",
+    "price": 2.38,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Bolt, qayka şayba",
+    "azencoCode": "S59682036",
+    "price": 4.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Bolta taxılan sıxac NB-2-6",
+    "azencoCode": "M00019379",
+    "price": 1.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Boru qofrlanmış DN 400 PPH",
+    "azencoCode": "000055799",
+    "price": 15.39,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Boru qofrlanmış (büzməli) Dn 50",
+    "azencoCode": "M00007305",
+    "price": 31.68,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Boru plastik 800x47,4",
+    "azencoCode": "M00005701",
+    "price": 0.71,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Boru PPR 25",
+    "azencoCode": "000052086",
+    "price": 192.19,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Buraz (tros-4 ayaqlı sapand 40tx4m)",
+    "azencoCode": "S58617755",
+    "price": 0.9,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Buraz (tros-4 ayaqlı sapand 50tx4m)",
+    "azencoCode": "S58631554",
+    "price": 357.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Bərkitmə qovşağı KQN-7-5",
+    "azencoCode": "S58631549",
+    "price": 565.14,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Vintil karabin 11mm",
+    "azencoCode": "S58006260",
+    "price": 12.43,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Qayka M 16",
+    "azencoCode": "M00007582",
+    "price": 0.97,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Qayka M 20",
+    "azencoCode": "000052780",
+    "price": 0.15,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Qayka M 24",
+    "azencoCode": "000013346",
+    "price": 0.28,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Qayka M 27",
+    "azencoCode": "000013349",
+    "price": 0.43,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Qayçı yakar N16",
+    "azencoCode": "000016080",
+    "price": 1.01,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Qoruyuju ekran EZ-500-1A",
+    "azencoCode": "M00044978",
+    "price": 86.4,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Qoruyucu kəmər paraşüt tipli bel dəstəkli",
+    "azencoCode": "000002473",
+    "price": 81.13,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Qulaqcıq U1-7-16",
+    "azencoCode": "S59650595",
+    "price": 13.03,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Qulaqcıq U1K-7-16",
+    "azencoCode": "000028920",
+    "price": 5.13,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Qulaqcıq U2K-7-16",
+    "azencoCode": "000056131",
+    "price": 3.34,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Dayaq sıxacı PQ-2-11D",
+    "azencoCode": "000056132",
+    "price": 4.32,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Dayaq sıxacı PQ-2-11D",
+    "azencoCode": "000056158",
+    "price": 3.58,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Qulaqcıq U2K-7-16",
+    "azencoCode": "000016516",
+    "price": 6.41,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Qulaqcıq U2K-7-16",
+    "azencoCode": "M00039334",
+    "price": 42.55,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Dayaq sıxacı PQ-2-11D",
+    "azencoCode": "S58611979",
+    "price": 58.59,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Dayaq sıxacı PQN-3-5",
+    "azencoCode": "S59652507",
+    "price": 6.53,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Dartma sıxac Nas-330-1",
+    "azencoCode": "M00040865",
+    "price": 0.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Dartma sıxac Nas-600-1",
+    "azencoCode": "M00041023",
+    "price": 512.51,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Döşək ağı",
+    "azencoCode": "M00045788",
+    "price": 379.58,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Dəmir beton bünövrə B1-2",
+    "azencoCode": "M00041714",
+    "price": 709.93,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Dəmir beton bünövrə B1-A",
+    "azencoCode": "S58018385",
+    "price": 993.46,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Dəmir beton bünövrə B3-2",
+    "azencoCode": "M00001275",
+    "price": 95.14,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Demir beton bünövrə B3-A(D)",
+    "azencoCode": "S59650647",
+    "price": 2.62,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Demir beton dayaq SK 26,1",
+    "azencoCode": "M00005716",
+    "price": 2.04,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Dəmir beton riqel AP-5",
+    "azencoCode": "000003219",
+    "price": 31.49,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Dəmir bolt 27x100",
+    "azencoCode": "000030293",
+    "price": 9.74,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Dəmir bolt 27x70",
+    "azencoCode": "M00026619",
+    "price": 23.23,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Ekran qoruyucusu EZ 500-5",
+    "azencoCode": "000030601",
+    "price": 4.55,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Ekranların bərkidmə bəndi UKE-6Q",
+    "azencoCode": "M00009646",
+    "price": 300.74,
+    "type": "bənd",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Elektrik lampa LED 50V",
+    "azencoCode": "000062761",
+    "price": 1.9,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "JAJ 50-3B",
+    "azencoCode": "S58612477",
+    "price": 9.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "İkilaylı çarpayı (2020x800x2140 mm)",
+    "azencoCode": "000004085",
+    "price": 46.86,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Yanmış məftil 5mm",
+    "azencoCode": "S58631957",
+    "price": 13.11,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Yağmurluq (plaş)",
+    "azencoCode": "000024302",
+    "price": 4.59,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Yorğan",
+    "azencoCode": "M00006550",
+    "price": 6.03,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Yorğan üzü",
+    "azencoCode": "T00002087",
+    "price": 1503.96,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Kabel APvPuq 1x95/25 10kv",
+    "azencoCode": "M00022851",
+    "price": 250.0,
+    "type": "kabel",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Kabel VVQz(M) 4x16 1kv",
+    "azencoCode": "123584",
+    "price": 398.5,
+    "type": "kabel",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "KD-26,1-2.2 d/b dayaq",
+    "azencoCode": "M00007714",
+    "price": 836.63,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Kondisioner Alarko",
+    "azencoCode": "000015719",
+    "price": 755.49,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Kondisioner Jhigo",
+    "azencoCode": "S58626960",
+    "price": 867.71,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Kondisioner Jarrer 12713",
+    "azencoCode": "000015726",
+    "price": 604.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Kondisioner LG-1260 HL",
+    "azencoCode": "S58017802",
+    "price": 0.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Kondisioner Hitaji RASJ-24 HPA",
+    "azencoCode": "000054424",
+    "price": 11.19,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Kondisioner HUNDAİ 50 GV",
+    "azencoCode": "000005274",
+    "price": 6.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Konteyner ofis 3000x3000x12000 mm (2 otaqlı, dəhlizli)",
+    "azencoCode": "000005276",
+    "price": 3.36,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Koromıslo 2 KU-12-1",
+    "azencoCode": "S59657513",
+    "price": 0.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Lapatka düz",
+    "azencoCode": "S58011836",
+    "price": 0.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Lapatka sapı",
+    "azencoCode": "S58620594",
+    "price": 11.8,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Lifli optik kabel",
+    "azencoCode": "000005587",
+    "price": 190.0,
+    "type": "kabel",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Liftli iki zirehli kabel FO 12",
+    "azencoCode": "S58070198",
+    "price": 114.96,
+    "type": "kabel",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Lom böyük",
+    "azencoCode": "M00042081",
+    "price": 0.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Masa",
+    "azencoCode": "000020066",
+    "price": 1304.47,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Matris komplekti P-100MA",
+    "azencoCode": "M00046777",
+    "price": 0.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Metal anker dayaq U-220-3+9",
+    "azencoCode": "M00045863",
+    "price": 13238.9,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Metal badya",
+    "azencoCode": "M00046614",
+    "price": 47336.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Metal dayaq P330-3",
+    "azencoCode": "M00046926",
+    "price": 28250.53,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Metal dayaq U 110-1",
+    "azencoCode": "M00041502",
+    "price": 1.89,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Metal dayaq U330-2+9",
+    "azencoCode": "000054068",
+    "price": 0.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Metal dayaq U330-3+5",
+    "azencoCode": "000054070",
+    "price": 3.33,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Metal dayaq hissələri U220-2",
+    "azencoCode": "000054072",
+    "price": 2.46,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Naqil AJ 240/32",
+    "azencoCode": "M00037642",
+    "price": 5.62,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Naqil AJ 70/11",
+    "azencoCode": "M00005029",
+    "price": 3.64,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Naqil AJ-120/19",
+    "azencoCode": "000071850",
+    "price": 1.04,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Naqil AS 330/43 mm2",
+    "azencoCode": "M00003666",
+    "price": 14.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Naqil AS-120/19",
+    "azencoCode": "M00016369",
+    "price": 1.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Naqil SiP-42x16",
+    "azencoCode": "M00017752",
+    "price": 0.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Nivelir xətkeşi",
+    "azencoCode": "M00034804",
+    "price": 0.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Nişan şar (qırmızı)",
+    "azencoCode": "000067358",
+    "price": 186.57,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "OKQ-Tç 1-48-11,7",
+    "azencoCode": "M00043598",
+    "price": 2.76,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "OKQT-ç-1-24-11,7",
+    "azencoCode": "M00044273",
+    "price": 10.53,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Oksigen balonu (klapanlı və qoruyucu qapaqla)",
+    "azencoCode": "000067597",
+    "price": 0.96,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Optik kabel OPGW-24BI-70",
+    "azencoCode": "M00038834",
+    "price": 178.95,
+    "type": "kabel",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Oturacaq tabletka 0,35x0,41",
+    "azencoCode": "000068220",
+    "price": 15.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Palatno sarı",
+    "azencoCode": "000069106",
+    "price": 0.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Paltar şkafı 1,80x0,40x0,80",
+    "azencoCode": "S59653117",
+    "price": 0.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Plastinka",
+    "azencoCode": "M00043166",
+    "price": 86.44,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Presləmə sıxaj SAS 300-1",
+    "azencoCode": "000070172",
+    "price": 16.3,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Propan qazı balonla birlikdə",
+    "azencoCode": "000070174",
+    "price": 0.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Radiator Timberk Tor 21 2009 DJL",
+    "azencoCode": "000007480",
+    "price": 55.67,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Rasporka RQ 2-400",
+    "azencoCode": "S58622122",
+    "price": 0.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Rasporka RQ 2-600",
+    "azencoCode": "M00041212",
+    "price": 72.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Ratsiya MT 500",
+    "azencoCode": "000021318",
+    "price": 106.8,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Rezak",
+    "azencoCode": "M00047301",
+    "price": 120.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Remen 6t 6mt",
+    "azencoCode": "S58622251",
+    "price": 191.46,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Remen 6t 8m",
+    "azencoCode": "S58622254",
+    "price": 263.52,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Remen 8t 6n",
+    "azencoCode": "000007728",
+    "price": 69.05,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Rolik (polad) 2ton 75 mm",
+    "azencoCode": "000007729",
+    "price": 45.03,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Rolik (polad) 4ton 115 mm",
+    "azencoCode": "000007730",
+    "price": 123.56,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Rolik M IP-5",
+    "azencoCode": "S58625257",
+    "price": 11.46,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Rolik M IP-6",
+    "azencoCode": "000013608",
+    "price": 0.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Rolik M IP-7",
+    "azencoCode": "S58015328",
+    "price": 9.03,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Sancaq M 27x600",
+    "azencoCode": "000039256",
+    "price": 0.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Sancaq M 27x650",
+    "azencoCode": "000039776",
+    "price": 40.2,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Sancaq M 30x650",
+    "azencoCode": "M00015913",
+    "price": 210.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Sas 300",
+    "azencoCode": "000073168",
+    "price": 1.95,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Skoba 25",
+    "azencoCode": "M00038368",
+    "price": 120.26,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Soyuducu Paris-40",
+    "azencoCode": "000056490",
+    "price": 13.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Sırğa SPS-7-16",
+    "azencoCode": "M00042390",
+    "price": 33.05,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Sıxac-Zajim MK-3 Klin=2",
+    "azencoCode": "58013772",
+    "price": 0.87,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Sıxac PA-5-1",
+    "azencoCode": "S58022539",
+    "price": 180.83,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Termos plasmas su üçün 20lt",
+    "azencoCode": "S58022541",
+    "price": 191.28,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Texniki oksigen qazı",
+    "azencoCode": "M00007271",
+    "price": 17.29,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Torpaqlama aləti ZPLŞM-110-220",
+    "azencoCode": "M00019015",
+    "price": 197.35,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Torpaqlama aləti ZPLŞM-330-500",
+    "azencoCode": "M00012456",
+    "price": 96.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Torpaqlama birləşdirici D 16x4500 mm",
+    "azencoCode": "M00047167",
+    "price": 82.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Travers B5JL=4m hissələri",
+    "azencoCode": "M00033662",
+    "price": 87.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Tros 18 8 metr",
+    "azencoCode": "M00047190",
+    "price": 157.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Tros 20 L=6m",
+    "azencoCode": "M00023333",
+    "price": 97.62,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Tros 22 (6m)",
+    "azencoCode": "M00034816",
+    "price": 430.57,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Tros 24 L=8m",
+    "azencoCode": "M00044466",
+    "price": 345.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Tros 27 6m-lik",
+    "azencoCode": "T00000221",
+    "price": 48.09,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Tros 70mx16mm",
+    "azencoCode": "S58625534",
+    "price": 140.7,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Tros başı bağlı F16mm, L=70,00 metr",
+    "azencoCode": "M00041475",
+    "price": 335.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Tros saxlayan dayaq L=2m",
+    "azencoCode": "M00041473",
+    "price": 65.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Tros F12 hörgülü 70m-lik",
+    "azencoCode": "M00044275",
+    "price": 75.37,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Tros F16 L 70m",
+    "azencoCode": "M00004972",
+    "price": 0.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Tros F18 8m",
+    "azencoCode": "M00014918",
+    "price": 2.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Tumba 0,30x0,60x0,70",
+    "azencoCode": "S58002170",
+    "price": 150.75,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "U şəkilli sancaq M 36x2400",
+    "azencoCode": "S59677659",
+    "price": 282.72,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Fırça 4",
+    "azencoCode": "000015920",
+    "price": 0.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Üçayaq ET-10 teodalit üçün",
+    "azencoCode": "S58017833",
+    "price": 90.57,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Çarpayı",
+    "azencoCode": "M00037873",
+    "price": 15.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Çarpayı (döşək ortopedik)",
+    "azencoCode": "000013843",
+    "price": 4.31,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "ÇARPAYI ORTOPEDİK DÖŞƏK",
+    "azencoCode": "000013844",
+    "price": 0.15,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Çarpayı sökülmüş",
+    "azencoCode": "M00013119",
+    "price": 0.39,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Şayba M 27",
+    "azencoCode": "000013845",
+    "price": 0.15,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Şayba M 27",
+    "azencoCode": "000023071",
+    "price": 234.0,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Şayba M 27 düz",
+    "azencoCode": "S59664335",
+    "price": 40.77,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Şayba M 30",
+    "azencoCode": "Şayba M 30",
+    "price": 1,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Şarnir 545x400x495",
+    "azencoCode": "Şarnir 545x400x495",
+    "price": 1,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  },
+  {
+    "name": "Halqa EZ-750-1A",
+    "azencoCode": "Halqa EZ-750-1A",
+    "price": 1,
+    "type": "digər",
+    "unit": "ədəd",
+    "img": ""
+  }
+]

@@ -614,8 +614,8 @@ export class BarnService {
       userId,
       username,
       productName,
-      unit: 'штук',
-      barnId: 0,
+      unit,
+      barnId: id,
     });
 
     await barn.destroy();

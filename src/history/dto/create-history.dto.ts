@@ -1,5 +1,5 @@
 import { IsString, IsNumber, IsNotEmpty } from 'class-validator';
-import { IMovementType, IUnit } from 'src/products/types';
+import { IMovementType } from 'src/products/types';
 
 export class CreateHistoryDto {
   @IsNumber()
@@ -45,7 +45,7 @@ export class CreateHistoryDto {
   // Единица измерения
   @IsNotEmpty()
   @IsString()
-  unit?: IUnit;
+  unit?: string;
 
   @IsNumber()
   price?: number;

@@ -56,16 +56,6 @@ export interface IDeleteProduct extends IError {
   message?: string;
 }
 
-export type IUnit =
-  | 'штук'
-  | 'набор'
-  | 'тон'
-  | 'кг'
-  | 'км'
-  | 'см'
-  | 'метр'
-  | 'литр';
-
 export type IMovementType =
   | 'создан__yaradılmışdır'
   | 'приход__gələn'

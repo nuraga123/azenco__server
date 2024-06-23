@@ -31,6 +31,8 @@
     "@nestjs/platform-express": "^10.3.0",
     "@nestjs/sequelize": "^10.0.0",
     "@nestjs/swagger": "^7.1.17",
+    "@sequelize/core": "^7.0.0-alpha.41",
+    "@sequelize/mariadb": "^7.0.0-alpha.41",
     "@types/bcrypt": "^5.0.0",
     "@types/ioredis": "^5.0.0",
     "@types/passport": "^1.0.12",
@@ -55,9 +57,9 @@
     "passport-local": "^1.0.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
-    "sequelize": "^6.33.0",
-    "sequelize-cli": "^6.6.1",
-    "sequelize-typescript": "^2.1.5"
+    "sequelize": "^6.37.3",
+    "sequelize-cli": "^6.6.2",
+    "sequelize-typescript": "^2.1.6"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
