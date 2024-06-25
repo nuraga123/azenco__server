@@ -93,8 +93,10 @@ export class UsersService {
     }
   }
 
-  getUsers() {
-    return this.userModel.findAll();
+  async findUsersNames(): Promise<string[]> {
+    const users = await this.userModel.findAll();
+    const names = users.map((user) => user.username);
+    return names;
   }
 
   async removeUserById(id: number) {

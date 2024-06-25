@@ -40,10 +40,9 @@ export class UsersController {
     this.startTime = this.startDateTime.getTime();
   }
 
-  @Get('all')
-  @HttpCode(HttpStatus.OK)
-  getUsers() {
-    return this.usersService.getUsers();
+  @Get('/names')
+  async getUsersNames() {
+    return this.usersService.findUsersNames();
   }
 
   @Get('/work')
@@ -93,7 +92,7 @@ export class UsersController {
   }
 
   @Get(':id')
-  getAll(@Param('id') id: string) {
+  getUserOne(@Param('id') id: string) {
     const usersData = this.usersService.findUserOne(+id);
     console.log(usersData);
     return usersData;
@@ -101,7 +100,7 @@ export class UsersController {
 
   @Get('remove/:id')
   removeUser(@Param('id') id: number) {
-    return this.usersService.removeUserById(+id); 
+    return this.usersService.removeUserById(+id);
   }
 
   @ApiOkResponse({ type: LogoutUserResponse })
