@@ -4,6 +4,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import * as bcrypt from 'bcrypt';
 import { User } from './users.model';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 import { IUserResponce } from './types';
 
 @Injectable()
@@ -64,30 +65,38 @@ export class UsersService {
   }
 
   async updateUserPassword(
-    userSecret: string,
-    userId: number,
-    newPassword: string,
+    updatePasswordDto: UpdatePasswordDto,
   ): Promise<{ User: User; message: string } | { message: string }> {
-    // Находим пользователя по его userId
-    const user = await this.findUserOne(userId);
-    this.consoleLogger.log(user);
-    if (!user) {
-      return { message: 'Пользователья не существует' };
+    const { id, secret, newPassword } = updatePasswordDto;
+
+    if (!secret) {
+      return { message: 'secret не существует' };
     }
 
     if (!newPassword) {
       return { message: 'new password не существует' };
     }
 
+    const user = await this.findUserOne(id);
+    this.consoleLogger.log(user);
+
+    if (!user) {
+      return { message: 'Пользователья не существует' };
+    }
+
+    if (user.password === newPassword) {
+      return { message: 'вы правельно ввели парол' };
+    }
+
     const secretWord = this.configService.get<string>('SECRET');
-    if (secretWord === userSecret) {
+
+    if (secretWord === secret) {
       const hashedPassword = await bcrypt.hash(newPassword, 10);
       // Обновляем пароль пользователя в базе данных
       user.password = hashedPassword;
       await user.save();
 
-      // Возвращаем обновленного пользователя
-      return { ...user, message: 'пароль обнавлен' };
+      return { ...user.dataValues, message: 'пароль обнавлен' };
     } else {
       return { message: 'неправильное секретное слово' };
     }

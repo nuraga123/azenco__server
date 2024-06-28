@@ -25,7 +25,8 @@ import {
 
 import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
 import { TokenService } from 'src/token/token.service';
-import { TokenGuard } from 'src/token/token.guard';
+// import { TokenGuard } from 'src/token/token.guard';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 
 @Controller('users')
 export class UsersController {
@@ -110,25 +111,9 @@ export class UsersController {
     return { msg: 'session has ended' };
   }
 
-  @UseGuards(TokenGuard)
   @Post('/secret-word')
-  resetPassword(
-    @Body()
-    {
-      userSecret,
-      userId,
-      newPassword,
-    }: {
-      userSecret: string;
-      userId: number;
-      newPassword: string;
-    },
-  ) {
-    return this.usersService.updateUserPassword(
-      userSecret,
-      userId,
-      newPassword,
-    );
+  resetPassword(@Body() updatePasswordDto: UpdatePasswordDto) {
+    return this.usersService.updateUserPassword(updatePasswordDto);
   }
 
   @Post('validate-token')

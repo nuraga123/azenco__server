@@ -26,7 +26,7 @@ import { BarnModule } from './barn/barn.module';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('SECRET'),
-        signOptions: { expiresIn: '1y' },
+        signOptions: { expiresIn: '8h' },
       }),
       inject: [ConfigService],
     }),
