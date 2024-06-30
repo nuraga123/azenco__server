@@ -25,7 +25,6 @@ import {
 
 import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
 import { TokenService } from 'src/token/token.service';
-// import { TokenGuard } from 'src/token/token.guard';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 
 @Controller('users')
@@ -130,6 +129,7 @@ export class UsersController {
       };
     } catch (error) {
       console.log(error);
+      return error;
     }
   }
 }
