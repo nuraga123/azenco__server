@@ -220,7 +220,7 @@ export class ProductsService {
 
       const { count, rows } = await this.productModel.findAndCountAll({
         limit: +limit,
-        offset: +offset * 3,
+        offset: +offset * +limit,
         where: filter,
         order: [[Sequelize.literal('CAST(price AS DECIMAL)'), orderDirection]],
       });
