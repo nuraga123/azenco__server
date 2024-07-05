@@ -22,7 +22,7 @@ export class Product extends Model {
 
   @Column(DataType.TEXT)
   @IsString()
-  type: string;
+  type?: string;
 
   @Column(DataType.TEXT)
   @IsString()

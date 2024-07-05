@@ -11,7 +11,7 @@ export class CreateProductDto {
 
   @IsNotEmpty()
   @IsString()
-  type: string;
+  type?: string;
 
   @IsNotEmpty()
   @IsString()
@@ -23,5 +23,5 @@ export class CreateProductDto {
 
   @IsOptional()
   @IsString()
-  img: string;
+  img?: string;
 }
