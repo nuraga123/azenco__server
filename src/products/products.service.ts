@@ -227,6 +227,11 @@ export class ProductsService {
       });
 
       rows.forEach(this.processProductPrice);
+      
+      rows.sort((a: Product, b: Product) =>
+        sortBy === 'asc' ? +a.price - +b.price : +b.price - +a.price,
+      );
+
       return { count, rows };
     } catch (e) {
       return this.errorsService.errorsMessage(e);
