@@ -22,6 +22,7 @@ import { TokenGuard } from 'src/token/token.guard';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { FilterProductDto } from './dto/filter-product.dto';
 
 @Controller('products')
 export class ProductsController {
@@ -43,6 +44,22 @@ export class ProductsController {
     @Query() query: IProductsQuery,
   ): Promise<ICountAndRowsProductsResponse> {
     return this.productService.paginateAndFilterOrSortProducts(query);
+  }
+
+  @Post('filter')
+  postSearchFilter(
+    @Query() query: IProductsQuery,
+    @Body() filter: FilterProductDto,
+  ): Promise<ICountAndRowsProductsResponse> {
+    const { type, searchValue, priceFrom, priceTo } = filter;
+
+    return this.productService.searchProducts(
+      query,
+      type,
+      searchValue,
+      priceFrom,
+      priceTo,
+    );
   }
 
   // Получение информации о продукте по его идентификатору
