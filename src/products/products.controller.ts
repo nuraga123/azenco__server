@@ -48,18 +48,9 @@ export class ProductsController {
 
   @Post('filter')
   postSearchFilter(
-    @Query() query: IProductsQuery,
     @Body() filter: FilterProductDto,
   ): Promise<ICountAndRowsProductsResponse> {
-    const { type, searchValue, priceFrom, priceTo } = filter;
-
-    return this.productService.searchProducts(
-      query,
-      type,
-      searchValue,
-      priceFrom,
-      priceTo,
-    );
+    return this.productService.searchProducts(filter);
   }
 
   // Получение информации о продукте по его идентификатору

@@ -186,7 +186,8 @@ export class ProductsService {
     query: IProductsQuery,
   ): Promise<ICountAndRowsProductsResponse> {
     try {
-      const { limit, offset, sortBy, priceFrom, priceTo } = query;
+      const limit = 20;
+      const { offset, sortBy } = query;
 
       if (!limit && !offset) {
         const { count, rows } = await this.productModel.findAndCountAll({
@@ -199,12 +200,6 @@ export class ProductsService {
       }
 
       const filter: Partial<IProductsFilter> = {};
-
-      if (priceFrom && priceTo) {
-        filter.price = {
-          [Op.between]: [+priceFrom, +priceTo],
-        };
-      }
 
       const orderDirection = sortBy === 'asc' ? 'asc' : 'desc';
 
@@ -342,63 +337,56 @@ export class ProductsService {
     }
   }
 
-// Метод для поиска продуктов по имени или коду с поддержкой фильтрации по диапазону цен
-async searchProducts(
-  query: IProductsQuery,
-  type: 'name' | 'code', // Тип поиска: 'name' или 'code'
-  searchValue: string, // Значение для поиска
-  priceFrom?: string, // Цена от (необязательный параметр)
-  priceTo?: string, // Цена до (необязательный параметр)
-): Promise<ICountAndRowsProductsResponse> {
-  try {
-    const { limit = 20, offset = 0, sortBy = 'asc' } = query;
-    const orderDirection = sortBy === 'asc' ? 'asc' : 'desc';
-    const filter: any = {};
+  // Метод для поиска продуктов по имени или коду с поддержкой фильтрации по диапазону цен
+  async searchProducts(filter: IProductsFilter): Promise<IProductsResponse> {
+    const { sortBy, searchValue, type, priceFrom, priceTo } = filter;
+    try {
+      const orderDirection = sortBy === 'asc' ? 'asc' : 'desc';
+      const filter: any = {};
 
-    // Установка условия поиска по имени или коду
-    if (type === 'name') {
-      filter.name = { [Op.like]: `%${searchValue}%` };
-    } else if (type === 'code') {
-      filter.azencoCode = searchValue;
+      // Установка условия поиска по имени или коду
+      if (type === 'name') {
+        filter.name = { [Op.like]: `%${searchValue}%` };
+      } else if (type === 'code') {
+        filter.azencoCode = searchValue;
+      }
+
+      // Установка условий фильтрации по диапазону цен
+      if (priceFrom && priceTo) {
+        filter.price = {
+          [Op.between]: [+priceFrom, +priceTo],
+        };
+      } else if (priceFrom) {
+        filter.price = {
+          [Op.gte]: +priceFrom,
+        };
+      } else if (priceTo) {
+        filter.price = {
+          [Op.lte]: +priceTo,
+        };
+      }
+
+      // Поиск продуктов по заданным условиям
+      const products = await this.productModel.findAll({
+        where: filter,
+        order: [['price', orderDirection]],
+      });
+
+      // Проверка наличия продуктов
+      if (!products.length) {
+        return {
+          error_message: `Göstərilən filtrdən istifadə edərək məhsul tapılmadı`,
+        };
+      }
+
+      // Обработка цены для каждого продукта
+      products.map(this.processProductPrice);
+
+      products.sort((a, b) => orderDirection === 'asc' ? (a.price - b.price) : (b.price - a.price))
+
+      return { products };
+    } catch (e) {
+      return this.errorsService.errorsMessage(e);
     }
-
-    // Установка условий фильтрации по диапазону цен
-    if (priceFrom && priceTo) {
-      filter.price = {
-        [Op.between]: [+priceFrom, +priceTo],
-      };
-    } else if (priceFrom) {
-      filter.price = {
-        [Op.gte]: +priceFrom,
-      };
-    } else if (priceTo) {
-      filter.price = {
-        [Op.lte]: +priceTo,
-      };
-    }
-
-    // Поиск продуктов по заданным условиям
-    const { rows, count } = await this.productModel.findAndCountAll({
-      limit: +limit,
-      offset: +offset,
-      where: filter,
-      order: [['price', orderDirection]], // Сортировка по цене
-    });
-
-    // Проверка наличия продуктов
-    if (!count) {
-      return { error_message: `Göstərilən filtrdən istifadə edərək məhsul tapılmadı` };
-    }
-
-    // Обработка цены для каждого продукта
-    for (const product of rows) {
-      await this.processProductPrice(product);
-    }
-
-    return { rows, count };
-  } catch (e) {
-    return this.errorsService.errorsMessage(e);
   }
-}
-
 }

@@ -1,4 +1,3 @@
-import { Op } from 'sequelize';
 import { Product } from '../product.model';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
@@ -35,21 +34,19 @@ export interface IUpdateProduct {
 }
 
 export interface IProductsFilter {
-  bolt?: string;
-  PRR?: string;
-  earring?: string;
-  price: { [Op.between]: number[] };
+  sortBy: 'asc' | 'desc';
+  type: 'name' | 'code';
+  searchValue: string;
+  priceFrom?: string;
+  priceTo?: string;
+  price?: string;
 }
 
 export interface IProductsQuery {
-  limit: string;
   offset: string;
   priceFrom?: string;
   priceTo?: string;
-  sortBy?: string;
-  bolt?: string;
-  PRR?: string;
-  earring?: string;
+  sortBy: string;
 }
 
 export interface IDeleteProduct extends IError {
