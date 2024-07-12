@@ -382,6 +382,7 @@ export class ProductsService {
       // Обработка цены для каждого продукта
       products.map(this.processProductPrice);
 
+      //
       products.sort((a, b) => orderDirection === 'asc' ? (a.price - b.price) : (b.price - a.price))
 
       return { products };
