@@ -254,7 +254,7 @@ export class BarnService {
         where: { id: +userId },
       });
 
-      if (!username) return { message: `Пользователь не найден` };
+      if (!username) return { error_message: `anbardar tapılmadı !` };
 
       // Поиск продукта
       const { product, error_message: productError } =
@@ -293,7 +293,9 @@ export class BarnService {
       });
 
       if (existingBarn?.barn) {
-        return { message: `Уже есть амбар №${existingBarn.barn.id} !` };
+        return {
+          error_message: `Material artıq ${existingBarn.barn.username} anbarında yaradılıb !`,
+        };
       }
 
       if (existingBarn?.error_message) {
@@ -348,13 +350,19 @@ export class BarnService {
       });
 
       // Создание сообщения о создании амбара для истории
-      const message = `Новый aмбар №${barn.id} ! Складчик: ${barn.username}; Товар: ${
+      const message = `Yeni material əlavə olundu! Anbardar: ${barn.username} Məhsul: ${
         //
         barn.productName
-      } - ${barn.unit}; Новые: ${barn.newStock}; Использованные: ${
+      } - ${barn.unit}; Yenilər: ${
+        //
+        barn.newStock
+      }; İstifadə olunmuşlar: ${
         //
         barn.usedStock
-      }; Сломанные: ${barn.brokenStock};`;
+      }; Sınıqlar: ${
+        //
+        barn.brokenStock
+      };`;
 
       await this.historyService.createHistory({
         userId,
@@ -395,6 +403,8 @@ export class BarnService {
         newStock,
         usedStock,
         brokenStock,
+        driverName,
+        carNumber,
       } = stocksBarnDto;
 
       if (!barnId || !userSelectedDate || !fromLocation || !toLocation) {
@@ -437,11 +447,9 @@ export class BarnService {
 
       await barn.save();
 
-      const message = `Приход в Амбар №${barnId} | Складчик: ${username} | Товар: ${productName} - ${unit} | ${
-        newStock ? `Новые: ${newStock} | ` : ''
-      } ${usedStock ? `Использованные: ${usedStock} | ` : ''} ${
-        brokenStock ? ` Сломанные:  ${brokenStock} |` : ''
-      }`;
+      const message = `Materialın anbara əlavə olunması: ${username} | material: ${productName} - ${unit} | ${
+        newStock ? `Yeni: ${newStock} | ` : ''
+      }${usedStock ? `İstifadə olunmuş: ${usedStock} | ` : ''}${brokenStock ? `Sındırılmış: ${brokenStock}` : ''}`;
 
       await this.historyService.createHistory({
         movementType: 'приход__gələn',
@@ -464,6 +472,8 @@ export class BarnService {
         lostUsedStock: +barn.lostUsedStock,
         lostBrokenStock: +barn.lostBrokenStock,
         lostTotalStock: +barn.lostTotalStock,
+        carNumber,
+        driverName,
       });
 
       return { message, barn };

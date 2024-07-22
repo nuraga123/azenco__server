@@ -31,17 +31,4 @@ export class CreatedBarnDto {
   @IsNotEmpty()
   @IsNumber()
   readonly brokenStock: number;
-
-  // lost
-  @ApiProperty({ example: 0 })
-  @IsNumber()
-  readonly lostNewStock?: number;
-
-  @ApiProperty({ example: 0 })
-  @IsNumber()
-  readonly lostUsedStock?: number;
-
-  @ApiProperty({ example: 0 })
-  @IsNumber()
-  readonly lostBrokenStock?: number;
 }

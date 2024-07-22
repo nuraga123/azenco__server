@@ -94,4 +94,12 @@ export class History extends Model<History> {
   // Общий потерянный продукт
   @Column(DataType.DECIMAL(20, 3))
   lostTotalStock: number;
+
+  @Column(DataType.TEXT)
+  @IsString()
+  driverName?: string;
+
+  @Column(DataType.TEXT)
+  @IsString()
+  carNumber?: string;
 }

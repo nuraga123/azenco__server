@@ -43,4 +43,10 @@ export class StocksBarnDto {
   @ApiProperty({ example: 0 })
   @IsNumber()
   readonly lostBrokenStock?: number;
+
+  @IsString()
+  driverName: string;
+
+  @IsString()
+  carNumber: string;
 }

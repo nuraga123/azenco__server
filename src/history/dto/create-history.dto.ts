@@ -83,4 +83,10 @@ export class CreateHistoryDto {
   // Общий потерянный продукт
   @IsNumber()
   lostTotalStock?: number;
+
+  @IsString()
+  driverName?: string;
+
+  @IsString()
+  carNumber?: string;
 }
