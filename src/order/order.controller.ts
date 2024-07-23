@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, Query } from '@nestjs/common';
 
 import { OrderService } from './order.service';
 import {
@@ -35,7 +29,7 @@ export class OrderController {
   ): Promise<ICountAndRowsOrdersResponse> {
     return this.orderService.findAndCountAllOrders(query);
   }
-  
+
   /*
   // запрос для создания нового заказа
   @Post('create')

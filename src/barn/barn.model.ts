@@ -1,21 +1,8 @@
-import { IsEnum, IsString } from 'class-validator';
+import { IsString } from 'class-validator';
 import { Table, Model, Column, DataType } from 'sequelize-typescript';
-
-enum BarnStatus {
-  AVAILABLE = 'в наличии',
-  ORDERED = 'заказан',
-  UNAVAILABLE = 'не доступен',
-}
 
 @Table({ tableName: 'Barn' })
 export class Barn extends Model {
-  @Column({
-    type: DataType.TEXT,
-    defaultValue: BarnStatus.AVAILABLE,
-  })
-  @IsEnum(BarnStatus)
-  barnStatus: BarnStatus;
-
   // Идентификатор пользователя
   @Column(DataType.INTEGER)
   userId: number;

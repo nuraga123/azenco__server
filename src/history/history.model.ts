@@ -22,6 +22,7 @@ export class History extends Model<History> {
   // Типы движения
   @Column(
     DataType.ENUM(
+      'создан__yaradılmışdır',
       'приход__gələn',
       'расход__istehlak',
       'отправление__gediş',
