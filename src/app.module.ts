@@ -10,7 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { ProductsModule } from './products/products.module';
 import { TokenModule } from './token/token.module';
 import { OrderModule } from './order/order.module';
-import { HistoryModule } from './history/history.module';
+import { ArchiveModule } from './archive/archive.module';
 import { CarsModule } from './cars/cars.module';
 import { ErrorsModule } from './errors/errors.module';
 import { BarnModule } from './barn/barn.module';
@@ -40,9 +40,9 @@ import { BarnModule } from './barn/barn.module';
     ProductsModule,
     TokenModule,
     OrderModule,
-    HistoryModule,
     CarsModule,
     ErrorsModule,
+    ArchiveModule,
   ],
 })
 export class AppModule {}

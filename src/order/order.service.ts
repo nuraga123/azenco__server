@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/sequelize';
 
 import { Order } from './order.model';
 import { UsersService } from 'src/users/users.service';
-import { HistoryService } from 'src/history/history.service';
+import { ArchiveService } from 'src/archive/archive.service';
 import {
   ICountAndRowsOrdersResponse,
   IOrderQuery,
@@ -22,7 +22,7 @@ export class OrderService {
     private readonly usersService: UsersService,
     private readonly barnService: BarnService,
     private readonly errorService: ErrorService,
-    private readonly historyService: HistoryService,
+    private readonly archiveService: ArchiveService,
   ) {
     /**/
   }
@@ -151,7 +151,7 @@ export class OrderService {
       // Создание записи в истории
       const message: string = `Новый заказ № ${order.id}! ${description}`;
 
-      await this.historyService.createHistory({
+      await this.archiveService.createHistory({
         userId: +client.id,
         username: client.username,
         message,
@@ -168,7 +168,7 @@ export class OrderService {
     const { order, error_message } = await this.findOrderById(+id);
     if (error_message) return { error_message };
 
-    await this.historyService.createHistory({
+    await this.archiveService.createHistory({
       message: `Заказ № ${+order.id} отменен клиентом: ${order.clientUserName}!`,
       username: order.clientUserName,
       userId: +order.clientId,
@@ -219,7 +219,7 @@ export class OrderService {
       await order.save();
       await anbar.save();
 
-      await this.historyService.createHistory({
+      await this.archiveService.createHistory({
         userId: anbar.userId,
         username: anbar.username,
         message,
@@ -292,7 +292,7 @@ export class OrderService {
         order.status = 'заказ_успешно_доставлен';
         order.description = message;
 
-        await this.historyService.createHistory({
+        await this.archiveService.createHistory({
           userId: newAnbar.userId,
           username: newAnbar.username,
           message,
@@ -327,7 +327,7 @@ export class OrderService {
         order.description = message;
         await order.save();
 
-        await this.historyService.createHistory({
+        await this.archiveService.createHistory({
           userId: clientAnbar.userId,
           username: clientAnbar.username,
           message,

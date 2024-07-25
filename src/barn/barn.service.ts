@@ -14,7 +14,7 @@ import {
 } from './types';
 
 import { UsersService } from 'src/users/users.service';
-import { HistoryService } from 'src/history/history.service';
+import { ArchiveService } from 'src/archive/archive.service';
 import { ProductsService } from 'src/products/products.service';
 import { ErrorService } from 'src/errors/errors.service';
 import { CreatedBarnDto } from './dto/create-barn.dto';
@@ -29,7 +29,7 @@ export class BarnService {
     private barnModel: typeof Barn,
     private readonly usersService: UsersService,
     private readonly productsService: ProductsService,
-    private readonly historyService: HistoryService,
+    private readonly archiveService: ArchiveService,
     private readonly errorService: ErrorService,
   ) {
     /**/
@@ -364,7 +364,7 @@ export class BarnService {
         barn.brokenStock
       };`;
 
-      await this.historyService.createHistory({
+      await this.archiveService.createArchive({
         userId,
         username,
         message,
@@ -451,7 +451,7 @@ export class BarnService {
         newStock ? `Yeni: ${newStock} | ` : ''
       }${usedStock ? `İstifadə olunmuş: ${usedStock} | ` : ''}${brokenStock ? `Sındırılmış: ${brokenStock}` : ''}`;
 
-      await this.historyService.createHistory({
+      await this.archiveService.createArchive({
         movementType: 'приход__gələn',
         barnId,
         userId,
@@ -544,7 +544,7 @@ export class BarnService {
       if (+sumTotalStocks) {
         await barn.save();
 
-        await this.historyService.createHistory({
+        await this.archiveService.createArchive({
           barnId,
           userId,
           username,
@@ -565,7 +565,7 @@ export class BarnService {
 
         return { message, barn };
       } else {
-        await this.historyService.createHistory({
+        await this.archiveService.createArchive({
           barnId,
           userId,
           username,
@@ -618,7 +618,7 @@ export class BarnService {
     //  описать поподробнее
     const message: string = `Амбар №${id} успешно удален! Складчик: ${username} | Товар: ${productName} | KOD: ${azencoCode} | Общий запас: ${totalStock} ${unit}`;
 
-    await this.historyService.createHistory({
+    await this.archiveService.createArchive({
       message,
       movementType: 'списание__silinmə',
       userId,

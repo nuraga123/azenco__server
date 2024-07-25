@@ -3,7 +3,7 @@ import { Table, Model, Column, DataType } from 'sequelize-typescript';
 import { IMovementType } from 'src/products/types';
 
 @Table({ tableName: 'Archive' })
-export class Archive extends Model<Archive> {
+export class Archive extends Model {
   @Column(DataType.INTEGER)
   barnId: number;
 

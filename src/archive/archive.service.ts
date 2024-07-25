@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Archive } from './Archive.model';
-import { CreateArchiveDto } from './dto/create-Archive.dto';
+import { Archive } from './archive.model';
+import { CreateArchiveDto } from './dto/create-archive.dto';
 
 @Injectable()
 export class ArchiveService {
@@ -10,8 +10,8 @@ export class ArchiveService {
     private readonly archiveModel: typeof Archive,
   ) {}
 
-  async createArchive(createArchiveDto: CreateArchiveDto): Promise<Archive> {
-    return this.archiveModel.create(createArchiveDto);
+  async createArchive(createArchiveDto: CreateArchiveDto) {
+    return await this.archiveModel.create({ ...createArchiveDto });
   }
 
   async findAllArchiveArr(): Promise<Archive[]> {

@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { ArchiveService } from './Archive.service';
-import { CreateArchiveDto } from './dto/create-Archive.dto';
-import { Archive } from './Archive.model';
+import { CreateArchiveDto } from './dto/create-archive.dto';
+import { Archive } from './archive.model';
 
 @Controller('archive')
 export class ArchiveController {

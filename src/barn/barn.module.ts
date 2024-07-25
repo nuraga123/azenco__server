@@ -3,7 +3,7 @@ import { SequelizeModule } from '@nestjs/sequelize';
 
 import { UsersModule } from 'src/users/users.module';
 import { ProductsModule } from 'src/products/products.module';
-import { HistoryModule } from 'src/history/history.module';
+import { ArchiveModule } from 'src/archive/archive.module';
 import { ErrorsModule } from 'src/errors/errors.module';
 import { Barn } from './barn.model';
 import { BarnService } from './barn.service';
@@ -14,7 +14,7 @@ import { BarnController } from './barn.controller';
     SequelizeModule.forFeature([Barn]),
     UsersModule,
     ProductsModule,
-    HistoryModule,
+    ArchiveModule,
     ErrorsModule,
   ],
   controllers: [BarnController],

@@ -11,4 +11,4 @@ import { ErrorsModule } from 'src/errors/errors.module';
   providers: [ArchiveService],
   exports: [ArchiveService],
 })
-export class HistoryModule {}
+export class ArchiveModule {}
