@@ -2,8 +2,8 @@ import { IsString } from 'class-validator';
 import { Table, Model, Column, DataType } from 'sequelize-typescript';
 import { IMovementType } from 'src/products/types';
 
-@Table({ tableName: 'History' })
-export class History extends Model<History> {
+@Table({ tableName: 'Archive' })
+export class Archive extends Model<Archive> {
   @Column(DataType.INTEGER)
   barnId: number;
 

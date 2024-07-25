@@ -1,7 +1,7 @@
 import { IsString, IsNumber, IsNotEmpty } from 'class-validator';
 import { IMovementType } from 'src/products/types';
 
-export class CreateHistoryDto {
+export class CreateArchiveDto {
   @IsNumber()
   barnId: number;
 
