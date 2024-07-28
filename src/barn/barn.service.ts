@@ -447,7 +447,7 @@ export class BarnService {
 
       await barn.save();
 
-      const message = `Materialın anbara əlavə olunması: ${username} | material: ${productName} - ${unit} | ${
+      const message = `Material Anbara əlavə olundu! Anbardar: ${username} | material: ${productName} - ${unit} | ${
         newStock ? `Yeni: ${newStock} | ` : ''
       }${usedStock ? `İstifadə olunmuş: ${usedStock} | ` : ''}${brokenStock ? `Sındırılmış: ${brokenStock}` : ''}`;
 
@@ -539,7 +539,9 @@ export class BarnService {
       barn.totalPrice = +barn.totalStock * +barn.price;
 
       const sumTotalStocks = +barn.totalStock + +barn.lostTotalStock;
-      const message = `Уменьшение в Амбаре №${barnId} | Складчик: ${username} | Товар: ${productName} - ${unit} | ${newStock ? `Новые: ${newStock}; ` : ''} ${usedStock ? `Использованные: ${usedStock}; ` : ''} ${brokenStock ? `Сломанные: ${brokenStock};` : ''}`;
+      const message = `Material Anbardan azaldıldı! Anbardar: ${username} | Material: ${productName} - ${unit} | ${
+        newStock ? `Yeni: ${newStock} | ` : ''
+      }${usedStock ? `İstifadə olunmuş: ${usedStock} | ` : ''}${brokenStock ? `Sındırılmış: ${brokenStock}` : ''}`;
 
       if (+sumTotalStocks) {
         await barn.save();
@@ -565,30 +567,11 @@ export class BarnService {
 
         return { message, barn };
       } else {
-        await this.archiveService.createArchive({
-          barnId,
-          userId,
-          username,
-          userSelectedDate,
-          movementType: 'расход__istehlak',
-          fromLocation,
-          toLocation,
-          message,
-          productName,
-          azencoCode,
-          unit,
-          price,
-          newStock: barn.newStock,
-          usedStock: barn.usedStock,
-          brokenStock: barn.brokenStock,
-          totalStock: barn.totalStock,
-        });
-
-        const { message: removeMessage, error_message: removeErrorMessage } =
-          await this.removeBarn(barn.id);
-
-        if (removeErrorMessage) return { error_message: removeErrorMessage };
-        return { message: `${message} И ${removeMessage}` };
+        /* спросить если материал закончился делать ли  его списание */
+        // const { message: removeMessage, error_message: removeErrorMessage } =
+        //   await this.removeBarn(barn.id);
+        // if (removeErrorMessage) return { error_message: removeErrorMessage };
+        // return { message: `${message} və ${removeMessage}` };
       }
     } catch (error) {
       return this.errorService.errorsMessage(error);
