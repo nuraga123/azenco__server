@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { BarnService } from './barn.service';
 import { CreatedBarnDto } from './dto/create-barn.dto';
 import { StocksBarnDto } from './dto/stocks-barn.dto';
@@ -46,5 +46,10 @@ export class BarnController {
   @Post('reduce-stocks')
   postReduceStocksBarn(@Body() stocksBarnDto: StocksBarnDto) {
     return this.barnService.reduceStocksBarn(stocksBarnDto);
+  }
+
+  @Delete('remove/:id')
+  deleteBarn(@Param('id') barnId: number) {
+    return this.barnService.removeBarn(barnId);
   }
 }

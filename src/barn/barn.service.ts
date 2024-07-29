@@ -538,41 +538,40 @@ export class BarnService {
       barn.brokenTotalPrice = +barn.brokenStock * +price;
       barn.totalPrice = +barn.totalStock * +barn.price;
 
-      const sumTotalStocks = +barn.totalStock + +barn.lostTotalStock;
+      //const sumTotalStocks = +barn.totalStock + +barn.lostTotalStock;
+
       const message = `Material Anbardan azaldıldı! Anbardar: ${username} | Material: ${productName} - ${unit} | ${
         newStock ? `Yeni: ${newStock} | ` : ''
       }${usedStock ? `İstifadə olunmuş: ${usedStock} | ` : ''}${brokenStock ? `Sındırılmış: ${brokenStock}` : ''}`;
 
-      if (+sumTotalStocks) {
-        await barn.save();
+      await barn.save();
 
-        await this.archiveService.createArchive({
-          barnId,
-          userId,
-          username,
-          userSelectedDate,
-          movementType: 'расход__istehlak',
-          fromLocation,
-          toLocation,
-          message,
-          productName,
-          azencoCode,
-          unit,
-          price,
-          newStock: barn.newStock,
-          usedStock: barn.usedStock,
-          brokenStock: barn.brokenStock,
-          totalStock: barn.totalStock,
-        });
+      await this.archiveService.createArchive({
+        barnId,
+        userId,
+        username,
+        userSelectedDate,
+        movementType: 'расход__istehlak',
+        fromLocation,
+        toLocation,
+        message,
+        productName,
+        azencoCode,
+        unit,
+        price,
+        newStock: barn.newStock,
+        usedStock: barn.usedStock,
+        brokenStock: barn.brokenStock,
+        totalStock: barn.totalStock,
+      });
 
-        return { message, barn };
-      } else {
-        /* спросить если материал закончился делать ли  его списание */
-        // const { message: removeMessage, error_message: removeErrorMessage } =
-        //   await this.removeBarn(barn.id);
-        // if (removeErrorMessage) return { error_message: removeErrorMessage };
-        // return { message: `${message} və ${removeMessage}` };
-      }
+      return { message, barn };
+
+      /* спросить если материал закончился делать ли  его списание */
+      // const { message: removeMessage, error_message: removeErrorMessage } =
+      //   await this.removeBarn(barn.id);
+      // if (removeErrorMessage) return { error_message: removeErrorMessage };
+      // return { message: `${message} və ${removeMessage}` };
     } catch (error) {
       return this.errorService.errorsMessage(error);
     }
@@ -595,8 +594,31 @@ export class BarnService {
 
     if (error_message) return { error_message };
 
-    const { userId, username, productName, unit, azencoCode, totalStock } =
-      barn;
+    const {
+      userId,
+      username,
+      productId,
+      productName,
+      azencoCode,
+      unit,
+      price,
+      newStock,
+      usedStock,
+      brokenStock,
+      totalStock,
+      newTotalPrice,
+      usedTotalPrice,
+      brokenTotalPrice,
+      totalPrice,
+      lostNewStock,
+      lostUsedStock,
+      lostBrokenStock,
+      lostTotalStock,
+      lostNewTotalPrice,
+      lostUsedTotalPrice,
+      lostBrokenTotalPrice,
+      lostTotalPrice,
+    } = barn;
 
     //  описать поподробнее
     const message: string = `Амбар №${id} успешно удален! Складчик: ${username} | Товар: ${productName} | KOD: ${azencoCode} | Общий запас: ${totalStock} ${unit}`;
@@ -609,6 +631,25 @@ export class BarnService {
       productName,
       unit,
       barnId: id,
+      productId,
+      azencoCode,
+      price,
+      newStock,
+      usedStock,
+      brokenStock,
+      totalStock,
+      newTotalPrice,
+      usedTotalPrice,
+      brokenTotalPrice,
+      totalPrice,
+      lostNewStock,
+      lostUsedStock,
+      lostBrokenStock,
+      lostTotalStock,
+      lostNewTotalPrice,
+      lostUsedTotalPrice,
+      lostBrokenTotalPrice,
+      lostTotalPrice,
     });
 
     await barn.destroy();

@@ -20,6 +20,18 @@ export class CreateArchiveDto {
   @IsString()
   movementType?: IMovementType;
 
+  @IsNotEmpty()
+  @IsString()
+  productId?: number;
+
+  @IsNotEmpty()
+  @IsString()
+  fromUsername?: string;
+
+  @IsNotEmpty()
+  @IsString()
+  toUsername?: string;
+
   // Выбранная пользователем дата
   @IsNotEmpty()
   @IsString()
@@ -89,4 +101,43 @@ export class CreateArchiveDto {
 
   @IsString()
   carNumber?: string;
+
+  /*  типизированные сумма колличество на цену товара в складе  */
+
+  // Новая цена продукта
+  @IsNumber()
+  newTotalPrice?: number;
+
+  // Цена продукта после использования
+  @IsNumber()
+  usedTotalPrice?: number;
+
+  // Цена продукта после поломки
+  @IsNumber()
+  brokenTotalPrice?: number;
+
+  // Общая цена всех продуктов
+  @IsNumber()
+  totalPrice?: number;
+
+  /* Потерянные --- Lost */
+
+  /* типизированные имена "Потерянных" количеств товара в складе */
+
+  /*  типизированные "Потерянных" сумма = колличество * цену товара в складе  */
+  // Новая цена продукта
+  @IsNumber()
+  lostNewTotalPrice?: number;
+
+  // Цена продукта после использования
+  @IsNumber()
+  lostUsedTotalPrice?: number;
+
+  // Цена продукта после поломки
+  @IsNumber()
+  lostBrokenTotalPrice?: number;
+
+  // Цена потерянного продукта
+  @IsNumber()
+  lostTotalPrice?: number;
 }
