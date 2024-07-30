@@ -45,6 +45,20 @@ export class CreateArchiveDto {
   @IsString()
   toLocation?: string;
 
+  // получатель - alıcı
+  @IsString()
+  recipientName?: string;
+
+  // поставщик - göndərən
+  @IsString()
+  senderName?: string;
+
+  @IsString()
+  driverName?: string;
+
+  @IsString()
+  carNumber?: string;
+
   /* передача данных материала */
   @IsString()
   azencoCode?: string;
@@ -95,12 +109,6 @@ export class CreateArchiveDto {
   // Общий потерянный продукт
   @IsNumber()
   lostTotalStock?: number;
-
-  @IsString()
-  driverName?: string;
-
-  @IsString()
-  carNumber?: string;
 
   /*  типизированные сумма колличество на цену товара в складе  */
 

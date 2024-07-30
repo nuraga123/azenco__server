@@ -103,4 +103,12 @@ export class Archive extends Model {
   @Column(DataType.TEXT)
   @IsString()
   carNumber?: string;
+
+  // получатель - alıcı
+  @Column(DataType.TEXT)
+  recipientName?: string;
+
+  // поставщик - göndərən
+  @Column(DataType.TEXT)
+  senderName?: string;
 }

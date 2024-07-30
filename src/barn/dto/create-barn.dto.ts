@@ -31,4 +31,24 @@ export class CreatedBarnDto {
   @IsNotEmpty()
   @IsNumber()
   readonly brokenStock: number;
+
+  // получатель - alıcı
+  @IsString()
+  recipientName?: string;
+
+  // поставщик - göndərən
+  @IsString()
+  senderName?: string;
+
+  @IsString()
+  driverName?: string;
+
+  @IsString()
+  carNumber?: string;
+
+  @IsString()
+  userSelectedDate?: string;
+
+  @IsString()
+  fromLocation?: string;
 }

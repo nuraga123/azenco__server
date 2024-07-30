@@ -237,8 +237,19 @@ export class BarnService {
   // Добавить товар в амбар
   async createBarn(createdBarnDto: CreatedBarnDto): Promise<IBarnResponce> {
     try {
-      const { userId, productId, location, newStock, usedStock, brokenStock } =
-        createdBarnDto;
+      const {
+        userId,
+        productId,
+        location,
+        newStock,
+        usedStock,
+        brokenStock,
+        senderName,
+        driverName,
+        carNumber,
+        userSelectedDate,
+        fromLocation,
+      } = createdBarnDto;
 
       // Проверка на корректность значений
       if (!userId || !productId || !location) {
@@ -350,32 +361,60 @@ export class BarnService {
       });
 
       // Создание сообщения о создании амбара для истории
-      const message = `Yeni material əlavə olundu! Anbardar: ${barn.username} Məhsul: ${
+      const message = `Material yaradılmışdır! Anbardar: ${
+        //
+        barn.username
+      } Məhsul: ${
         //
         barn.productName
-      } - ${barn.unit}; Yenilər: ${
+      } - ${barn.unit}; ${
         //
-        barn.newStock
-      }; İstifadə olunmuşlar: ${
+        barn.newStock ? `Yenilər: ${barn.newStock};` : ''
+      } ${
         //
-        barn.usedStock
-      }; Sınıqlar: ${
+        barn.usedStock ? `İstifadə olunmuşlar: ${barn.usedStock};` : ''
+      } ${
         //
-        barn.brokenStock
-      };`;
+        barn.brokenStock ? `Sınıqlar: ${barn.brokenStock};` : ''
+      } ${
+        //
+        senderName ? `Göndərən: ${senderName};` : ''
+      } ${
+        //
+        driverName ? `Sürücü: ${driverName};` : ''
+      } ${
+        //
+        carNumber ? `Avtomobil nömrəsi: ${carNumber};` : ''
+      } ${
+        //
+        fromLocation ? `Haradan: ${fromLocation};` : ''
+      } ${
+        //
+        location ? `material ünvanı: ${location};` : ''
+      } ${
+        //
+        userSelectedDate ? `Tarix: ${userSelectedDate};` : ''
+      }`;
 
       await this.archiveService.createArchive({
+        movementType: 'создан__yaradılmışdır',
+        message,
+        // göndərən - Отправитель
+        senderName: senderName ? senderName : 'Yazılmayıb',
+        // номер и водител
+        driverName: driverName ? driverName : 'Yazılmayıb',
+        carNumber: carNumber ? carNumber : 'Yazılmayıb',
+        // откуда и где будет материал и дата
+        fromLocation: fromLocation ? fromLocation : 'Yazılmayıb',
+        toLocation: barn.location,
+        userSelectedDate,
+        // данные амбара
+        barnId: barn.id,
         userId,
         username,
-        message,
         azencoCode,
         unit,
         price,
-        userSelectedDate: new Date().toLocaleDateString(),
-        barnId: barn.id,
-        movementType: 'создан__yaradılmışdır',
-        fromLocation: '',
-        toLocation: barn.location,
         productName: barn.productName,
         newStock: +barn.newStock,
         usedStock: +barn.usedStock,
