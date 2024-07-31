@@ -4,10 +4,10 @@ import * as session from 'express-session';
 import * as passport from 'passport';
 import * as express from 'express';
 import { AppModule } from './app.module';
-// import { Logger } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
-  //const logger = new Logger('Bootstrap');
+  const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
 
   // Используем express-session для управления сессиями
@@ -62,17 +62,9 @@ async function bootstrap() {
   // Монтирование Swagger на /swagger
   SwaggerModule.setup('swagger', app, document);
 
-  /*
   // Пример вывода в консоль каждые 30 секунд
-  setInterval(() => {
-    logger.log('Сервер работает 15 секунд!');
-  }, 15000);
-
-  // Пример вывода в консоль каждую минуту
-  setInterval(() => {
-    logger.log('Сервер работает два метода по 30 секунд!');
-  }, 30000);
-  */
+  logger.log('Server işləyir!');
+  setInterval(() => logger.log('Server işləyir !'), 30000);
 
   // Обслуживание статических файлов из папки public
   app.use(express.static('public'));
