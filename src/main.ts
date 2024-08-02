@@ -5,6 +5,7 @@ import * as passport from 'passport';
 import * as express from 'express';
 import { AppModule } from './app.module';
 import { Logger } from '@nestjs/common';
+import { exec } from 'child_process';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -71,6 +72,12 @@ async function bootstrap() {
 
   // Прослушивание порта 3000 или из переменной окружения, если указана
   await app.listen(process.env.PORT || 3000);
+
+  exec('start http://192.168.1.53:3000', (err) => {
+    if (err) {
+      console.error('Ошибка при попытке открыть URL в браузере:', err);
+    }
+  });
 }
 
 bootstrap();
