@@ -49,4 +49,12 @@ export class StocksBarnDto {
 
   @IsString()
   carNumber: string;
+
+  // получатель - alıcı
+  @IsString()
+  recipientName?: string;
+
+  // поставщик - göndərən
+  @IsString()
+  senderName?: string;
 }

@@ -22,13 +22,5 @@ export class Product extends Model {
 
   @Column(DataType.TEXT)
   @IsString()
-  type?: string;
-
-  @Column(DataType.TEXT)
-  @IsString()
   unit: string;
-
-  @Column(DataType.TEXT)
-  @IsString()
-  img: string;
 }

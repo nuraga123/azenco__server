@@ -314,7 +314,7 @@ export class BarnService {
       }
 
       // !!! переименовать name на productName
-      const { name, azencoCode, price, type, img, unit } = product;
+      const { name, azencoCode, price, unit } = product;
 
       // для реального количества
       const newTotalPrice: number = +newStock * +price;
@@ -331,9 +331,7 @@ export class BarnService {
         productId,
         azencoCode,
         price,
-        type,
         unit,
-        img,
         location,
 
         // stock
@@ -444,6 +442,7 @@ export class BarnService {
         brokenStock,
         driverName,
         carNumber,
+        senderName,
       } = stocksBarnDto;
 
       if (!barnId || !userSelectedDate || !fromLocation || !toLocation) {
@@ -513,6 +512,8 @@ export class BarnService {
         lostTotalStock: +barn.lostTotalStock,
         carNumber,
         driverName,
+        senderName,
+        recipientName: barn.username,
       });
 
       return { message, barn };
@@ -531,6 +532,9 @@ export class BarnService {
         newStock,
         usedStock,
         brokenStock,
+        driverName,
+        carNumber,
+        recipientName,
       } = stocksBarnDto;
 
       if (!barnId || !userSelectedDate || !fromLocation || !toLocation) {
@@ -602,6 +606,10 @@ export class BarnService {
         usedStock: barn.usedStock,
         brokenStock: barn.brokenStock,
         totalStock: barn.totalStock,
+        carNumber,
+        driverName,
+        senderName: barn.username,
+        recipientName,
       });
 
       return { message, barn };

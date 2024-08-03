@@ -114,6 +114,10 @@ export class UsersController {
   resetPassword(@Body() updatePasswordDto: UpdatePasswordDto) {
     return this.usersService.updateUserPassword(updatePasswordDto);
   }
+  @Post('/secret')
+  getSecret(@Body() { secret }: { secret: string }) {
+    return this.usersService.getDoneSecret(secret);
+  }
 
   @Post('validate-token')
   async validateToken(@Body() { token }: { token: string }) {

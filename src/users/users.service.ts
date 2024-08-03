@@ -102,6 +102,19 @@ export class UsersService {
     }
   }
 
+  async getDoneSecret(secret: string) {
+    const secretWord = this.configService.get<string>('SECRET');
+    this.consoleLogger.log('//////////////////////////////////////secret');
+    this.consoleLogger.log(secret);
+    this.consoleLogger.log(secretWord);
+    this.consoleLogger.log('//////////////////////////////////////secret');
+    if (secret === secretWord) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   async findUsersNames(): Promise<string[]> {
     const users = await this.userModel.findAll();
     const names = users.map((user) => user.username);

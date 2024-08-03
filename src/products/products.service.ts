@@ -270,17 +270,7 @@ export class ProductsService {
           ? +updatedProduct.price
           : +product.price;
 
-      product.type =
-        updatedProduct.type && updatedProduct.type.length >= 1
-          ? updatedProduct.type
-          : product.type;
-
       product.unit = !!updatedProduct.unit ? updatedProduct.unit : product.unit;
-
-      product.img =
-        updatedProduct.img && updatedProduct.img.length >= 1
-          ? updatedProduct.img
-          : product.img;
 
       // Сохраняем обновленный продукт в базе данных
       await product.save();
@@ -315,25 +305,29 @@ export class ProductsService {
     try {
       const products = JSON.parse(json);
 
-      this.errorsService.log(json);
-
-      // for (let index = 0; index < products.length; index++) {
-      //   const element = products[index];
-      //   this.errorsService.log(element);
-      //   await this.addProduct(element);
-      // }
-
       const result = await this.productModel.bulkCreate(products);
       this.errorsService.log('result');
       this.errorsService.log([...result]);
 
       if (result.length) {
+        const message = 'uğurla tamamlandı';
         const createdProducts = await this.findProducts();
-        return { createdProducts };
+        return { createdProducts, message };
       }
       return { message: 'не получилось !' };
     } catch (error) {
-      return this.errorsService.errorsMessage(error);
+      // Обработка ошибок
+      if (error.name === 'SequelizeUniqueConstraintError') {
+        this.errorsService.log(
+          `materialın adı və ya kodu təkrarlanır: ${error.errors[0].message}`,
+        );
+        this.errorsService.errorsMessage(error);
+        return {
+          message: `Adı və ya kodu təkrarlanır: ${error.errors[0].value}`,
+        };
+      } else {
+        return this.errorsService.errorsMessage(error);
+      }
     }
   }
 
@@ -383,7 +377,9 @@ export class ProductsService {
       products.map(this.processProductPrice);
 
       //
-      products.sort((a, b) => orderDirection === 'asc' ? (a.price - b.price) : (b.price - a.price))
+      products.sort((a, b) =>
+        orderDirection === 'asc' ? a.price - b.price : b.price - a.price,
+      );
 
       return { products };
     } catch (e) {
