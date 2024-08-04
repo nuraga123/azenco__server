@@ -667,8 +667,7 @@ export class BarnService {
       lostTotalPrice,
     } = barn;
 
-    //  описать поподробнее
-    const message: string = `Амбар №${id} успешно удален! Складчик: ${username} | Товар: ${productName} | KOD: ${azencoCode} | Общий запас: ${totalStock} ${unit}`;
+    const message: string = `Anbar №${id} uğurla silindi! Anbarçı: ${username} | Məhsul: ${productName} | KOD: ${azencoCode} | Ümumi ehtiyat: ${totalStock} - ${unit}`;
 
     await this.archiveService.createArchive({
       message,
