@@ -52,12 +52,3 @@ export interface IProductsQuery {
 export interface IDeleteProduct extends IError {
   message?: string;
 }
-
-export type IMovementType =
-  | 'создан__yaradılmışdır'
-  | 'приход__gələn'
-  | 'расход__istehlak'
-  | 'отправление__gediş'
-  | 'возврат__qayıdış'
-  | 'списание__silinmə'
-  | 'изменение__dəyişikliklər';

@@ -1,6 +1,6 @@
 import { IsString } from 'class-validator';
 import { Table, Model, Column, DataType } from 'sequelize-typescript';
-import { IMovementType } from 'src/products/types';
+import { IMovementType } from 'src/archive/types';
 
 @Table({ tableName: 'Archive' })
 export class Archive extends Model {
@@ -22,13 +22,13 @@ export class Archive extends Model {
   // Типы движения
   @Column(
     DataType.ENUM(
-      'создан__yaradılmışdır',
-      'приход__gələn',
-      'расход__istehlak',
-      'отправление__gediş',
-      'списание__silinmə',
-      'возврат__qayıdış',
-      'изменения__dəyişikliklər',
+      'yaradılmışdır',
+      'gələn',
+      'istehlak',
+      'gediş',
+      'silinmə',
+      'qayıdış',
+      'dəyişikliklər',
     ),
   )
   movementType: IMovementType;

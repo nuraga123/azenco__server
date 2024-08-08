@@ -1,11 +1,13 @@
 import { Table, Column, Model, DataType } from 'sequelize-typescript';
 import { StatusOrderType } from './types';
+import { IsString } from 'class-validator';
 
 @Table
 export class Order extends Model<Order> {
   @Column({
     type: DataType.ENUM(
       'новый_заказ',
+      'заказ_отменен_клиентом',
       'заказ_принял_складчик',
       'заказ_отменен_складчиком',
       'заказ_отправлен_клиенту',
@@ -18,20 +20,26 @@ export class Order extends Model<Order> {
   })
   status: StatusOrderType;
 
+  // заказчик и складчик
   @Column(DataType.INTEGER)
   clientId: number;
 
   @Column(DataType.TEXT)
   clientUserName: string;
 
+  @Column(DataType.TEXT)
+  barnUsername: string;
+
   @Column(DataType.INTEGER)
-  anbarId: number;
+  barnUserId: number;
 
-  @Column(DataType.TEXT)
-  anbarUsername: string;
+  // амбар
+  @Column(DataType.INTEGER)
+  barnId: number;
 
+  // продукт
   @Column(DataType.TEXT)
-  name: string;
+  productName: string;
 
   @Column(DataType.STRING)
   azencoCode: string;
@@ -48,12 +56,23 @@ export class Order extends Model<Order> {
   @Column(DataType.DECIMAL(20, 3))
   brokenStock: number;
 
-  // количество потерянных товаров
-  @Column(DataType.DECIMAL(20, 3))
-  lostStock: number;
-
   @Column(DataType.DECIMAL(20, 3))
   totalStock: number;
+
+  // количество потерянных товаров
+  @Column(DataType.DECIMAL(20, 3))
+  lostNewStock: number;
+
+  // количество потерянных товаров
+  @Column(DataType.DECIMAL(20, 3))
+  lostUsedStock: number;
+
+  // количество потерянных товаров
+  @Column(DataType.DECIMAL(20, 3))
+  lostBrokenStock: number;
+
+  @Column(DataType.DECIMAL(20, 3))
+  lostTotalStock: number;
 
   @Column({ type: DataType.DECIMAL(20, 2) })
   price: number;
@@ -65,14 +84,23 @@ export class Order extends Model<Order> {
   unit: string;
 
   @Column(DataType.TEXT)
-  description: string;
-
-  @Column(DataType.TEXT)
-  anbarLocation: string;
+  barnLocation: string;
 
   @Column(DataType.TEXT)
   clientLocation: string;
 
-  @Column({ defaultValue: '', type: DataType.TEXT })
-  img: string;
+  @Column(DataType.TEXT)
+  @IsString()
+  driverName?: string;
+
+  @Column(DataType.TEXT)
+  @IsString()
+  carNumber?: string;
+
+  @Column(DataType.TEXT)
+  description?: string;
+
+  @Column(DataType.TEXT)
+  info?: string;
+  productId: any;
 }

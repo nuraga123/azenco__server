@@ -1,5 +1,5 @@
 import { IsString, IsNumber, IsNotEmpty } from 'class-validator';
-import { IMovementType } from 'src/products/types';
+import { IMovementType } from '../types';
 
 export class CreateArchiveDto {
   @IsNumber()

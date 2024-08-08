@@ -4,25 +4,31 @@ import { IsNumber, IsNotEmpty, IsString } from 'class-validator';
 export class NewOrderDto {
   @IsNotEmpty()
   @IsNumber()
-  anbarId: number;
+  barnId: number;
 
   @IsNotEmpty()
   @IsNumber()
   clientId: number;
 
+  @IsNotEmpty()
+  @IsNumber()
   @ApiProperty({ example: 10 })
   @IsNotEmpty()
-  readonly newStock: number;
+  newStock: number;
 
   @ApiProperty({ example: 5 })
   @IsNotEmpty()
-  readonly usedStock: number;
+  usedStock: number;
 
   @ApiProperty({ example: 2 })
   @IsNotEmpty()
-  readonly brokenStock: number;
+  brokenStock: number;
 
   @IsNotEmpty()
   @IsString()
   clientLocation: string;
+
+  @IsNotEmpty()
+  @IsString()
+  description?: string;
 }

@@ -1,3 +1,4 @@
+import { Barn } from 'src/barn/barn.model';
 import { Order } from '../order.model';
 
 export interface IOrderErrorMessage {
@@ -33,4 +34,11 @@ export interface ICountAndRowsOrdersResponse extends IOrderErrorMessage {
 
 export interface IOrdersResponse extends IOrderErrorMessage {
   orders?: Order[];
+}
+
+export interface IValidateStocks {
+  newStock: number;
+  usedStock: number;
+  brokenStock: number;
+  barn: Barn;
 }
