@@ -5,44 +5,44 @@ import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 export class StocksBarnDto {
   @ApiProperty({ example: 1 })
   @IsNotEmpty()
-  readonly barnId: number;
+  barnId: number;
 
   // Выбранная пользователем дата
   @IsString()
-  readonly userSelectedDate: string;
+  userSelectedDate: string;
 
   // Источник (откуда перемещен товар)
   @IsString()
-  readonly fromLocation: string;
+  fromLocation: string;
 
   // Назначение (куда перемещен товар)
   @IsString()
-  readonly toLocation: string;
+  toLocation: string;
 
   @ApiProperty({ example: 10 })
   @IsNumber()
-  readonly newStock?: number;
+  newStock?: number;
 
   @ApiProperty({ example: 5 })
   @IsNumber()
-  readonly usedStock?: number;
+  usedStock?: number;
 
   @ApiProperty({ example: 2 })
   @IsNumber()
-  readonly brokenStock?: number;
+  brokenStock?: number;
 
   // lost
   @ApiProperty({ example: 0 })
   @IsNumber()
-  readonly lostNewStock?: number;
+  lostNewStock?: number;
 
   @ApiProperty({ example: 0 })
   @IsNumber()
-  readonly lostUsedStock?: number;
+  lostUsedStock?: number;
 
   @ApiProperty({ example: 0 })
   @IsNumber()
-  readonly lostBrokenStock?: number;
+  lostBrokenStock?: number;
 
   @IsString()
   driverName: string;

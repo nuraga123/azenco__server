@@ -42,3 +42,16 @@ export interface IValidateStocks {
   brokenStock: number;
   barn: Barn;
 }
+
+export interface IConfirmOrder {
+  orderId: number;
+  barnUsername: string;
+  barnUserId: number;
+  barnId: number;
+}
+
+export interface ISendOrder extends IConfirmOrder {
+  driverName: string;
+  carNumber: string;
+  userSelectedDate: string;
+}

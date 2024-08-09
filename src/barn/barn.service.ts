@@ -24,9 +24,6 @@ import { barnText } from './text/barnText';
 
 @Injectable()
 export class BarnService {
-  minusBarnStock(arg0: { barnId: number; newStock: number; usedStock: number; brokenStock: number; }): { barn: any; error_message: any; } | PromiseLike<{ barn: any; error_message: any; }> {
-    throw new Error('Method not implemented.');
-  }
   constructor(
     @InjectModel(Barn)
     private barnModel: typeof Barn,
@@ -359,6 +356,7 @@ export class BarnService {
         lostUsedTotalPrice: 0,
         lostBrokenTotalPrice: 0,
         lostTotalPrice: 0,
+        orderStatus: false,
       });
 
       // Создание сообщения о создании амбара для истории

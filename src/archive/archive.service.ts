@@ -5,7 +5,7 @@ import { CreateArchiveDto } from './dto/create-archive.dto';
 
 @Injectable()
 export class ArchiveService {
-  createHistory(arg0: { userId: any; username: any; message: string; }) {
+  createHistory(arg0: { userId: number; username: string; message: string; }) {
     throw new Error('Method not implemented.');
   }
   constructor(

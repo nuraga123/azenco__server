@@ -120,5 +120,10 @@ export class Barn extends Model {
   // Цена потерянного продукта
   @Column(DataType.DECIMAL(20, 2))
   lostTotalPrice: number;
+
+  // Цена потерянного продукта
+  @Column(DataType.BOOLEAN)
+  orderStatus: boolean;
+  name: any;
   lostStock: number;
 }

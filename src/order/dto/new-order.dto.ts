@@ -30,5 +30,5 @@ export class NewOrderDto {
 
   @IsNotEmpty()
   @IsString()
-  description?: string;
+  clientMessage?: string;
 }

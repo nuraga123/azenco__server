@@ -5,10 +5,12 @@ import { Order } from './order.model';
 import { UsersService } from 'src/users/users.service';
 import { ArchiveService } from 'src/archive/archive.service';
 import {
+  IConfirmOrder,
   ICountAndRowsOrdersResponse,
   IOrderQuery,
   IOrderResponse,
   IOrdersResponse,
+  ISendOrder,
   IValidateStocks,
 } from './types';
 import { ErrorService } from 'src/errors/errors.service';
@@ -119,7 +121,7 @@ export class OrderService {
         newStock,
         usedStock,
         brokenStock,
-        description,
+        clientMessage,
       } = newOrderDto;
 
       // Поиск клиента по ID
@@ -153,13 +155,12 @@ export class OrderService {
       // Создание заказа
       const order = await this.orderModel.create({
         status: 'новый_заказ',
-        description,
         clientLocation,
         clientId: +client.id,
         clientUserName: client.username,
         barnUserId: barn.userId,
         barnId: +barn.id,
-        barnUserName: barn.username,
+        barnUsername: barn.username,
         productName: barn.productName,
         azencoCode: barn.azencoCode,
         price: +barn.price,
@@ -174,10 +175,11 @@ export class OrderService {
         totalStock,
         totalPrice,
         info,
+        clientMessage,
       });
 
       // Создание записи в истории
-      const message: string = `Yeni sifariş №${order.id}! ${info}`;
+      const message: string = `Yeni sifariş №${order.id}! ${info} | status: ${order.status} | `;
 
       await this.archiveService.createArchive({
         ...order,
@@ -199,23 +201,8 @@ export class OrderService {
     barnUsername,
     barnUserId,
     barnId,
-  }: {
-    orderId: number;
-    barnUsername: string;
-    barnUserId: number;
-    barnId: number;
-  }): Promise<IOrderResponse> {
+  }: IConfirmOrder): Promise<IOrderResponse> {
     try {
-      // Поиск склада по ID
-      const { error_message: barnError } =
-        await this.barnService.findOneBarnId(barnId);
-
-      if (barnError) return { error_message: barnError };
-
-      // Поиск заказа по ID
-      const { order, error_message } = await this.findOrderById(orderId);
-      if (error_message) return { error_message };
-
       // Поиск пользователя по имени
       const user = await this.usersService.findOne({
         where: {
@@ -224,8 +211,27 @@ export class OrderService {
         },
       });
 
+      // Поиск склада по ID
+      const { barn, error_message: barnError } =
+        await this.barnService.findOneBarnId(barnId);
+
+      if (barn.orderStatus)
+        return {
+          message: 'artıq sifariş olunub',
+        };
+
+      if (barnError) return { error_message: barnError };
+
+      // Поиск заказа по ID
+      const { order, error_message } = await this.findOrderById(orderId);
+      if (error_message) return { error_message };
+
       // Проверка, что пользователь существует и соответствует складчику в заказе
-      if (user.username !== order.barnUsername && user.id !== barnUserId) {
+      if (
+        user.username !== order.barnUsername &&
+        order.barnUserId !== barnUserId &&
+        barn.username !== order.barnUsername
+      ) {
         return {
           message: 'siz sifarişdə göstərilən anbardar deyilsiniz',
         };
@@ -233,15 +239,20 @@ export class OrderService {
 
       // Обновление статуса и описания заказа
       const message = `Anbardar: ${order.barnUsername} sifarişi qəbul etdi №${order.id} müştəridən ${order.clientUserName}`;
+
       order.status = 'заказ_принял_складчик';
       order.description = message;
 
+      barn.orderStatus = true;
+
       // Сохранение обновленного заказа
       await order.save();
+      await barn.save();
 
       await this.archiveService.createArchive({
-        barnId: barnId,
+        ...order,
         message,
+        barnId: barnId,
         userId: barnUserId,
         username: barnUsername,
       });
@@ -253,36 +264,94 @@ export class OrderService {
   }
 
   // Метод для отправки заказа
-  async sendOrder(id: number) {
+  async sendOrder({
+    orderId,
+    barnUsername,
+    barnUserId,
+    barnId,
+    driverName,
+    carNumber,
+    userSelectedDate,
+  }: ISendOrder): Promise<IOrderResponse> {
     try {
-      const { order, error_message: orderError } = await this.findOrderById(id);
-      if (orderError) return { error_message: orderError };
+      // Поиск пользователя по имени
+      const user = await this.usersService.findOne({
+        where: {
+          username: barnUsername,
+          id: barnUserId,
+        },
+      });
 
-      const { barnId, newStock, usedStock, brokenStock } = order;
-
-      // Обновляем склад
+      // Поиск склада по ID
       const { barn, error_message: barnError } =
-        await this.barnService.minusBarnStock({
-          barnId,
-          newStock,
-          usedStock,
-          brokenStock,
-        });
+        await this.barnService.findOneBarnId(barnId);
 
       if (barnError) return { error_message: barnError };
 
-      const message: string = `Заказ №${order.id} успешно отправлен! В вашем складе №${barn.id} на месте: новые - ${barn.newStock} | использованные - ${barn.usedStock} | сломанные - ${barn.brokenStock} | ${barn.unit} ${barn.name}`;
+      // Поиск заказа по ID
+      const { order, error_message } = await this.findOrderById(orderId);
+      if (error_message) return { error_message };
+
+      if (order.status !== 'заказ_принял_складчик') {
+        return {
+          message: 'zəhmət olmasa əvvəlcə sifarişi təsdiqləyin !',
+        };
+      }
+
+      // Проверка, что пользователь существует и соответствует складчику в заказе
+      if (
+        user.username !== order.barnUsername &&
+        order.barnUserId !== barnUserId &&
+        barn.username !== order.barnUsername
+      ) {
+        return {
+          message: 'siz sifarişdə göstərilən anbardar deyilsiniz',
+        };
+      }
+
+      if (!barn.orderStatus) {
+        return {
+          message: 'zəhmət olmasa əvvəlcə sifarişi təsdiqləyin !',
+        };
+      }
+
+      const { newStock, usedStock, brokenStock } = order;
+
+      this.validateStockValues({
+        barn,
+        newStock,
+        usedStock,
+        brokenStock,
+      });
+
+      await this.barnService.reduceStocksBarn({
+        barnId,
+        newStock,
+        usedStock,
+        brokenStock,
+        driverName,
+        carNumber,
+        userSelectedDate,
+        recipientName: order.clientUserName,
+        fromLocation: order.barnLocation,
+        toLocation: order.clientLocation,
+      });
+
+      const info: string = `Заказ №${order.id} успешно отправлен! В вашем складе №${barn.id} на месте: новые - ${barn.newStock} | использованные - ${barn.usedStock} | сломанные - ${barn.brokenStock} | ${barn.unit} ${barn.name}`;
 
       order.status = 'заказ_отправлен_клиенту';
-      order.description = message;
+      order.info = info;
+
+      const message: string = `${info} status: ${order.status} | senderName: ${barnUsername} - ${order.description}`;
 
       await order.save();
       await barn.save();
 
-      await this.archiveService.createHistory({
+      this.archiveService.createArchive({
         userId: barn.userId,
         username: barn.username,
-        message,
+        message: info + ` status: ${order.status}`,
+        barnId,
       });
 
       return { order, message };
@@ -310,23 +379,16 @@ export class OrderService {
       if (barnError) return { error_message: barnError };
 
       if (!clientBarn) {
-        const {
-          clientId,
-          newStock,
-          brokenStock,
-          usedStock,
-          lostStock,
-          clientLocation,
-        } = order;
+        const { clientId, newStock, brokenStock, usedStock, clientLocation } =
+          order;
 
         // Если склада с данным продуктом не существует, создаем новый
-        const createdBarnDto: CreatedBarnDto = {
+        const createdBarnDto = {
           userId: +clientId,
           productId: order.productId,
           newStock,
           usedStock,
           brokenStock,
-          lostStock,
           location: clientLocation,
         };
 
@@ -401,7 +463,7 @@ export class OrderService {
       // ...
 
       // Обновляем статус заказа и описание
-      order.status = 'заказ_доставлен_с_потерей_и_повреждениями';
+      order.status = 'заказ_доставлен с потерей и повреждениями';
       order.description = `Заказ №${order.id} доставлен с потерей и повреждениями! ${issues}`;
 
       await order.save();

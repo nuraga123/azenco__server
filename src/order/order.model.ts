@@ -28,10 +28,16 @@ export class Order extends Model<Order> {
   clientUserName: string;
 
   @Column(DataType.TEXT)
+  clientMessage?: string;
+
+  @Column(DataType.TEXT)
   barnUsername: string;
 
   @Column(DataType.INTEGER)
   barnUserId: number;
+
+  @Column(DataType.TEXT)
+  BarnUserMessage?: string;
 
   // амбар
   @Column(DataType.INTEGER)
