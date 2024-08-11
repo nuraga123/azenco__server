@@ -5,4 +5,5 @@ export type IMovementType =
   | 'отправление__gediş'
   | 'возврат__qayıdış'
   | 'списание__silinmə'
-  | 'изменение__dəyişikliklər';
+  | 'изменение__dəyişikliklər'
+  | string;

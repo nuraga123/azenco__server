@@ -162,12 +162,16 @@ export class BarnService {
   // поиск амбара по id
   async findOneBarnId(id: number): Promise<IBarnResponce> {
     try {
-      if (+id <= 0) return { message: barnText.ID_ERROR };
+      if (+id <= 0) return { error_message: barnText.ID_ERROR };
 
       const barn = await this.barnModel.findOne({ where: { id } });
 
       if (!barn?.id) {
-        return { message: `${barnText.NOT_ID_BARN} - ${id}` };
+        return { error_message: `${barnText.NOT_ID_BARN} - ${id}` };
+      }
+
+      if (!barn) {
+        return { error_message: barnText.NOT_BARN };
       }
 
       return { barn };

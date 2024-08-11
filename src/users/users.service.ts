@@ -24,7 +24,7 @@ export class UsersService {
 
   async findOneById(id: number): Promise<IUserResponce> {
     const user = await this.userModel.findOne({ where: { id } });
-    if (!user) return { error_message: `нет пользователя по ID: ${id}` };
+    if (!user) return { error_message: `Anbar istifadəçisi tapılmadı: ${id}` };
     return { user };
   }
 
@@ -42,11 +42,11 @@ export class UsersService {
     });
 
     if (existingByUserName) {
-      return { warningMessage: 'Пользователь с таким именем уже существует' };
+      return { warningMessage: 'Eyni adlı istifadəçi artıq mövcuddur' };
     }
 
     if (existingByEmail) {
-      return { warningMessage: 'Пользователь с таким email уже существует' };
+      return { warningMessage: 'Bu e-poçtu olan istifadəçi artıq mövcuddur' };
     }
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
@@ -70,22 +70,22 @@ export class UsersService {
     const { id, secret, newPassword } = updatePasswordDto;
 
     if (!secret) {
-      return { message: 'secret не существует' };
+      return { message: 'gizli söz yazılmayıb' };
     }
 
     if (!newPassword) {
-      return { message: 'new password не существует' };
+      return { message: 'yeni parol yazılmayıb' };
     }
 
     const user = await this.findUserOne(id);
     this.consoleLogger.log(user);
 
     if (!user) {
-      return { message: 'Пользователья не существует' };
+      return { message: 'İstifadəçi mövcud deyil' };
     }
 
     if (user.password === newPassword) {
-      return { message: 'вы правельно ввели парол' };
+      return { message: 'parolu düzgün daxil etmisiniz' };
     }
 
     const secretWord = this.configService.get<string>('SECRET');
@@ -96,23 +96,15 @@ export class UsersService {
       user.password = hashedPassword;
       await user.save();
 
-      return { ...user.dataValues, message: 'пароль обнавлен' };
+      return { ...user.dataValues, message: 'parol yeniləndi' };
     } else {
-      return { message: 'неправильное секретное слово' };
+      return { message: 'gizli söz səhv yazılıb' };
     }
   }
 
-  async getDoneSecret(secret: string) {
+  async getDoneSecret(secret: string): Promise<boolean> {
     const secretWord = this.configService.get<string>('SECRET');
-    this.consoleLogger.log('//////////////////////////////////////secret');
-    this.consoleLogger.log(secret);
-    this.consoleLogger.log(secretWord);
-    this.consoleLogger.log('//////////////////////////////////////secret');
-    if (secret === secretWord) {
-      return true;
-    } else {
-      return false;
-    }
+    return secret === secretWord ? true : false;
   }
 
   async findUsersNames(): Promise<string[]> {
@@ -122,12 +114,15 @@ export class UsersService {
   }
 
   async removeUserById(id: number) {
-    if (isNaN(id)) return { errorMessage: 'не число nan!' };
-    if (id <= 0) return { errorMessage: 'id должно быть больше 0 !' };
+    if (isNaN(id)) return { errorMessage: 'rəqəmlər deyil!' };
+    if (id <= 0) return { errorMessage: 'id 0-dan böyük olmalıdır !' };
+
     const removeUser = await this.userModel.findByPk(id);
-    if (!removeUser) return { errorMessage: `нет в базе ${id}!` };
-    this.consoleLogger.log({ ...removeUser });
+    if (!removeUser) {
+      return { errorMessage: `verilənlər bazasında deyil: ${id}!` };
+    }
+
     removeUser.destroy();
-    return `${removeUser.username} удален`;
+    return `${removeUser.username} silindi`;
   }
 }

@@ -1,13 +1,26 @@
-import { Controller, Get, HttpCode, HttpStatus, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  //Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Query,
+} from '@nestjs/common';
 
 import { OrderService } from './order.service';
 import {
   ICountAndRowsOrdersResponse,
   IOrderQuery,
+  IOrderResponse,
   IOrdersResponse,
 } from './types';
+import { NewOrderDto } from './dto/new-order.dto';
+import { ConfirmBarnUserDto } from './dto/confirm-barn-user.dto';
+import { SendBarnUserDto } from './dto/send-barn-user.dto';
 
-@Controller('orders')
+@Controller('order')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {
     /**/
@@ -30,7 +43,6 @@ export class OrderController {
     return this.orderService.findAndCountAllOrders(query);
   }
 
-  /*
   // запрос для создания нового заказа
   @Post('create')
   @HttpCode(HttpStatus.CREATED)
@@ -38,18 +50,23 @@ export class OrderController {
     return this.orderService.createOrder(newOrderDto);
   }
 
-  @Post('confirm-anbar-user')
+  @Post('confirm-barn-user')
   @HttpCode(HttpStatus.OK)
-  confirmAnbarUser(@Body('id') id: number): Promise<IOrderResponse> {
-    return this.orderService.confirmAnbarUserOrder(id);
+  confirmBarnUser(
+    @Body() confirmBarnUserDto: ConfirmBarnUserDto,
+  ): Promise<IOrderResponse> {
+    return this.orderService.confirmOrderBarnUser(confirmBarnUserDto);
   }
 
-  @Post('send-anbar-user')
+  @Post('send-barn-user')
   @HttpCode(HttpStatus.OK)
-  sendAnbarUser(@Body('id') id: number): Promise<IOrderResponse> {
-    return this.orderService.sendAnbarUserOrder(id);
+  sendAnbarUser(
+    @Body() sendBarnUserDto: SendBarnUserDto,
+  ): Promise<IOrderResponse> {
+    return this.orderService.sendOrder(sendBarnUserDto);
   }
 
+  /*
   // запрос для удаления заказа клиентом
   @Delete('remove-client')
   @HttpCode(HttpStatus.OK)

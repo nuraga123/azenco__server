@@ -4,20 +4,7 @@ import { IsString } from 'class-validator';
 
 @Table
 export class Order extends Model<Order> {
-  @Column({
-    type: DataType.ENUM(
-      'новый_заказ',
-      'заказ_отменен_клиентом',
-      'заказ_принял_складчик',
-      'заказ_отменен_складчиком',
-      'заказ_отправлен_клиенту',
-      'заказ_успешно_доставлен',
-      'заказ_доставлен_с_потерей_и_повреждениями',
-      'заказ_доставлен_с_повреждениями',
-      'заказ_доставлен_с_потерей',
-      'заказ_недоставлен',
-    ),
-  })
+  @Column(DataType.TEXT)
   status: StatusOrderType;
 
   // заказчик и складчик
@@ -104,9 +91,8 @@ export class Order extends Model<Order> {
   carNumber?: string;
 
   @Column(DataType.TEXT)
-  description?: string;
+  info: string;
 
-  @Column(DataType.TEXT)
-  info?: string;
-  productId: any;
+  @Column(DataType.INTEGER)
+  productId: number;
 }
