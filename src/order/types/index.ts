@@ -59,3 +59,8 @@ export interface ISendOrder extends IConfirmOrder {
   usedStockSend: number;
   brokenStockSend: number;
 }
+
+export interface IMyOrders {
+  clientId: number;
+  clientUserName: string;
+}

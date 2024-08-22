@@ -6,6 +6,7 @@ import { UsersService } from 'src/users/users.service';
 import { ArchiveService } from 'src/archive/archive.service';
 import {
   ICountAndRowsOrdersResponse,
+  IMyOrders,
   IOrderQuery,
   IOrderResponse,
   IOrdersResponse,
@@ -36,6 +37,38 @@ export class OrderService {
     try {
       const orders = await this.orderModel.findAll();
       if (!orders.length) return { error_message: 'Sifariş siyahısı boşdur !' };
+      return { orders };
+    } catch (e) {
+      return this.errorService.errorsMessage(e);
+    }
+  }
+
+  // Поиск всех заказов
+  async findMyOrdersByClientIdAndClientUserName({
+    clientId,
+    clientUserName,
+  }: IMyOrders): Promise<IOrdersResponse> {
+    try {
+      const filterUser = {
+        where: {
+          id: clientId,
+          username: clientUserName,
+        },
+      };
+
+      const { username } = await this.usersService.findOne(filterUser);
+
+      if (!username?.length) return { error_message: 'istifadeci tapılmadı !' };
+
+      const orders = await this.orderModel.findAll({
+        where: {
+          clientId,
+          clientUserName,
+        },
+      });
+
+      if (!orders.length) return { error_message: 'Sifariş siyahısı boşdur !' };
+
       return { orders };
     } catch (e) {
       return this.errorService.errorsMessage(e);

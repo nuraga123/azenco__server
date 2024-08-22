@@ -122,18 +122,28 @@ export class UsersController {
   @Post('validate-token')
   async validateToken(@Body() { token }: { token: string }) {
     try {
-      console.log(`token ${token}`);
       const validation = await this.tokenService.validateJwtToken(token);
-      console.log(`validation`);
-      console.log(validation);
-      return {
-        id: validation.user.id,
-        username: validation.user.username,
-        email: validation.user.email,
-      };
+
+      if (validation?.user?.username?.length > 0) {
+        return {
+          id: validation.user.id,
+          username: validation.user.username,
+          email: validation.user.email,
+        };
+      } else {
+        console.log((validation as Error).message);
+        return {
+          expiresIn:
+            'son istifadə müddəti bitdi, lütfən, proqramı yenidən daxil edin',
+        };
+      }
     } catch (error) {
       console.log(error);
-      return error;
+      console.log((error as Error).message);
+      return {
+        message:
+          'son istifadə müddəti bitdi, lütfən, proqramı yenidən daxil edin',
+      };
     }
   }
 }

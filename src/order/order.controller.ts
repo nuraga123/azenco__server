@@ -12,6 +12,7 @@ import {
 import { OrderService } from './order.service';
 import {
   ICountAndRowsOrdersResponse,
+  IMyOrders,
   IOrderQuery,
   IOrderResponse,
   IOrdersResponse,
@@ -48,6 +49,17 @@ export class OrderController {
   @HttpCode(HttpStatus.CREATED)
   addNewOrder(@Body() newOrderDto: NewOrderDto): Promise<IOrderResponse> {
     return this.orderService.createOrder(newOrderDto);
+  }
+
+  @Post('my')
+  @HttpCode(HttpStatus.OK)
+  postMyOrders(
+    @Body() { clientId, clientUserName }: IMyOrders,
+  ): Promise<IOrderResponse> {
+    return this.orderService.findMyOrdersByClientIdAndClientUserName({
+      clientId,
+      clientUserName,
+    });
   }
 
   @Post('confirm-barn-user')
