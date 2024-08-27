@@ -10,6 +10,7 @@ import {
   IBarnsResponce,
   IBarnsUsernamesResponse,
   ICountAndRowsBarnsResponce,
+  IFindBarnsOfProduct,
   IUserIdAndProductId,
 } from './types';
 
@@ -53,11 +54,11 @@ export class BarnService {
     const stocks = [
       { stock: newStock, type: 'новый' },
       { stock: usedStock, type: 'использованный' },
-      { stock: brokenStock, type: 'не пригодный' },
+      { stock: brokenStock, type: 'не_пригодный' },
       // lost
       { stock: lostNewStock, type: 'потерянно-новый' },
-      { stock: lostBrokenStock, type: 'потерянно-новый' },
-      { stock: lostUsedStock, type: 'потерянно-новый' },
+      { stock: lostBrokenStock, type: 'потерянно-использованный' },
+      { stock: lostUsedStock, type: 'потерянно-не_пригодный' },
     ];
 
     const checkIntegerStocks = (
@@ -72,7 +73,7 @@ export class BarnService {
           .map((item) => `${item.type}: ${item.stock}`)
           .join(', ');
 
-        return { message: `Нецелые числа: ${message}` };
+        return { message: `Не целые числа: ${message}` };
       }
     };
 
@@ -235,6 +236,43 @@ export class BarnService {
       return { barn };
     } catch (e) {
       return this.errorService.errorsMessage(e);
+    }
+  }
+
+  // поиск амбаров по коду по имени и по id
+  async findAllBarnsByAzencoCodeAndByProductName({
+    deleteName,
+    azencoCode,
+    productName,
+    productId,
+  }: IFindBarnsOfProduct): Promise<IBarnsResponce> {
+    try {
+      const findBarns = await this.barnModel.findAll({
+        where: {
+          azencoCode,
+          productName,
+          productId,
+        },
+      });
+
+      if (findBarns?.length === 0) {
+        return { error_message: barnText.NOT_BARNS };
+      }
+
+      const findBarnsDeleteName = findBarns.map(
+        (barn) => barn.username !== deleteName,
+      );
+
+      if (findBarnsDeleteName?.length > 0) {
+        return {
+          barns: findBarns,
+          message: `${findBarns.length} anbar tapılıb`,
+        };
+      } else {
+        return { error_message: barnText.NOT_BARNS };
+      }
+    } catch (error) {
+      return this.errorService.errorsMessage((error as Error).message);
     }
   }
 

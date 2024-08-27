@@ -75,3 +75,10 @@ export interface IMinusAnbarOrder {
   usedStock: number;
   brokenStock: number;
 }
+
+export interface IFindBarnsOfProduct {
+  productId: number;
+  azencoCode: string;
+  productName: string;
+  deleteName?: string;
+}

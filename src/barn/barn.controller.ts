@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { BarnService } from './barn.service';
 import { CreatedBarnDto } from './dto/create-barn.dto';
 import { StocksBarnDto } from './dto/stocks-barn.dto';
+import { IFindBarnsOfProduct } from './types';
 
 @Controller('barn')
 export class BarnController {
@@ -17,6 +18,14 @@ export class BarnController {
   @Post('usersnames')
   getBarnsUsernames(@Body('noname') noname: string) {
     return this.barnService.findAllBarnsUsername(noname);
+  }
+
+  // получение имен анбаров
+  @Post('find-barns')
+  postFindBarnsOfProduct(@Body() productData: IFindBarnsOfProduct) {
+    return this.barnService.findAllBarnsByAzencoCodeAndByProductName(
+      productData,
+    );
   }
 
   // поиск по id анбара
