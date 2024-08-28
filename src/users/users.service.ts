@@ -110,7 +110,9 @@ export class UsersService {
   async findUsersNames(): Promise<string[]> {
     const users = await this.userModel.findAll();
     const names = users.map((user) => user.username);
-    return names;
+
+    const sortedNames = names.sort((a, b) => a.localeCompare(b));
+    return sortedNames;
   }
 
   async removeUserById(id: number) {
