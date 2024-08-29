@@ -114,13 +114,17 @@ export class UsersController {
   resetPassword(@Body() updatePasswordDto: UpdatePasswordDto) {
     return this.usersService.updateUserPassword(updatePasswordDto);
   }
+
   @Post('/secret')
   getSecret(@Body() { secret }: { secret: string }) {
     return this.usersService.getDoneSecret(secret);
   }
 
   @Post('validate-token')
+  @HttpCode(HttpStatus.OK)
   async validateToken(@Body() { token }: { token: string }) {
+    const EXPIRED = 'Istifadə müddəti bitdi, proqrama yenidən daxil olun !';
+
     try {
       const validation = await this.tokenService.validateJwtToken(token);
 
@@ -133,16 +137,13 @@ export class UsersController {
       } else {
         console.log((validation as Error).message);
         return {
-          expiresIn:
-            'son istifadə müddəti bitdi, lütfən, proqramı yenidən daxil edin',
+          message: EXPIRED,
         };
       }
     } catch (error) {
-      console.log(error);
       console.log((error as Error).message);
       return {
-        message:
-          'son istifadə müddəti bitdi, lütfən, proqramı yenidən daxil edin',
+        message: EXPIRED,
       };
     }
   }
