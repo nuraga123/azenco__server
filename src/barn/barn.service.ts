@@ -239,7 +239,7 @@ export class BarnService {
     }
   }
 
-  // поиск амбаров по коду по имени и по id
+  // поиск амбаров по коду, имени и id
   async findAllBarnsByAzencoCodeAndByProductName({
     deleteName,
     azencoCode,
@@ -259,14 +259,17 @@ export class BarnService {
         return { error_message: barnText.NOT_BARNS };
       }
 
-      const findBarnsDeleteName = findBarns.map(
+      const findBarnsDeleteName = findBarns.filter(
         (barn) => barn.username !== deleteName,
       );
 
-      if (findBarnsDeleteName?.length > 0) {
+      console.log('findBarnsDeleteName[0].username !== deleteName');
+      console.log(findBarnsDeleteName[0]?.username !== deleteName);
+
+      if (findBarnsDeleteName.length > 0) {
         return {
-          barns: findBarns,
-          message: `${findBarns.length} anbar tapılıb`,
+          barns: findBarnsDeleteName,
+          message: `${findBarnsDeleteName.length} anbar tapılıb`,
         };
       } else {
         return { error_message: barnText.NOT_BARNS };

@@ -43,7 +43,7 @@ export class OrderService {
     }
   }
 
-  // Поиск всех заказов
+  // Поиск всех заказов клиента который он заказал
   async findMyOrdersByClientIdAndClientUserName({
     clientId,
     clientUserName,
@@ -73,6 +73,18 @@ export class OrderService {
     } catch (e) {
       return this.errorService.errorsMessage(e);
     }
+  }
+
+  // Поиск всех заказов складчика у  которого заказывают
+  async findOrderByBarnUserNameAndByBarnUserId({
+    barnUsername,
+    barnUserId,
+  }: {
+    barnUsername: string;
+    barnUserId: string;
+  }): Promise<IOrdersResponse> {
+    console.log(barnUsername, barnUserId);
+    return { orders: [] };
   }
 
   // Получение всех заказов с подсчетом
