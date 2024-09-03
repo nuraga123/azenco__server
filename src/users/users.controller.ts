@@ -107,7 +107,7 @@ export class UsersController {
   @Get('/logout')
   logout(@Request() req) {
     req.session.destroy();
-    return { msg: 'session has ended' };
+    return { msg: 'proqramdan çıxmısınız' };
   }
 
   @Post('/secret-word')

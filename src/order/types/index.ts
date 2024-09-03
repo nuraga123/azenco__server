@@ -33,7 +33,7 @@ export interface ICountAndRowsOrdersResponse extends IOrderErrorMessage {
   message?: string;
 }
 
-export interface IOrdersResponse extends IOrderErrorMessage {
+export interface IOrdersResponse extends IOrderResponse {
   orders?: Order[];
 }
 
@@ -63,4 +63,9 @@ export interface ISendOrder extends IConfirmOrder {
 export interface IMyOrders {
   clientId: number;
   clientUserName: string;
+}
+
+export interface IOherOrders {
+  barnUsername: string;
+  barnUserId: number;
 }

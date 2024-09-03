@@ -24,7 +24,7 @@ export class Order extends Model<Order> {
   barnUserId: number;
 
   @Column(DataType.TEXT)
-  BarnUserMessage?: string;
+  barnUserMessage?: string;
 
   // амбар
   @Column(DataType.INTEGER)

@@ -11,11 +11,12 @@ import {
 
 import { OrderService } from './order.service';
 import {
-  ICountAndRowsOrdersResponse,
-  IMyOrders,
-  IOrderQuery,
   IOrderResponse,
   IOrdersResponse,
+  IOrderQuery,
+  ICountAndRowsOrdersResponse,
+  IMyOrders,
+  IOherOrders,
 } from './types';
 import { NewOrderDto } from './dto/new-order.dto';
 import { ConfirmBarnUserDto } from './dto/confirm-barn-user.dto';
@@ -59,6 +60,17 @@ export class OrderController {
     return this.orderService.findMyOrdersByClientIdAndClientUserName({
       clientId,
       clientUserName,
+    });
+  }
+
+  @Post('other')
+  @HttpCode(HttpStatus.OK)
+  postOrderByBarnUserNameAndByBarnUserId(
+    @Body() { barnUsername, barnUserId }: IOherOrders,
+  ): Promise<IOrderResponse> {
+    return this.orderService.findOrderByBarnUserNameAndByBarnUserId({
+      barnUsername,
+      barnUserId,
     });
   }
 

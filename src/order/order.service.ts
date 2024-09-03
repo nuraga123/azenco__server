@@ -5,6 +5,7 @@ import { Order } from './order.model';
 import { UsersService } from 'src/users/users.service';
 import { ArchiveService } from 'src/archive/archive.service';
 import {
+  IOherOrders,
   ICountAndRowsOrdersResponse,
   IMyOrders,
   IOrderQuery,
@@ -79,12 +80,32 @@ export class OrderService {
   async findOrderByBarnUserNameAndByBarnUserId({
     barnUsername,
     barnUserId,
-  }: {
-    barnUsername: string;
-    barnUserId: string;
-  }): Promise<IOrdersResponse> {
-    console.log(barnUsername, barnUserId);
-    return { orders: [] };
+  }: IOherOrders): Promise<IOrdersResponse> {
+    try {
+      if (!barnUsername && !barnUserId) {
+        return {
+          error_message: 'not vxodnix dannix',
+        };
+      }
+
+      const ordersBarnUser = await this.orderModel.findAll({
+        where: {
+          barnUsername,
+          barnUserId,
+        },
+      });
+
+      const message: string =
+        ordersBarnUser.length === 0
+          ? 'Anbarınız üçün sifariş yoxdur'
+          : `Anbarınızda ${ordersBarnUser.length}  sifariş tapıldı`;
+
+      console.log(ordersBarnUser);
+
+      return { orders: ordersBarnUser, message };
+    } catch (e) {
+      return this.errorService.errorsMessage(e);
+    }
   }
 
   // Получение всех заказов с подсчетом
@@ -215,7 +236,7 @@ export class OrderService {
         barnId: +barn.id,
         barnUsername: barn.username,
         barnLocation: barn.location,
-        BarnUserMessage: '',
+        barnUserMessage: '',
 
         productId: barn.productId,
         productName: barn.productName,
@@ -325,7 +346,7 @@ export class OrderService {
 
       order.status = 'anbardar_sifarişi_qəbul_etdi';
       order.info = message;
-      order.BarnUserMessage = barnUserMessage;
+      order.barnUserMessage = barnUserMessage;
 
       barn.orderStatus = true;
 
