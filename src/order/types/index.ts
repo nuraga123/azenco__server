@@ -6,16 +6,38 @@ export interface IOrderErrorMessage {
 }
 
 export type StatusOrderType =
+  // новый заказ
   | 'yeni_sifariş'
+
+  // заказ отменен клиентом
+  | 'müştəri_sifarişi_ləğv_etdi'
+
+  // складчик принял заказ
   | 'anbardar_sifarişi_qəbul_etdi'
-  | 'заказ_отменен_складчиком'
+
+  // заказ отменен складским работником
+  | 'sifariş_anbardar_tərəfindən_ləğv_edildi'
+
+  // складской работник полностью отправил заказ клиенту
   | 'anbardar_tam_sifarişi_müştəriyə_göndərdi'
+
+  // складской работник не отправил заказ клиенту
   | 'anbardar_tam_sifarişi_müştəriyə_göndərməyib'
-  | 'заказ_успешно_доставлен'
-  | 'заказ_доставлен с потерей и повреждениями'
-  | 'заказ_доставлен с повреждениями'
-  | 'заказ_доставлен с потерей'
-  | 'заказ_недоставлен';
+
+  // заказ успешно доставлен
+  | 'sifariş_uğurla_çatdırıldı'
+
+  // заказ доставлен с потерями и повреждениями
+  | 'sifariş_itki_və_ziyanla_çatdırıldı'
+
+  // заказ доставлен в неисправном состоянии
+  | 'sifariş_yararsız_çatdırıldı'
+
+  // заказ доставлен с потерями
+  | 'sifariş_itki_ilə_çatdırıldı'
+
+  // заказ не доставлен
+  | 'sifariş_çatdırılmadı';
 
 export interface IOrderQuery {
   limit?: string;
