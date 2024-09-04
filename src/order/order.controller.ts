@@ -20,7 +20,6 @@ import {
 } from './types';
 import { NewOrderDto } from './dto/new-order.dto';
 import { ConfirmBarnUserDto } from './dto/confirm-barn-user.dto';
-import { SendBarnUserDto } from './dto/send-barn-user.dto';
 
 @Controller('order')
 export class OrderController {
@@ -82,13 +81,13 @@ export class OrderController {
     return this.orderService.confirmOrderBarnUser(confirmBarnUserDto);
   }
 
-  @Post('send-barn-user')
-  @HttpCode(HttpStatus.OK)
-  sendAnbarUser(
-    @Body() sendBarnUserDto: SendBarnUserDto,
-  ): Promise<IOrderResponse> {
-    return this.orderService.sendOrder(sendBarnUserDto);
-  }
+  // @Post('send-barn-user')
+  // @HttpCode(HttpStatus.OK)
+  // sendAnbarUser(
+  //   @Body() sendBarnUserDto: SendBarnUserDto,
+  // ): Promise<IOrderResponse> {
+  //   return this.orderService.sendOrder(sendBarnUserDto);
+  // }
 
   /*
   // запрос для удаления заказа клиентом
