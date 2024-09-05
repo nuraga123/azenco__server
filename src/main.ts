@@ -1,11 +1,10 @@
 import { NestFactory } from '@nestjs/core';
+import { Logger } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as session from 'express-session';
 import * as passport from 'passport';
 import * as express from 'express';
 import { AppModule } from './app.module';
-import { Logger } from '@nestjs/common';
-//import { exec } from 'child_process';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -14,7 +13,7 @@ async function bootstrap() {
   // Используем express-session для управления сессиями
   app.use(
     session({
-      secret: process.env.SESSION_SECRET || 'keyword', // Секрет для подписи куки сессии
+      secret: process.env.SESSION_SECRET || 'keyword',
       resave: false, // Не сохранять сессию, если нет изменений
       saveUninitialized: false, // Не сохранять новую, но не измененную сессию
     }),
@@ -67,7 +66,6 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-
   // Монтирование Swagger на /swagger
   SwaggerModule.setup('swagger', app, document);
 
@@ -80,12 +78,6 @@ async function bootstrap() {
 
   // Прослушивание порта 3000 или из переменной окружения, если указана
   await app.listen(process.env.PORT || 3000);
-
-  // exec('start http://localhost:3000', (err) => {
-  //   if (err) {
-  //     console.error('Ошибка при попытке открыть URL в браузере:', err);
-  //   }
-  // });
 }
 
 bootstrap();
