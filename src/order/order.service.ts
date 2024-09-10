@@ -15,8 +15,11 @@ import {
 } from './types';
 import { ErrorService } from 'src/errors/errors.service';
 import { BarnService } from 'src/barn/barn.service';
+import { errorText } from 'src/errors/text';
+
 import { NewOrderDto } from './dto/new-order.dto';
 import { ConfirmBarnUserDto } from './dto/confirm-barn-user.dto';
+import { SendBarnUserDto } from './dto/send-barn-user.dto';
 
 @Injectable()
 export class OrderService {
@@ -32,6 +35,7 @@ export class OrderService {
     /**/
   }
 
+  /* поиски */
   // Поиск всех заказов
   async findAllOrders(): Promise<IOrdersResponse> {
     try {
@@ -178,17 +182,20 @@ export class OrderService {
     return '';
   }
 
+  /* движения */
+
   // Создание заказа
+  // status: 'yeni_sifariş',
   async createOrder(newOrderDto: NewOrderDto): Promise<IOrderResponse> {
     try {
       const {
         barnId,
         clientId,
         clientLocation,
+        clientMessage,
         newStock,
         usedStock,
         brokenStock,
-        clientMessage,
       } = newOrderDto;
 
       // Поиск клиента по ID
@@ -217,7 +224,7 @@ export class OrderService {
       const totalPrice: number = +barn.price * +totalStock;
 
       // Sifariş təsvirini yaratma
-      const info: string = `Sifariş edən şəxs: ${client.username} (ID: ${client.id}); ${clientLocation} - dən sifariş etdi Anbardar: ${barn.username} (ID: ${barn.userId}) tərəfindən ${barn.location} - dən ${
+      const info: string = `Sifariş edən şəxs: ${client.username} (ID: ${client.id}); Müştəri Yeri: ${clientLocation}. | Anbardar: ${barn.username} (ID: ${barn.userId}); Anbardar Yeri: ${barn.location} ${
         newStock ? ` | yeni - ${+newStock}` : ''
       } ${usedStock ? ` | işlənmiş - ${+usedStock}` : ''} ${
         brokenStock ? ` | yararsız - ${+brokenStock}` : ''
@@ -258,7 +265,7 @@ export class OrderService {
       });
 
       // Создание записи в истории
-      const message: string = `Yeni sifariş №${order.id}! ${info} | status: ${order.status} | ${order.clientMessage}`;
+      const message: string = `Status: ${order.status} | №${order.id}! ${info} | ${order.clientMessage}`;
 
       await this.archiveService.createArchive({
         barnId: +barn.id,
@@ -282,6 +289,7 @@ export class OrderService {
         carNumber: '',
         recipientName: client.username,
         senderName: barn.username,
+
         // Для потерянные
         lostNewStock: 0,
         lostUsedStock: 0,
@@ -296,6 +304,7 @@ export class OrderService {
   }
 
   // Метод для подтверждения заказа складчиком
+  // status = 'anbardar_sifarişi_qəbul_etdi';
   async confirmOrderBarnUser(
     confirmBarnUserDto: ConfirmBarnUserDto,
   ): Promise<IOrderResponse> {
@@ -310,12 +319,14 @@ export class OrderService {
       } = confirmBarnUserDto;
 
       // Поиск пользователя по имени
-      const user = await this.usersService.findOne({
+      const barnUser = await this.usersService.findOne({
         where: {
           username: barnUsername,
           id: barnUserId,
         },
       });
+
+      if (!barnUser.id) return { error_message: '' };
 
       // Поиск склада по ID
       const { barn, error_message: barnError } =
@@ -331,7 +342,7 @@ export class OrderService {
 
       // Проверка, что пользователь существует и соответствует складчику в заказе
       if (
-        user.username !== order.barnUsername &&
+        barnUser.username !== order.barnUsername &&
         order.barnUserId !== barnUserId &&
         barn.username !== order.barnUsername
       ) {
@@ -341,13 +352,12 @@ export class OrderService {
       }
 
       // Обновление статуса и описания заказа
-      const message = `Anbardar: ${order.barnUsername} sifarişi qəbul etdi №${order.id}; Sifariş edən şəxs ${order.clientUserName} | status: ${order.status}`;
-
       order.status = 'anbardar_sifarişi_qəbul_etdi';
-      order.info = message;
       order.barnUserMessage = barnUserMessage;
-
       barn.orderStatus = true;
+
+      const message = `Anbardar: ${order.barnUsername} sifarişi qəbul etdi № ${order.id} | Anbardar Mesajı: ${barnUserMessage}`;
+      order.info = message;
 
       // Сохранение обновленного заказа
       await order.save();
@@ -385,6 +395,103 @@ export class OrderService {
       return { order, message };
     } catch (e) {
       return this.errorService.errorsMessage(e);
+    }
+  }
+
+  async sendOrderBarnUser(
+    sendBarnUserDto: SendBarnUserDto,
+  ): Promise<IOrderResponse> {
+    try {
+      const {
+        orderId,
+
+        userSelectedDate,
+        barnUserId,
+        barnUsername,
+        barnUserMessage,
+        barnLocationProduct,
+
+        // car
+        driverName,
+        carNumber,
+
+        // stock
+        newStockSend,
+        usedStockSend,
+        brokenStockSend,
+      } = sendBarnUserDto;
+
+      if (!driverName) return { error_message: errorText.NOT_DRIVER_NAME };
+
+      if (!carNumber) return { error_message: errorText.NOT_CAR_NUMBER };
+
+      // Поиск заказа по ID
+      const { order, error_message: findOrderErrorMessage } =
+        await this.findOrderById(orderId);
+
+      if (findOrderErrorMessage)
+        return { error_message: findOrderErrorMessage };
+
+      const { barn, error_message: barnError } =
+        await this.barnService.findOneBarnIdAndBarnUsername({
+          id: +barnUserId,
+          username: barnUsername,
+        });
+
+      if (barnError) return { error_message: barnError };
+
+      // Проверка, что заказ находится в статусе "anbardar_sifarişi_qəbul_etdi"
+      if (order.status !== 'anbardar_sifarişi_qəbul_etdi') {
+        return { message: 'bu sifariş artıq qəbul edilmişdir' };
+      }
+
+      // Проверка достаточности товара в складе
+      const validSendOrderStock = this.validateStockValues({
+        barn,
+        newStock: +newStockSend,
+        usedStock: +usedStockSend,
+        brokenStock: +brokenStockSend,
+      });
+
+      if (validSendOrderStock) return { error_message: validSendOrderStock };
+
+      const checkOrderAndSendStockBarn =
+        Boolean(+order.newStock === +newStockSend) &&
+        Boolean(+order.usedStock === +usedStockSend) &&
+        Boolean(+order.brokenStock === +brokenStockSend);
+
+      if (checkOrderAndSendStockBarn) {
+        const { price } = barn;
+        // обновляем амбар складчика
+        barn.newStock -= +newStockSend;
+        barn.usedStock -= +usedStockSend;
+        barn.brokenStock -= -+brokenStockSend;
+
+        barn.totalStock = +barn.newStock + +barn.usedStock + +barn.brokenStock;
+
+        barn.newTotalPrice = +price * +barn.newStock;
+        barn.usedTotalPrice = +price * +barn.usedStock;
+        barn.brokenTotalPrice = +price * +barn.brokenStock;
+
+        barn.totalPrice =
+          +barn.newTotalPrice + +barn.usedTotalPrice + +barn.brokenTotalPrice;
+
+        // обновляем заказ складчика
+
+        // устоновим полную отправку
+        order.status = 'anbardar_tam_sifarişi_müştəriyə_göndərdi';
+        order.barnUserMessage = barnUserMessage;
+        order.barnLocation = barnLocationProduct || barn.location;
+        order.driverName = driverName;
+        order.carNumber = carNumber;
+
+        // перевести
+        const info = `Статус: ${order.status}! Заказ №${order.id} был полностью отправлен! Дата отправки: ${userSelectedDate};Cкладчик: ${barnUsername} (ID: ${barnUserId}) отправил из ${order.barnLocation}; Клиенту: ${order.clientUserName} в ${order.clientLocation}; Материал: ${order.productName}, Код: ${order.azencoCode}, новые: ${newStockSend}, использованные: ${usedStockSend}, непригодные: ${brokenStockSend}; Водитель: ${driverName} - номер: ${carNumber}`;
+
+        order.info = info;
+      }
+    } catch (e) {
+      this.errorService.errorsMessage(e);
     }
   }
 }

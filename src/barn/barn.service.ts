@@ -18,10 +18,11 @@ import { UsersService } from 'src/users/users.service';
 import { ArchiveService } from 'src/archive/archive.service';
 import { ProductsService } from 'src/products/products.service';
 import { ErrorService } from 'src/errors/errors.service';
+import { errorText } from 'src/errors/text/index';
+//dto
 import { CreatedBarnDto } from './dto/create-barn.dto';
 import { UpdatedBarnDto } from './dto/update-barn.dto';
 import { StocksBarnDto } from './dto/stocks-barn.dto';
-import { barnText } from './text/barnText';
 
 @Injectable()
 export class BarnService {
@@ -116,7 +117,7 @@ export class BarnService {
   async findAllBarns(): Promise<IBarnsResponce> {
     try {
       const barns = await this.barnModel.findAll();
-      if (!barns?.length) return { message: barnText.NOT_BARNS };
+      if (!barns?.length) return { message: errorText.NOT_BARNS };
       return { barns };
     } catch (e) {
       return this.errorService.errorsMessage(e);
@@ -163,17 +164,44 @@ export class BarnService {
   // поиск амбара по id
   async findOneBarnId(id: number): Promise<IBarnResponce> {
     try {
-      if (+id <= 0) return { error_message: barnText.ID_ERROR };
+      if (+id <= 0) return { error_message: errorText.ID_ERROR };
 
       const barn = await this.barnModel.findOne({ where: { id } });
 
       if (!barn?.id) {
-        return { error_message: `${barnText.NOT_ID_BARN} - ${id}` };
+        return { error_message: `${errorText.NOT_ID_BARN} - ${id}` };
       }
 
       if (!barn) {
-        return { error_message: barnText.NOT_BARN };
+        return { error_message: errorText.NOT_BARN };
       }
+
+      return { barn };
+    } catch (e) {
+      return this.errorService.errorsMessage(e);
+    }
+  }
+
+  async findOneBarnIdAndBarnUsername({
+    id,
+    username,
+  }: {
+    id: number;
+    username: string;
+  }): Promise<IBarnResponce> {
+    try {
+      if (+id <= 0) return { error_message: errorText.ID_ERROR };
+
+      if (username.length <= 0)
+        return { error_message: errorText.NOT_USERNAME };
+
+      const barn = await this.barnModel.findOne({ where: { id } });
+
+      if (!barn?.id) {
+        return { error_message: `${errorText.NOT_ID_BARN} - ${id}` };
+      }
+
+      if (!barn) return { error_message: errorText.NOT_BARN };
 
       return { barn };
     } catch (e) {
@@ -188,14 +216,14 @@ export class BarnService {
         attributes: ['username', 'userId'],
       });
 
-      if (!barns.length) return { message: barnText.NOT_USERNAME_BARNS };
+      if (!barns.length) return { message: errorText.NOT_USERNAME_BARNS };
 
       const barnsMapValues = [
         ...new Map(barns.map((barn) => [barn.userId, barn])).values(),
       ];
 
       if (!barnsMapValues.length)
-        return { message: barnText.NOT_USERNAME_BARNS };
+        return { message: errorText.NOT_USERNAME_BARNS };
 
       const usernames = barnsMapValues.filter(
         (barn) => barn.username !== noname,
@@ -211,7 +239,7 @@ export class BarnService {
   async findAllBarnsUserId(userId: number): Promise<IBarnsResponce> {
     try {
       const barns = await this.barnModel.findAll({ where: { userId } });
-      if (barns.length <= 0) return { message: barnText.NOT_BARNS };
+      if (barns.length <= 0) return { message: errorText.NOT_BARNS };
       return { barns };
     } catch (e) {
       return this.errorService.errorsMessage(e);
@@ -226,13 +254,13 @@ export class BarnService {
     try {
       if (!userId || !productId) {
         return {
-          error_message: barnText.ID_ERROR,
+          error_message: errorText.ID_ERROR,
         };
       }
 
       const options = { where: { userId, productId } };
       const barn = await this.barnModel.findOne(options);
-      if (!barn?.id) return { message: barnText.NOT_BARN };
+      if (!barn?.id) return { message: errorText.NOT_BARN };
       return { barn };
     } catch (e) {
       return this.errorService.errorsMessage(e);
@@ -256,7 +284,7 @@ export class BarnService {
       });
 
       if (findBarns?.length === 0) {
-        return { error_message: barnText.NOT_BARNS };
+        return { error_message: errorText.NOT_BARNS };
       }
 
       const findBarnsDeleteName = findBarns.filter(
@@ -272,7 +300,7 @@ export class BarnService {
           message: `${findBarnsDeleteName.length} anbar tapılıb`,
         };
       } else {
-        return { error_message: barnText.NOT_BARNS };
+        return { error_message: errorText.NOT_BARNS };
       }
     } catch (error) {
       return this.errorService.errorsMessage((error as Error).message);
@@ -298,11 +326,11 @@ export class BarnService {
 
       // Проверка на корректность значений
       if (!userId || !productId || !location) {
-        return { error_message: barnText.WRONG_DATA };
+        return { error_message: errorText.WRONG_DATA };
       }
 
       if (+newStock + +usedStock + +brokenStock <= 0) {
-        return { error_message: barnText.STOCKS_ERROR };
+        return { error_message: errorText.STOCKS_ERROR };
       }
 
       // Поиск пользователя укоратить метод
@@ -492,7 +520,7 @@ export class BarnService {
       } = stocksBarnDto;
 
       if (!barnId || !userSelectedDate || !fromLocation || !toLocation) {
-        return { error_message: barnText.NOT_INPUT_DATA };
+        return { error_message: errorText.NOT_INPUT_DATA };
       }
 
       if (
@@ -503,7 +531,7 @@ export class BarnService {
         brokenStock < 0 ||
         typeof brokenStock !== 'number'
       ) {
-        return { error_message: barnText.STOCKS_ERROR };
+        return { error_message: errorText.STOCKS_ERROR };
       }
 
       const {
@@ -584,7 +612,7 @@ export class BarnService {
       } = stocksBarnDto;
 
       if (!barnId || !userSelectedDate || !fromLocation || !toLocation) {
-        return { error_message: barnText.NOT_INPUT_DATA };
+        return { error_message: errorText.NOT_INPUT_DATA };
       }
 
       if (
@@ -595,7 +623,7 @@ export class BarnService {
         brokenStock < 0 ||
         typeof brokenStock !== 'number'
       ) {
-        return { error_message: barnText.STOCKS_ERROR };
+        return { error_message: errorText.STOCKS_ERROR };
       }
 
       const {
@@ -614,7 +642,7 @@ export class BarnService {
         usedStock > barn.usedStock ||
         brokenStock > barn.brokenStock
       ) {
-        return { error_message: barnText.STOCKS_EXCEED_ERROR };
+        return { error_message: errorText.STOCKS_EXCEED_ERROR };
       }
 
       barn.newStock -= Number(newStock);

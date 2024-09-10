@@ -52,6 +52,7 @@ export interface IBarnsUsernamesResponse extends IErrorMessage {
 }
 
 export interface IBarnText {
+  NOT_USERNAME: string;
   ID_ERROR: string;
   NOT_BARN: string;
   NOT_ID_BARN: string;

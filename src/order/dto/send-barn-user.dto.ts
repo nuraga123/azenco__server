@@ -14,6 +14,10 @@ export class SendBarnUserDto {
   barnUsername: string;
 
   @IsNotEmpty()
+  @IsString()
+  barnLocationProduct: string;
+
+  @IsNotEmpty()
   @IsNumber()
   barnUserId: number;
 
@@ -44,4 +48,7 @@ export class SendBarnUserDto {
   @IsNotEmpty()
   @IsNumber()
   brokenStockSend: number;
+
+  @IsNumber()
+  updatePrice?: number;
 }
