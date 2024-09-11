@@ -326,7 +326,7 @@ export class OrderService {
         },
       });
 
-      if (!barnUser.id) return { error_message: '' };
+      if (!barnUser) return { error_message: errorText.NOT_BARN_USER };
 
       // Поиск склада по ID
       const { barn, error_message: barnError } =

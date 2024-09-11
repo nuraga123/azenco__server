@@ -6,9 +6,27 @@ import * as passport from 'passport';
 import * as express from 'express';
 import { AppModule } from './app.module';
 
+import * as fs from 'fs';
+import * as path from 'path';
+
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
-  const app = await NestFactory.create(AppModule);
+
+  // Определите абсолютные пути к SSL-сертификатам
+  const keyPath = path.resolve(__dirname, '..', 'src/cert', 'cert.key');
+  const certPath = path.resolve(__dirname, '..', 'src/cert', 'cert.crt');
+
+  // Чтение SSL-сертификатов
+  const httpsOptions = {
+    key: fs.readFileSync(keyPath),
+    cert: fs.readFileSync(certPath),
+  };
+
+  logger.log('httpsOptions');
+
+  const app = await NestFactory.create(AppModule, {
+    httpsOptions,
+  });
 
   // Используем express-session для управления сессиями
   app.use(
@@ -66,12 +84,9 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
+
   // Монтирование Swagger на /swagger
   SwaggerModule.setup('swagger', app, document);
-
-  // Пример вывода в консоль каждые 30 секунд
-  logger.log('Server işləyir!');
-  setInterval(() => logger.log('Server işləyir !'), 30000);
 
   // Обслуживание статических файлов из папки public
   app.use(express.static('public'));
