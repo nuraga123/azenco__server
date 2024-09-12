@@ -1,6 +1,23 @@
 import { Barn } from 'src/barn/barn.model';
 import { Order } from '../order.model';
 
+export interface IFilterOptions {
+  where: {
+    id?: number;
+    username?: string;
+    email?: string;
+  };
+}
+
+export interface IDeleteOptions {
+  orderId: number;
+  productId: number;
+  azencoCode: string;
+  productName: string;
+  clientId: number;
+  clientUserName: string;
+}
+
 export interface IOrderErrorMessage {
   error_message?: string;
 }

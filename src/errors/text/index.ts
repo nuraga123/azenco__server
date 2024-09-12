@@ -11,8 +11,18 @@ export const errorText: IErrorText = {
   NOT_USERNAME: 'Anbardar adı yoxdur !',
   NOT_USERNAME_BARNS: 'Anbardar adları tapılmadı !',
   NOT_PRODUCT_ID_AND_USER_ID: 'Istifadəçi ID və ya məhsul ID yoxdur !',
-  WRONG_DATA: 'Yanlış məlumat !',
   NOT_INPUT_DATA: 'Funksiya üçün Giriş Məlumatı yoxdur !',
+  NOT_ORDER_BARNUSER: 'Sifarişdə göstərilən Anbardar deyilsiniz !',
+  NOT_REQUIRED_USER_ACTION:
+    'Əməliyyat üçün tələb olunan istifadəçi deyilsiniz !',
+  WRONG_DATA: 'Yanlış məlumat !',
   STOCKS_ERROR: 'Miqdar 0-dan az və ya rəqəm deyil!',
   STOCKS_EXCEED_ERROR: 'Anbarda olduğundan çox götürdünüz !',
+  // status
+  STATUS_NEW: 'Yeni sifariş olmalıdır !',
+  STATUS_CONFIRMED: `Artıq təsdiqlənib !`,
+  STATUS_SEND: 'Anbardar tərəfindən təsdiq edilməlidir sifariş !',
+
+  STATUS_CANCELED:
+    'Statusu yeni və ya Anbardar tərəfindən ləğv edildikdə silinə bilər !',
 };

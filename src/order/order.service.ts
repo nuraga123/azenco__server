@@ -12,6 +12,9 @@ import {
   IOrderResponse,
   IOrdersResponse,
   IValidateStocks,
+  IFilterOptions,
+  IDeleteOptions,
+  StatusOrderType,
 } from './types';
 import { ErrorService } from 'src/errors/errors.service';
 import { BarnService } from 'src/barn/barn.service';
@@ -332,13 +335,23 @@ export class OrderService {
       const { barn, error_message: barnError } =
         await this.barnService.findOneBarnId(barnId);
 
-      if (barn.orderStatus) return { message: 'artıq sifariş olunub' };
-
       if (barnError) return { error_message: barnError };
 
       // Поиск заказа по ID
       const { order, error_message } = await this.findOrderById(orderId);
       if (error_message) return { error_message };
+
+      const orderStatus: StatusOrderType = order.status;
+
+      const orderStatusNew = orderStatus !== 'yeni_sifariş';
+
+      const orderStatusConfirm = orderStatus === 'anbardar_sifarişi_qəbul_etdi';
+
+      if (orderStatusNew) {
+        if (orderStatusConfirm) {
+          return { error_message: errorText.STATUS_CONFIRMED };
+        } else return { error_message: errorText.STATUS_NEW };
+      }
 
       // Проверка, что пользователь существует и соответствует складчику в заказе
       if (
@@ -347,17 +360,19 @@ export class OrderService {
         barn.username !== order.barnUsername
       ) {
         return {
-          message: 'siz sifarişdə göstərilən anbardar deyilsiniz',
+          error_message: 'siz sifarişdə göstərilən anbardar deyilsiniz',
         };
       }
 
       // Обновление статуса и описания заказа
       order.status = 'anbardar_sifarişi_qəbul_etdi';
       order.barnUserMessage = barnUserMessage;
-      barn.orderStatus = true;
 
-      const message = `Anbardar: ${order.barnUsername} sifarişi qəbul etdi № ${order.id} | Anbardar Mesajı: ${barnUserMessage}`;
+      const message = `Anbardar: ${order.barnUsername} sifarişi №${order.id} qəbul etdi № ${order.id} | Anbardar Mesajı: ${barnUserMessage}`;
       order.info = message;
+
+      // Обновление склада
+      barn.orderStatus = true;
 
       // Сохранение обновленного заказа
       await order.save();
@@ -381,15 +396,8 @@ export class OrderService {
         brokenStock: +order.brokenStock || 0,
         totalStock: +order.totalStock,
         totalPrice: +order.totalPrice,
-        driverName: '',
-        carNumber: '',
         recipientName: order.clientUserName,
         senderName: barn.username,
-        // Для потерянные
-        lostNewStock: 0,
-        lostUsedStock: 0,
-        lostBrokenStock: 0,
-        lostTotalStock: 0,
       });
 
       return { order, message };
@@ -442,7 +450,7 @@ export class OrderService {
 
       // Проверка, что заказ находится в статусе "anbardar_sifarişi_qəbul_etdi"
       if (order.status !== 'anbardar_sifarişi_qəbul_etdi') {
-        return { message: 'bu sifariş artıq qəbul edilmişdir' };
+        return { message: errorText.STATUS_SEND };
       }
 
       // Проверка достаточности товара в складе
@@ -485,13 +493,121 @@ export class OrderService {
         order.driverName = driverName;
         order.carNumber = carNumber;
 
-        // перевести
-        const info = `Статус: ${order.status}! Заказ №${order.id} был полностью отправлен! Дата отправки: ${userSelectedDate};Cкладчик: ${barnUsername} (ID: ${barnUserId}) отправил из ${order.barnLocation}; Клиенту: ${order.clientUserName} в ${order.clientLocation}; Материал: ${order.productName}, Код: ${order.azencoCode}, новые: ${newStockSend}, использованные: ${usedStockSend}, непригодные: ${brokenStockSend}; Водитель: ${driverName} - номер: ${carNumber}`;
+        // Переводим русский текст на азербайджанский и добавляем комментарии
+        const info = `Status: ${order.status}! Sifarişi №${order.id} Göndərmə tarixi: ${
+          // выбранная пользователем дата
+          userSelectedDate
+        }; Anbardar: ${barnUsername} (ID: ${barnUserId})  ${
+          // локация склада
+          order.barnLocation
+        }-dan getdi Müştəri: ${order.clientUserName} ünvanına ${
+          // локация клиента
+          order.clientLocation
+        }; Material: ${order.productName}, AZENCO Kod: ${
+          // азенко код
+          order.azencoCode
+        }, yeni: ${newStockSend || ''}, işlənmiş: ${
+          usedStockSend || ''
+        }, yararsız: ${brokenStockSend || ''}; Sürücü: ${
+          // имя водителя
+          driverName
+        } - nömrə: ${carNumber}! Anbarda qalıb yeni: ${
+          //
+          barn.newStock || ''
+        }, işlənmiş: ${
+          //
+          barn.usedStock || ''
+        }, yararsız: ${barn.brokenStock || ''}, cəmi: ${barn.totalStock} `;
 
         order.info = info;
+
+        return {
+          order,
+          message: info,
+        };
       }
     } catch (e) {
       this.errorService.errorsMessage(e);
+    }
+  }
+
+  async deleteOrderFromClient({
+    orderId,
+    clientId,
+    productId,
+    azencoCode,
+    productName,
+    clientUserName,
+  }: IDeleteOptions) {
+    const dataVerification = Boolean(
+      orderId &&
+        clientId &&
+        productId &&
+        azencoCode &&
+        productName &&
+        clientUserName,
+    );
+
+    if (!dataVerification) return { error_message: errorText.WRONG_DATA };
+
+    try {
+      const { order, error_message: orderError } =
+        await this.findOrderById(orderId);
+
+      if (orderError) return { error_message: orderError };
+
+      const orderStatus: StatusOrderType = order.status;
+
+      const testStatusNew = orderStatus !== 'yeni_sifariş';
+
+      const testStatusCanceledBarnUser =
+        orderStatus !== 'sifariş_anbardar_tərəfindən_ləğv_edildi';
+
+      if (testStatusNew || testStatusCanceledBarnUser) {
+        return { error_message: errorText.STATUS_CANCELED };
+      }
+
+      const findClientOptions: IFilterOptions = {
+        where: {
+          id: +clientId,
+          username: clientUserName,
+        },
+      };
+
+      const clientUser = await this.usersService.findOne(findClientOptions);
+
+      if (!clientUser) return { error_message: errorText.NOT_USERNAME };
+
+      const testProductName = order.productName !== productName;
+      const testProductId = order.productId !== productId;
+      const testAzencoCode = order.azencoCode !== azencoCode;
+      const testClientId = order.clientId !== clientUser?.id;
+      const testClientUserName = order.clientUserName !== clientUser?.username;
+
+      const deleteDateOrder = Boolean(
+        testProductName &&
+          testProductId &&
+          testAzencoCode &&
+          testClientId &&
+          testClientUserName,
+      );
+
+      if (deleteDateOrder) {
+        return { error_message: errorText.NOT_REQUIRED_USER_ACTION };
+      } else {
+        const message = `Sifariş №${order.id} müştəri: ${order.clientUserName} (ID: ${order.clientId}) tərəfindən silindi !`;
+
+        await this.archiveService.createArchive({
+          barnId: order.barnId,
+          userId: clientId,
+          username: clientUserName,
+          message,
+        });
+
+        await order.destroy();
+      }
+    } catch (e) {
+      return this.errorService.errorsMessage(e);
     }
   }
 }
