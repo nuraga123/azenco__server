@@ -20,6 +20,7 @@ import {
 } from './types';
 import { NewOrderDto } from './dto/new-order.dto';
 import { ConfirmBarnUserDto } from './dto/confirm-barn-user.dto';
+import { DeleteOrderFromClientDTO } from './dto/delete-order-client';
 
 @Controller('order')
 export class OrderController {
@@ -81,6 +82,15 @@ export class OrderController {
     return this.orderService.confirmOrderBarnUser(confirmBarnUserDto);
   }
 
+  // запрос для удаления заказа клиентом
+  @Post('remove-client')
+  @HttpCode(HttpStatus.OK)
+  removeOrderToClient(
+    @Body() deleteOrderFromClientDTO: DeleteOrderFromClientDTO,
+  ): Promise<IOrderResponse> {
+    return this.orderService.deleteOrderFromClient(deleteOrderFromClientDTO);
+  }
+
   // @Post('send-barn-user')
   // @HttpCode(HttpStatus.OK)
   // sendAnbarUser(
@@ -90,12 +100,7 @@ export class OrderController {
   // }
 
   /*
-  // запрос для удаления заказа клиентом
-  @Delete('remove-client')
-  @HttpCode(HttpStatus.OK)
-  removeOrderToClient(@Body('id') id: number): Promise<IOrderResponse> {
-    return this.orderService.cancelOrderClient(+id);
-  }
+
 
   @Post('success-deliver-client')
   successDeliverToClient(

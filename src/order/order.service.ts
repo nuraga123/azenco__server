@@ -558,14 +558,14 @@ export class OrderService {
 
       const orderStatus: StatusOrderType = order.status;
 
-      const testStatusNew = orderStatus !== 'yeni_sifariş';
+      const testStatusNewOrder = orderStatus === 'yeni_sifariş';
 
-      const testStatusCanceledBarnUser =
-        orderStatus !== 'sifariş_anbardar_tərəfindən_ləğv_edildi';
+      const testStatusCanceledBarn =
+        orderStatus === 'sifariş_anbardar_tərəfindən_ləğv_edildi';
 
-      if (testStatusNew || testStatusCanceledBarnUser) {
-        return { error_message: errorText.STATUS_CANCELED };
-      }
+      const test = testStatusNewOrder || testStatusCanceledBarn;
+
+      if (!test) return { error_message: errorText.STATUS_CANCELED };
 
       const findClientOptions: IFilterOptions = {
         where: {
@@ -605,6 +605,8 @@ export class OrderService {
         });
 
         await order.destroy();
+
+        return { message };
       }
     } catch (e) {
       return this.errorService.errorsMessage(e);
