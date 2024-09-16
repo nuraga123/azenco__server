@@ -406,13 +406,14 @@ export class OrderService {
     }
   }
 
+  // Метод складчик отправляет заказ складчику клиенту
+  // status = 'anbardar_sifarişi_qəbul_etdi';
   async sendOrderBarnUser(
     sendBarnUserDto: SendBarnUserDto,
   ): Promise<IOrderResponse> {
     try {
       const {
         orderId,
-
         userSelectedDate,
         barnUserId,
         barnUsername,
@@ -434,11 +435,10 @@ export class OrderService {
       if (!carNumber) return { error_message: errorText.NOT_CAR_NUMBER };
 
       // Поиск заказа по ID
-      const { order, error_message: findOrderErrorMessage } =
+      const { order, error_message: orderError } =
         await this.findOrderById(orderId);
 
-      if (findOrderErrorMessage)
-        return { error_message: findOrderErrorMessage };
+      if (orderError) return { error_message: orderError };
 
       const { barn, error_message: barnError } =
         await this.barnService.findOneBarnIdAndBarnUsername({
@@ -449,9 +449,9 @@ export class OrderService {
       if (barnError) return { error_message: barnError };
 
       // Проверка, что заказ находится в статусе "anbardar_sifarişi_qəbul_etdi"
-      if (order.status !== 'anbardar_sifarişi_qəbul_etdi') {
-        return { message: errorText.STATUS_SEND };
-      }
+      const testCheck = order.status === 'anbardar_sifarişi_qəbul_etdi';
+
+      if (!testCheck) return { message: errorText.STATUS_SEND };
 
       // Проверка достаточности товара в складе
       const validSendOrderStock = this.validateStockValues({
@@ -463,6 +463,7 @@ export class OrderService {
 
       if (validSendOrderStock) return { error_message: validSendOrderStock };
 
+      // проверка на полный закак
       const checkOrderAndSendStockBarn =
         Boolean(+order.newStock === +newStockSend) &&
         Boolean(+order.usedStock === +usedStockSend) &&
@@ -493,7 +494,6 @@ export class OrderService {
         order.driverName = driverName;
         order.carNumber = carNumber;
 
-        // Переводим русский текст на азербайджанский и добавляем комментарии
         const info = `Status: ${order.status}! Sifarişi №${order.id} Göndərmə tarixi: ${
           // выбранная пользователем дата
           userSelectedDate
@@ -501,23 +501,17 @@ export class OrderService {
           // локация склада
           order.barnLocation
         }-dan getdi Müştəri: ${order.clientUserName} ünvanına ${
-          // локация клиента
           order.clientLocation
-        }; Material: ${order.productName}, AZENCO Kod: ${
-          // азенко код
-          order.azencoCode
-        }, yeni: ${newStockSend || ''}, işlənmiş: ${
-          usedStockSend || ''
-        }, yararsız: ${brokenStockSend || ''}; Sürücü: ${
-          // имя водителя
-          driverName
-        } - nömrə: ${carNumber}! Anbarda qalıb yeni: ${
-          //
-          barn.newStock || ''
+        }; Material: ${order.productName}, AZENCO Kod: ${order.azencoCode}, ${
+          +newStockSend ? `yeni: ${+newStockSend}` : ''
+        }, ${+usedStockSend ? `işlənmiş: ${+usedStockSend}` : ''}, yararsız: ${
+          +brokenStockSend ? `yararsız: ${+brokenStockSend}` : ''
+        }; Sürücü: ${driverName} - nömrə: ${carNumber}! Anbarda qalıb yeni: ${
+          barn.newStock || 0
         }, işlənmiş: ${
           //
-          barn.usedStock || ''
-        }, yararsız: ${barn.brokenStock || ''}, cəmi: ${barn.totalStock} `;
+          barn.usedStock || 0
+        }, yararsız: ${barn.brokenStock || 0}, cəmi: ${barn.totalStock} `;
 
         order.info = info;
 
@@ -595,7 +589,10 @@ export class OrderService {
       if (deleteDateOrder) {
         return { error_message: errorText.NOT_REQUIRED_USER_ACTION };
       } else {
-        const message = `Sifariş №${order.id} müştəri: ${order.clientUserName} (ID: ${order.clientId}) tərəfindən silindi !`;
+        const message = `Sifariş №${order.id} müştəri: ${order.clientUserName} (ID: ${
+          //
+          order.clientId
+        }) tərəfindən silindi !`;
 
         await this.archiveService.createArchive({
           barnId: order.barnId,
