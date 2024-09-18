@@ -50,7 +50,7 @@ export class OrderService {
     }
   }
 
-  // Поиск всех заказов клиента который он заказал
+  // Поиск всех заказов клиента
   async findMyOrdersByClientIdAndClientUserName({
     clientId,
     clientUserName,
@@ -185,7 +185,7 @@ export class OrderService {
     return '';
   }
 
-  /* движения */
+  /* движения клиента */
 
   // Создание заказа
   // status: 'yeni_sifariş',
@@ -306,6 +306,243 @@ export class OrderService {
     }
   }
 
+  // клиент отменил заказ
+  // 'müştəri_sifarişi_ləğv_etdi';
+  async cancelOrderClient({
+    orderId,
+    clientId,
+    productId,
+    azencoCode,
+    productName,
+    clientUserName,
+  }: IDeleteOptions) {
+    const dataVerification = Boolean(
+      orderId &&
+        clientId &&
+        productId &&
+        azencoCode &&
+        productName &&
+        clientUserName,
+    );
+
+    if (!dataVerification) return { error_message: errorText.WRONG_DATA };
+
+    try {
+      const { order, error_message: orderError } =
+        await this.findOrderById(orderId);
+
+      if (orderError) return { error_message: orderError };
+
+      const orderStatus: StatusOrderType = order.status;
+
+      const test = orderStatus === 'yeni_sifariş';
+
+      if (!test) return { error_message: errorText.STATUS_NEW };
+
+      const findClientOptions: IFilterOptions = {
+        where: {
+          id: +clientId,
+          username: clientUserName,
+        },
+      };
+
+      const clientUser = await this.usersService.findOne(findClientOptions);
+
+      if (!clientUser) return { error_message: errorText.NOT_USERNAME };
+
+      const testProductName = order.productName !== productName;
+      const testProductId = order.productId !== productId;
+      const testAzencoCode = order.azencoCode !== azencoCode;
+      const testClientId = order.clientId !== clientUser?.id;
+      const testClientUserName = order.clientUserName !== clientUser?.username;
+
+      const deleteDateOrder = Boolean(
+        testProductName &&
+          testProductId &&
+          testAzencoCode &&
+          testClientId &&
+          testClientUserName,
+      );
+
+      if (deleteDateOrder) {
+        return { error_message: errorText.NOT_REQUIRED_USER_ACTION };
+      } else {
+        const message: string = `Sifariş №${order.id} müştəri: ${order.clientUserName} (ID: ${
+          //
+          order.clientId
+        }) tərəfindən ləğv etdi !`;
+
+        order.info = message;
+
+        order.status = 'müştəri_sifarişi_ləğv_etdi';
+        order.save();
+
+        await this.archiveService.createArchive({
+          barnId: order.barnId,
+          userId: clientId,
+          username: clientUserName,
+          message,
+        });
+
+        return { message };
+      }
+    } catch (e) {
+      return this.errorService.errorsMessage(e);
+    }
+  }
+
+  // клиент удалил заказ
+  async deletedOrderFromClient({
+    orderId,
+    clientId,
+    productId,
+    azencoCode,
+    productName,
+    clientUserName,
+  }: IDeleteOptions) {
+    const dataVerification = Boolean(
+      orderId &&
+        clientId &&
+        productId &&
+        azencoCode &&
+        productName &&
+        clientUserName,
+    );
+
+    if (!dataVerification) return { error_message: errorText.WRONG_DATA };
+
+    try {
+      const { order, error_message: orderError } =
+        await this.findOrderById(orderId);
+
+      if (orderError) return { error_message: orderError };
+
+      const orderStatus: StatusOrderType = order.status;
+
+      const orderStatusClient = orderStatus === 'müştəri_sifarişi_ləğv_etdi';
+      const orderStatusBarnUser =
+        orderStatus === 'sifariş_anbardar_tərəfindən_ləğv_edildi';
+
+      const validStatus = Boolean(orderStatusClient || orderStatusBarnUser);
+
+      if (!validStatus) return { error_message: errorText.STATUS_DELETE };
+
+      const findClientOptions: IFilterOptions = {
+        where: {
+          id: +clientId,
+          username: clientUserName,
+        },
+      };
+
+      const clientUser = await this.usersService.findOne(findClientOptions);
+
+      if (!clientUser) return { error_message: errorText.NOT_USERNAME };
+
+      const testProductName = order.productName !== productName;
+      const testProductId = order.productId !== productId;
+      const testAzencoCode = order.azencoCode !== azencoCode;
+      const testClientId = order.clientId !== clientUser?.id;
+      const testClientUserName = order.clientUserName !== clientUser?.username;
+
+      const deleteDateOrder = Boolean(
+        testProductName &&
+          testProductId &&
+          testAzencoCode &&
+          testClientId &&
+          testClientUserName,
+      );
+
+      if (deleteDateOrder) {
+        return { error_message: errorText.NOT_REQUIRED_USER_ACTION };
+      } else {
+        const message = `Sifariş №${order.id} müştəri: ${order.clientUserName} (ID: ${
+          //
+          order.clientId
+        }) tərəfindən silindi !`;
+
+        await this.archiveService.createArchive({
+          barnId: order.barnId,
+          userId: clientId,
+          username: clientUserName,
+          message,
+        });
+
+        await order.destroy();
+
+        return { message };
+      }
+    } catch (e) {
+      return this.errorService.errorsMessage(e);
+    }
+  }
+
+  // принят заказ успешно полностью
+  // async acceptedOrderClientSuccess({
+  //   orderId,
+  //   // client
+  //   clientId,
+  //   clientUserName,
+
+  //   // barn
+  //   barnId,
+  //   barnUserId,
+  //   barnUsername,
+
+  //   // car
+  //   driverName,
+  //   carNumber,
+
+  //   // product
+  //   productId,
+  //   productName,
+  //   azencoCode,
+  //   newStock,
+  //   usedStock,
+  //   brokenStock,
+  //   updatePrice,
+  //   clientLocation,
+  //   clientMessage,
+  // }: {
+  // }): Promise<IOrderResponse> {
+  //   try {
+  //     // Поиск заказа по ID
+  //     const { order, error_message: orderError } =
+  //       await this.findOrderById(orderId);
+
+  //     // Если возникла ошибка при поиске заказа, возвращаем её
+  //     if (orderError) return { error_message: orderError };
+
+  //     // Проверка, что текущий статус заказа позволяет его доставить
+  //     const validStatuses = [
+  //       'anbardar_sifarişi_qəbul_etdi',
+  //       'anbardar_tam_sifarişi_müştəriyə_göndərdi',
+  //     ];
+  //     if (!validStatuses.includes(order.status)) {
+  //       return { message: 'Bu sifarişin statusunu dəyişmək olmaz.' }; // Сообщение об ошибке статуса
+  //     }
+
+  //     // Обновляем информацию о заказе на статус "sifariş_uğurla_çatdırıldı"
+  //     order.status = 'sifariş_uğurla_çatdırıldı';
+  //     order.deliveryDate = deliveryInfo.deliveryDate; // Указываем дату доставки
+  //     order.driverName = deliveryInfo.driverName; // Указываем имя водителя
+  //     order.carNumber = deliveryInfo.carNumber; // Указываем номер машины
+  //     order.barnUserMessage = deliveryInfo.barnUserMessage || ''; // Сообщение от складчика, если есть
+
+  //     // Формируем информационное сообщение о заказе
+  //     const info = `Sifariş uğurla çatdırıldı! Sifariş ID: ${order.id}, Çatdırılma tarixi: ${deliveryInfo.deliveryDate}, Sürücü: ${deliveryInfo.driverName}, Maşın nömrəsi: ${deliveryInfo.carNumber}.`;
+
+  //     order.info = info; // Сохраняем информацию о заказе
+
+  //     // Возвращаем обновленный заказ с информацией о доставке
+  //     return { order, message: info };
+  //   } catch (e) {
+  //     // Обрабатываем возможные ошибки
+  //     this.errorService.errorsMessage(e);
+  //   }
+  // }
+
+  /* движения складчика */
+
   // Метод для подтверждения заказа складчиком
   // status = 'anbardar_sifarişi_qəbul_etdi';
   async confirmOrderBarnUser(
@@ -396,6 +633,7 @@ export class OrderService {
         brokenStock: +order.brokenStock || 0,
         totalStock: +order.totalStock,
         totalPrice: +order.totalPrice,
+
         recipientName: order.clientUserName,
         senderName: barn.username,
       });
@@ -515,98 +753,10 @@ export class OrderService {
 
         order.info = info;
 
-        return {
-          order,
-          message: info,
-        };
+        return { order, message: info };
       }
     } catch (e) {
       this.errorService.errorsMessage(e);
-    }
-  }
-
-  async deleteOrderFromClient({
-    orderId,
-    clientId,
-    productId,
-    azencoCode,
-    productName,
-    clientUserName,
-  }: IDeleteOptions) {
-    const dataVerification = Boolean(
-      orderId &&
-        clientId &&
-        productId &&
-        azencoCode &&
-        productName &&
-        clientUserName,
-    );
-
-    if (!dataVerification) return { error_message: errorText.WRONG_DATA };
-
-    try {
-      const { order, error_message: orderError } =
-        await this.findOrderById(orderId);
-
-      if (orderError) return { error_message: orderError };
-
-      const orderStatus: StatusOrderType = order.status;
-
-      const testStatusNewOrder = orderStatus === 'yeni_sifariş';
-
-      const testStatusCanceledBarn =
-        orderStatus === 'sifariş_anbardar_tərəfindən_ləğv_edildi';
-
-      const test = testStatusNewOrder || testStatusCanceledBarn;
-
-      if (!test) return { error_message: errorText.STATUS_CANCELED };
-
-      const findClientOptions: IFilterOptions = {
-        where: {
-          id: +clientId,
-          username: clientUserName,
-        },
-      };
-
-      const clientUser = await this.usersService.findOne(findClientOptions);
-
-      if (!clientUser) return { error_message: errorText.NOT_USERNAME };
-
-      const testProductName = order.productName !== productName;
-      const testProductId = order.productId !== productId;
-      const testAzencoCode = order.azencoCode !== azencoCode;
-      const testClientId = order.clientId !== clientUser?.id;
-      const testClientUserName = order.clientUserName !== clientUser?.username;
-
-      const deleteDateOrder = Boolean(
-        testProductName &&
-          testProductId &&
-          testAzencoCode &&
-          testClientId &&
-          testClientUserName,
-      );
-
-      if (deleteDateOrder) {
-        return { error_message: errorText.NOT_REQUIRED_USER_ACTION };
-      } else {
-        const message = `Sifariş №${order.id} müştəri: ${order.clientUserName} (ID: ${
-          //
-          order.clientId
-        }) tərəfindən silindi !`;
-
-        await this.archiveService.createArchive({
-          barnId: order.barnId,
-          userId: clientId,
-          username: clientUserName,
-          message,
-        });
-
-        await order.destroy();
-
-        return { message };
-      }
-    } catch (e) {
-      return this.errorService.errorsMessage(e);
     }
   }
 }

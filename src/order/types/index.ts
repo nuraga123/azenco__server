@@ -24,22 +24,11 @@ export interface IOrderErrorMessage {
 
 export type StatusOrderType =
   // новый заказ
+  // клиент
   | 'yeni_sifariş'
 
   // заказ отменен клиентом
   | 'müştəri_sifarişi_ləğv_etdi'
-
-  // складчик принял заказ
-  | 'anbardar_sifarişi_qəbul_etdi'
-
-  // заказ отменен складским работником
-  | 'sifariş_anbardar_tərəfindən_ləğv_edildi'
-
-  // складской работник полностью отправил заказ клиенту
-  | 'anbardar_tam_sifarişi_müştəriyə_göndərdi'
-
-  // складской работник не отправил заказ клиенту
-  | 'anbardar_tam_sifarişi_müştəriyə_göndərməyib'
 
   // заказ успешно доставлен
   | 'sifariş_uğurla_çatdırıldı'
@@ -54,7 +43,20 @@ export type StatusOrderType =
   | 'sifariş_itki_ilə_çatdırıldı'
 
   // заказ не доставлен
-  | 'sifariş_çatdırılmadı';
+  | 'sifariş_çatdırılmadı'
+
+  //складчик
+  // складчик принял заказ
+  | 'anbardar_sifarişi_qəbul_etdi'
+
+  // заказ отменен складским работником
+  | 'sifariş_anbardar_tərəfindən_ləğv_edildi'
+
+  // складской работник полностью отправил заказ клиенту
+  | 'anbardar_tam_sifarişi_müştəriyə_göndərdi'
+
+  // складской работник не отправил заказ клиенту
+  | 'anbardar_tam_sifarişi_müştəriyə_göndərməyib';
 
 export interface IOrderQuery {
   limit?: string;

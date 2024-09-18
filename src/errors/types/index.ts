@@ -20,6 +20,7 @@ export interface IErrorText {
   STATUS_CONFIRMED: string;
   STATUS_SEND: string;
   STATUS_CANCELED: string;
+  STATUS_DELETE: string;
   WRONG_DATA: string;
 }
 

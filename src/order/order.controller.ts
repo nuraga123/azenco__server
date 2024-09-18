@@ -46,13 +46,9 @@ export class OrderController {
     return this.orderService.findAndCountAllOrders(query);
   }
 
-  // запрос для создания нового заказа
-  @Post('create')
-  @HttpCode(HttpStatus.CREATED)
-  addNewOrder(@Body() newOrderDto: NewOrderDto): Promise<IOrderResponse> {
-    return this.orderService.createOrder(newOrderDto);
-  }
+  /* клиент */
 
+  // мои заказаы
   @Post('my')
   @HttpCode(HttpStatus.OK)
   postMyOrders(
@@ -64,7 +60,35 @@ export class OrderController {
     });
   }
 
-  @Post('other')
+  // запрос для создания нового заказа
+  @Post('create')
+  @HttpCode(HttpStatus.CREATED)
+  addNewOrder(@Body() newOrderDto: NewOrderDto): Promise<IOrderResponse> {
+    return this.orderService.createOrder(newOrderDto);
+  }
+
+  // запрос для отмены заказа клиентом
+  @Post('cancel-client')
+  @HttpCode(HttpStatus.OK)
+  postCanceledOrderClient(
+    @Body() canceledOrderFromClientDTO: DeleteOrderFromClientDTO,
+  ): Promise<IOrderResponse> {
+    return this.orderService.cancelOrderClient(canceledOrderFromClientDTO);
+  }
+
+  // запрос для удаления заказа клиентом
+  @Post('delete')
+  @HttpCode(HttpStatus.OK)
+  postRemoveOrderClient(
+    @Body() deleteOrderFromClientDTO: DeleteOrderFromClientDTO,
+  ): Promise<IOrderResponse> {
+    return this.orderService.deletedOrderFromClient(deleteOrderFromClientDTO);
+  }
+
+  /* складчик */
+
+  // мои заказы от клиентов
+  @Post('from-barn-user')
   @HttpCode(HttpStatus.OK)
   postOrderByBarnUserNameAndByBarnUserId(
     @Body() { barnUsername, barnUserId }: IOherOrders,
@@ -75,23 +99,25 @@ export class OrderController {
     });
   }
 
+  // подтверждение складчика
   @Post('confirm-barn-user')
   @HttpCode(HttpStatus.OK)
-  confirmBarnUser(
+  postConfirmBarnUser(
     @Body() confirmBarnUserDto: ConfirmBarnUserDto,
   ): Promise<IOrderResponse> {
     return this.orderService.confirmOrderBarnUser(confirmBarnUserDto);
   }
 
-  // запрос для удаления заказа клиентом
-  @Post('remove-client')
+  // отмена заказа с стороны складчика
+  @Post('canceled-barn-user')
   @HttpCode(HttpStatus.OK)
-  removeOrderToClient(
-    @Body() deleteOrderFromClientDTO: DeleteOrderFromClientDTO,
+  postCanceledBarnUser(
+    @Body() confirmBarnUserDto: ConfirmBarnUserDto,
   ): Promise<IOrderResponse> {
-    return this.orderService.deleteOrderFromClient(deleteOrderFromClientDTO);
+    return this.orderService.confirmOrderBarnUser(confirmBarnUserDto);
   }
 
+  // отправка клиенту от складчика
   @Post('send-barn-user')
   @HttpCode(HttpStatus.OK)
   sendAnbarUser(
