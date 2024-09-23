@@ -645,7 +645,7 @@ export class OrderService {
   }
 
   // Метод складчик отправляет заказ складчику клиенту
-  // status = 'anbardar_sifarişi_qəbul_etdi';
+  // status = 'anbardar_tam_sifarişi_müştəriyə_göndərdi';
   async sendOrderBarnUser(
     sendBarnUserDto: SendBarnUserDto,
   ): Promise<IOrderResponse> {

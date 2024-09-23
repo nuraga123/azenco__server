@@ -6,27 +6,29 @@ import * as passport from 'passport';
 import * as express from 'express';
 import { AppModule } from './app.module';
 
-import * as fs from 'fs';
-import * as path from 'path';
-
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
 
   // Определите абсолютные пути к SSL-сертификатам
-  const keyPath = path.resolve(__dirname, '..', 'src/cert', 'cert.key');
-  const certPath = path.resolve(__dirname, '..', 'src/cert', 'cert.crt');
+  // const keyPath = path.resolve(__dirname, '..', 'src/cert', 'cert.key');
+  // const certPath = path.resolve(__dirname, '..', 'src/cert', 'cert.crt');
 
+  /*
   // Чтение SSL-сертификатов
   const httpsOptions = {
     key: fs.readFileSync(keyPath),
     cert: fs.readFileSync(certPath),
   };
 
-  logger.log('httpsOptions');
-
   const app = await NestFactory.create(AppModule, {
     httpsOptions,
   });
+
+
+  */
+  logger.log('httpsOptions');
+
+  const app = await NestFactory.create(AppModule);
 
   // Используем express-session для управления сессиями
   app.use(
