@@ -118,12 +118,10 @@ export class OrderController {
   }
 
   // отправка клиенту от складчика
-  @Post('send-barn-user')
+  @Post('send-full-barn-user')
   @HttpCode(HttpStatus.OK)
-  sendAnbarUser(
-    @Body() sendBarnUserDto: SendBarnUserDto,
-  ): Promise<IOrderResponse> {
-    return this.orderService.sendOrderBarnUser(sendBarnUserDto);
+  sendAnbarUser(@Body() sendBarnUserDto: SendBarnUserDto) {
+    return this.orderService.sendFullOrderBarnUser(sendBarnUserDto);
   }
 
   /*

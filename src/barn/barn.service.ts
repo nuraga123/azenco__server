@@ -182,11 +182,14 @@ export class BarnService {
     }
   }
 
+  // поиск по Id и barnUsername и barnUserId
   async findOneBarnIdAndBarnUsername({
     id,
     username,
+    userId,
   }: {
     id: number;
+    userId?: number;
     username: string;
   }): Promise<IBarnResponce> {
     try {
@@ -195,7 +198,9 @@ export class BarnService {
       if (username.length <= 0)
         return { error_message: errorText.NOT_USERNAME };
 
-      const barn = await this.barnModel.findOne({ where: { id } });
+      const barn = await this.barnModel.findOne({
+        where: { id, username, userId },
+      });
 
       if (!barn?.id) {
         return { error_message: `${errorText.NOT_ID_BARN} - ${id}` };

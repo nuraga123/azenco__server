@@ -645,118 +645,51 @@ export class OrderService {
   }
 
   // Метод складчик отправляет заказ складчику клиенту
-  // status = 'anbardar_tam_sifarişi_müştəriyə_göndərdi';
-  async sendOrderBarnUser(
-    sendBarnUserDto: SendBarnUserDto,
-  ): Promise<IOrderResponse> {
+  // status = 'anbardar_tam_sifarişi_müştəriyə_göndərdi'
+  async sendFullOrderBarnUser(sendBarnUserDto: SendBarnUserDto) {
     try {
       const {
         orderId,
-        userSelectedDate,
+        // barn
+        barnId,
         barnUserId,
         barnUsername,
-        barnUserMessage,
-        barnLocationProduct,
 
-        // car
+        barnLocationProduct,
         driverName,
         carNumber,
-
-        // stock
-        newStockSend,
-        usedStockSend,
-        brokenStockSend,
+        userSelectedDate,
+        updatePrice,
       } = sendBarnUserDto;
 
-      if (!driverName) return { error_message: errorText.NOT_DRIVER_NAME };
-
-      if (!carNumber) return { error_message: errorText.NOT_CAR_NUMBER };
-
-      // Поиск заказа по ID
-      const { order, error_message: orderError } =
-        await this.findOrderById(orderId);
-
-      if (orderError) return { error_message: orderError };
-
-      const { barn, error_message: barnError } =
-        await this.barnService.findOneBarnIdAndBarnUsername({
-          id: +barnUserId,
+      const findUserBarn = {
+        where: {
+          id: barnUserId,
           username: barnUsername,
-        });
+        },
+      };
 
-      if (barnError) return { error_message: barnError };
+      const userBarn = await this.usersService.findOne(findUserBarn);
+      // допольнить валидацию
+      if (!userBarn?.username) {
+        return {
+          error_message: `siz sifarişdə göstərilən anbardar deyilsiniz ad duzgun deyil ${barnUsername}`,
+        };
+      }
+      console.log(userBarn);
+      //const findOrder = await this
 
-      // Проверка, что заказ находится в статусе "anbardar_sifarişi_qəbul_etdi"
-      const testCheck = order.status === 'anbardar_sifarişi_qəbul_etdi';
-
-      if (!testCheck) return { message: errorText.STATUS_SEND };
-
-      // Проверка достаточности товара в складе
-      const validSendOrderStock = this.validateStockValues({
-        barn,
-        newStock: +newStockSend,
-        usedStock: +usedStockSend,
-        brokenStock: +brokenStockSend,
+      const barn = await this.barnService.findOneBarnIdAndBarnUsername({
+        id: barnId,
+        userId: barnUserId,
+        username: barnUsername,
       });
 
-      if (validSendOrderStock) return { error_message: validSendOrderStock };
-
-      // проверка на полный закак
-      const checkOrderAndSendStockBarn =
-        Boolean(+order.newStock === +newStockSend) &&
-        Boolean(+order.usedStock === +usedStockSend) &&
-        Boolean(+order.brokenStock === +brokenStockSend);
-
-      if (checkOrderAndSendStockBarn) {
-        const { price } = barn;
-        // обновляем амбар складчика
-        barn.newStock -= +newStockSend;
-        barn.usedStock -= +usedStockSend;
-        barn.brokenStock -= -+brokenStockSend;
-
-        barn.totalStock = +barn.newStock + +barn.usedStock + +barn.brokenStock;
-
-        barn.newTotalPrice = +price * +barn.newStock;
-        barn.usedTotalPrice = +price * +barn.usedStock;
-        barn.brokenTotalPrice = +price * +barn.brokenStock;
-
-        barn.totalPrice =
-          +barn.newTotalPrice + +barn.usedTotalPrice + +barn.brokenTotalPrice;
-
-        // обновляем заказ складчика
-
-        // устоновим полную отправку
-        order.status = 'anbardar_tam_sifarişi_müştəriyə_göndərdi';
-        order.barnUserMessage = barnUserMessage;
-        order.barnLocation = barnLocationProduct || barn.location;
-        order.driverName = driverName;
-        order.carNumber = carNumber;
-
-        const info = `Status: ${order.status}! Sifarişi №${order.id} Göndərmə tarixi: ${
-          // выбранная пользователем дата
-          userSelectedDate
-        }; Anbardar: ${barnUsername} (ID: ${barnUserId})  ${
-          // локация склада
-          order.barnLocation
-        }-dan getdi Müştəri: ${order.clientUserName} ünvanına ${
-          order.clientLocation
-        }; Material: ${order.productName}, AZENCO Kod: ${order.azencoCode}, ${
-          +newStockSend ? `yeni: ${+newStockSend}` : ''
-        }, ${+usedStockSend ? `işlənmiş: ${+usedStockSend}` : ''}, yararsız: ${
-          +brokenStockSend ? `yararsız: ${+brokenStockSend}` : ''
-        }; Sürücü: ${driverName} - nömrə: ${carNumber}! Anbarda qalıb yeni: ${
-          barn.newStock || 0
-        }, işlənmiş: ${
-          //
-          barn.usedStock || 0
-        }, yararsız: ${barn.brokenStock || 0}, cəmi: ${barn.totalStock} `;
-
-        order.info = info;
-
-        return { order, message: info };
-      }
+      return barn;
     } catch (e) {
       this.errorService.errorsMessage(e);
     }
+
+    return { error_message: '' };
   }
 }
