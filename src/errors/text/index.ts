@@ -26,4 +26,6 @@ export const errorText: IErrorText = {
   STATUS_CANCELED:
     'Statusu yeni və ya Anbardar tərəfindən ləğv edildikdə silinə bilər !',
   STATUS_DELETE: 'Statusu sifarişi ləğv_etdi olmalıdır',
+  // orderType
+  NOT_ORDER: 'Sifariş tapılmadı!',
 };

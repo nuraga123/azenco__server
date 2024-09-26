@@ -15,6 +15,7 @@ import {
   IFilterOptions,
   IDeleteOptions,
   StatusOrderType,
+  IFindOrderBarnUser,
 } from './types';
 import { ErrorService } from 'src/errors/errors.service';
 import { BarnService } from 'src/barn/barn.service';
@@ -134,7 +135,7 @@ export class OrderService {
   async findOrderById(orderId: number): Promise<IOrderResponse> {
     try {
       const order = await this.orderModel.findByPk(orderId);
-      if (!order) return { error_message: 'Sifariş tapılmadı!' };
+      if (!order) return { error_message: errorText.NOT_ORDER };
       return { order };
     } catch (e) {
       return this.errorService.errorsMessage(e);
@@ -147,6 +148,19 @@ export class OrderService {
       return await this.orderModel.findAll({
         where: { clientId },
       });
+    } catch (e) {
+      return this.errorService.errorsMessage(e);
+    }
+  }
+
+  async findOrderBarnUser(
+    findOrderBarnUser: IFindOrderBarnUser,
+  ): Promise<IOrderResponse> {
+    try {
+      const order = await this.orderModel.findOne(findOrderBarnUser);
+
+      if (!order) return { error_message: errorText.NOT_ORDER };
+      return { order };
     } catch (e) {
       return this.errorService.errorsMessage(e);
     }
@@ -662,34 +676,32 @@ export class OrderService {
         updatePrice,
       } = sendBarnUserDto;
 
-      const findUserBarn = {
-        where: {
-          id: barnUserId,
+      const { barn, error_message: barnError } =
+        await this.barnService.findOneBarnIdAndBarnUsername({
+          id: barnId,
+          userId: barnUserId,
           username: barnUsername,
+        });
+
+      if (barnError) return { error_message: barnError };
+
+      const findOrderFilter: IFindOrderBarnUser = {
+        where: {
+          orderId,
+          barnId,
+          barnUserId,
+          barnUsername,
         },
       };
 
-      const userBarn = await this.usersService.findOne(findUserBarn);
-      // допольнить валидацию
-      if (!userBarn?.username) {
-        return {
-          error_message: `siz sifarişdə göstərilən anbardar deyilsiniz ad duzgun deyil ${barnUsername}`,
-        };
-      }
-      console.log(userBarn);
-      //const findOrder = await this
+      const { order, error_message } =
+        await this.findOrderBarnUser(findOrderFilter);
 
-      const barn = await this.barnService.findOneBarnIdAndBarnUsername({
-        id: barnId,
-        userId: barnUserId,
-        username: barnUsername,
-      });
+      if (error_message) return { error_message };
 
-      return barn;
+      return { resOrder: order, resBarn: barn };
     } catch (e) {
       this.errorService.errorsMessage(e);
     }
-
-    return { error_message: '' };
   }
 }

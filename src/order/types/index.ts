@@ -110,3 +110,12 @@ export interface IOherOrders {
   barnUsername: string;
   barnUserId: number;
 }
+
+export interface IFindOrderBarnUser {
+  where: {
+    orderId: number;
+    barnId: number;
+    barnUserId: number;
+    barnUsername: string;
+  };
+}

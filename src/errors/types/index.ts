@@ -22,6 +22,7 @@ export interface IErrorText {
   STATUS_CANCELED: string;
   STATUS_DELETE: string;
   WRONG_DATA: string;
+  NOT_ORDER: string;
 }
 
 export interface IErrorMessage {
